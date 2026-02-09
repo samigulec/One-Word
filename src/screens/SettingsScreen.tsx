@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { LanguageCode, LANGUAGES } from '../utils/translations';
+import { LanguageCode, LANGUAGES, getTranslation } from '../utils/translations';
 import { ProficiencyLevel } from '../types';
 import { clearAllData } from '../utils/storage';
 
@@ -25,26 +25,27 @@ type SettingsScreenProps = {
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ 
   nativeLanguage, targetLanguage, proficiencyLevel, onClose, onReset 
 }) => {
+  const t = (key: Parameters<typeof getTranslation>[0]) => getTranslation(key, nativeLanguage);
   const nativeLang = LANGUAGES.find(l => l.code === nativeLanguage);
   const targetLang = LANGUAGES.find(l => l.code === targetLanguage);
 
   const levelNames: Record<string, string> = {
-    'A1': '🌱 Beginner',
+    'A1': `🌱 ${t('beginner')}`,
     'A2': '🌿 Elementary',
-    'B1': '📚 Intermediate',
+    'B1': `📚 ${t('intermediate')}`,
     'B2': '📖 Upper Intermediate',
-    'C1': '🚀 Advanced',
+    'C1': `🚀 ${t('advanced')}`,
     'C2': '⭐ Mastery',
   };
 
   const handleReset = () => {
     Alert.alert(
-      'Reset App',
-      'This will delete all your progress, favorites, and settings. Are you sure?',
+      t('resetConfirmTitle'),
+      t('resetConfirmMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
-          text: 'Reset', 
+          text: t('reset'), 
           style: 'destructive',
           onPress: async () => {
             await clearAllData();
@@ -63,17 +64,17 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>⚙️ Settings</Text>
+          <Text style={styles.headerTitle}>{t('settings')}</Text>
           <View style={styles.placeholder} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Current Settings */}
-          <Text style={styles.sectionTitle}>Your Settings</Text>
+          <Text style={styles.sectionTitle}>{t('yourSettings')}</Text>
           
           <View style={styles.card}>
             <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>I speak</Text>
+              <Text style={styles.settingLabel}>{t('iSpeak')}</Text>
               <View style={styles.settingValue}>
                 <Text style={styles.settingFlag}>{nativeLang?.flag}</Text>
                 <Text style={styles.settingText}>{nativeLang?.nativeName}</Text>
@@ -83,7 +84,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <View style={styles.divider} />
 
             <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>Learning</Text>
+              <Text style={styles.settingLabel}>{t('learning')}</Text>
               <View style={styles.settingValue}>
                 <Text style={styles.settingFlag}>{targetLang?.flag}</Text>
                 <Text style={styles.settingText}>{targetLang?.nativeName}</Text>
@@ -93,34 +94,32 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <View style={styles.divider} />
 
             <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>Level</Text>
+              <Text style={styles.settingLabel}>{t('level')}</Text>
               <Text style={styles.settingText}>{levelNames[proficiencyLevel] || proficiencyLevel}</Text>
             </View>
           </View>
 
-          <Text style={styles.settingHint}>
-            To change these, reset the app and go through setup again.
-          </Text>
+          <Text style={styles.settingHint}>{t('changeHint')}</Text>
 
           {/* About */}
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>{t('about')}</Text>
           <View style={styles.card}>
             <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>App</Text>
+              <Text style={styles.settingLabel}>{t('appName')}</Text>
               <Text style={styles.settingText}>One Word</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>Version</Text>
+              <Text style={styles.settingLabel}>{t('version')}</Text>
               <Text style={styles.settingText}>1.0.0</Text>
             </View>
           </View>
 
           {/* Danger Zone */}
-          <Text style={styles.sectionTitle}>Danger Zone</Text>
+          <Text style={styles.sectionTitle}>{t('dangerZone')}</Text>
           <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
-            <Text style={styles.resetButtonText}>🗑️ Reset All Data</Text>
-            <Text style={styles.resetButtonSubtext}>Delete progress, favorites & settings</Text>
+            <Text style={styles.resetButtonText}>{t('resetAllData')}</Text>
+            <Text style={styles.resetButtonSubtext}>{t('resetDesc')}</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>

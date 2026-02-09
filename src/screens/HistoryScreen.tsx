@@ -11,7 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { LearnedWord } from '../types';
 import { getLearnedWords, toggleFavorite } from '../utils/storage';
-import { LanguageCode } from '../utils/translations';
+import { LanguageCode, getTranslation } from '../utils/translations';
 
 type HistoryScreenProps = {
   nativeLanguage: LanguageCode;
@@ -19,6 +19,7 @@ type HistoryScreenProps = {
 };
 
 const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }) => {
+  const t = (key: Parameters<typeof getTranslation>[0]) => getTranslation(key, nativeLanguage);
   const [words, setWords] = useState<LearnedWord[]>([]);
   const [filter, setFilter] = useState<'all' | 'favorites'>('all');
 
@@ -83,7 +84,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>📖 Word History</Text>
+          <Text style={styles.headerTitle}>{t('wordHistory')}</Text>
           <View style={styles.placeholder} />
         </View>
 
@@ -94,7 +95,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
             onPress={() => setFilter('all')}
           >
             <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
-              All ({words.length})
+              {t('all')} ({words.length})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -102,7 +103,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
             onPress={() => setFilter('favorites')}
           >
             <Text style={[styles.filterText, filter === 'favorites' && styles.filterTextActive]}>
-              ❤️ Favorites ({words.filter(w => w.isFavorite).length})
+              ❤️ {t('favorites')} ({words.filter(w => w.isFavorite).length})
             </Text>
           </TouchableOpacity>
         </View>
@@ -113,8 +114,8 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
             <Text style={styles.emptyEmoji}>{filter === 'favorites' ? '💭' : '📭'}</Text>
             <Text style={styles.emptyText}>
               {filter === 'favorites' 
-                ? 'No favorites yet!\nTap ❤️ to save words you love.'
-                : 'No words learned yet!\nOpen the app daily to learn new words.'}
+                ? `${t('noFavoritesYet')}\n${t('noFavoritesHint')}`
+                : `${t('noWordsYet')}\n${t('noWordsHint')}`}
             </Text>
           </View>
         ) : (

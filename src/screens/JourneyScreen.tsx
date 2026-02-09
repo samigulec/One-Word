@@ -11,12 +11,14 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { LanguageCode, getTranslation } from '../utils/translations';
 
 const { width } = Dimensions.get('window');
 
 type JourneyScreenProps = {
   currentStreak: number;
   totalWordsLearned: number;
+  nativeLanguage: LanguageCode;
   onClose: () => void;
 };
 
@@ -29,8 +31,10 @@ interface DayNode {
 const JourneyScreen: React.FC<JourneyScreenProps> = ({ 
   currentStreak, 
   totalWordsLearned,
+  nativeLanguage,
   onClose 
 }) => {
+  const t = (key: Parameters<typeof getTranslation>[0]) => getTranslation(key, nativeLanguage);
   // Generate journey nodes based on streak
   const generateNodes = (): DayNode[] => {
     const nodes: DayNode[] = [];
@@ -64,11 +68,11 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
   }, []);
 
   const getMilestone = (day: number): { emoji: string; label: string } | null => {
-    if (day === 7) return { emoji: '🏆', label: '1 Week!' };
-    if (day === 14) return { emoji: '⭐', label: '2 Weeks!' };
-    if (day === 30) return { emoji: '🎯', label: '1 Month!' };
-    if (day === 60) return { emoji: '🔥', label: '2 Months!' };
-    if (day === 100) return { emoji: '💎', label: '100 Days!' };
+    if (day === 7) return { emoji: '🏆', label: t('week1') };
+    if (day === 14) return { emoji: '⭐', label: t('weeks2') };
+    if (day === 30) return { emoji: '🎯', label: t('month1') };
+    if (day === 60) return { emoji: '🔥', label: t('months2') };
+    if (day === 100) return { emoji: '💎', label: t('days100') };
     return null;
   };
 
@@ -131,7 +135,7 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
           {/* Day Label */}
           <View style={[styles.dayLabelContainer, !isLeft && styles.dayLabelRight]}>
             <Text style={[styles.dayLabel, node.status === 'locked' && styles.dayLabelLocked]}>
-              Day {node.day}
+              {t('day')} {node.day}
             </Text>
             {milestone && (
               <View style={styles.milestoneBadge}>
@@ -167,7 +171,7 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeIcon}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Your Journey</Text>
+          <Text style={styles.headerTitle}>{t('yourJourney')}</Text>
           <View style={styles.placeholder} />
         </View>
 
@@ -176,17 +180,17 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
           <View style={styles.statCard}>
             <Text style={styles.statEmoji}>🔥</Text>
             <Text style={styles.statValue}>{currentStreak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
+            <Text style={styles.statLabel}>{t('dayStreak')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statEmoji}>📚</Text>
             <Text style={styles.statValue}>{totalWordsLearned}</Text>
-            <Text style={styles.statLabel}>Words</Text>
+            <Text style={styles.statLabel}>{t('words')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statEmoji}>⭐</Text>
             <Text style={styles.statValue}>{Math.floor(currentStreak / 7)}</Text>
-            <Text style={styles.statLabel}>Weeks</Text>
+            <Text style={styles.statLabel}>{t('weeks')}</Text>
           </View>
         </Animated.View>
 
@@ -196,8 +200,8 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
             contentContainerStyle={styles.journeyContainer}
             showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.journeyTitle}>🗺️ Learning Path</Text>
-            <Text style={styles.journeySubtitle}>Complete daily lessons to unlock new days</Text>
+            <Text style={styles.journeyTitle}>{t('learningPath')}</Text>
+            <Text style={styles.journeySubtitle}>{t('unlockDays')}</Text>
             
             <View style={styles.pathContainer}>
               {nodes.map((node, index) => renderNode(node, index))}
@@ -208,12 +212,12 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
               <Text style={styles.motivationEmoji}>💪</Text>
               <Text style={styles.motivationText}>
                 {currentStreak === 0 
-                  ? "Start your journey today!"
+                  ? t('startJourney')
                   : currentStreak < 7 
-                    ? "Keep going! First week almost complete!"
+                    ? t('keepGoing')
                     : currentStreak < 30
-                      ? "Amazing progress! You're on fire!"
-                      : "You're a language learning champion!"}
+                      ? t('amazingProgress')
+                      : t('champion')}
               </Text>
             </View>
           </ScrollView>

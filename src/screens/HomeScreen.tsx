@@ -497,19 +497,19 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
         <View style={styles.bottomBar}>
           <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
             <Text style={styles.tabEmoji}>🏠</Text>
-            <Text style={[styles.tabLabel, styles.tabLabelActive]}>Home</Text>
+            <Text style={[styles.tabLabel, styles.tabLabelActive]}>{t('tabHome')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }}>
             <Text style={styles.tabEmoji}>📖</Text>
-            <Text style={styles.tabLabel}>History</Text>
+            <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToJourney(); }}>
             <Text style={styles.tabEmoji}>🗺️</Text>
-            <Text style={styles.tabLabel}>Journey</Text>
+            <Text style={styles.tabLabel}>{t('tabJourney')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToSettings(); }}>
             <Text style={styles.tabEmoji}>⚙️</Text>
-            <Text style={styles.tabLabel}>Settings</Text>
+            <Text style={styles.tabLabel}>{t('tabSettings')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

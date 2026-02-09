@@ -121,6 +121,7 @@ export default function App() {
         <JourneyScreen
           currentStreak={userProgress?.streak || 0}
           totalWordsLearned={userProgress?.totalIdiomsLearned || 0}
+          nativeLanguage={nativeLanguage}
           onClose={navigateToHome}
         />
       )}
