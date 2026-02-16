@@ -3,6 +3,7 @@ import { ContentItem, ProficiencyLevel } from '../types';
 // Import content files
 import esContent from '../data/content/es_content.json';
 import enContent from '../data/content/en_content.json';
+import itContent from '../data/content/it_content.json';
 
 /**
  * Map of target language codes to their content
@@ -10,6 +11,7 @@ import enContent from '../data/content/en_content.json';
 const contentMap: Record<string, ContentItem[]> = {
   es: esContent as ContentItem[],
   en: enContent as ContentItem[],
+  it: itContent as ContentItem[],
 };
 
 /**
