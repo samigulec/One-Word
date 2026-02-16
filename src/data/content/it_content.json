@@ -1,0 +1,653 @@
+[
+  {
+    "id": "it_1",
+    "target_word": "Ciao",
+    "level": "A1",
+    "translations": {
+      "en": "Hello / Hi",
+      "tr": "Merhaba",
+      "es": "Hola",
+      "de": "Hallo",
+      "fr": "Salut",
+      "pt": "Oi",
+      "ru": "Привет",
+      "ja": "こんにちは",
+      "ko": "안녕하세요",
+      "zh": "你好"
+    },
+    "example_sentence": "Ciao! Come stai?",
+    "example_translation": {
+      "en": "Hello! How are you?",
+      "tr": "Merhaba! Nasılsın?",
+      "es": "¡Hola! ¿Cómo estás?",
+      "de": "Hallo! Wie geht es dir?",
+      "fr": "Salut! Comment vas-tu?",
+      "pt": "Oi! Como vai?",
+      "ru": "Привет! Как дела?",
+      "ja": "こんにちは！元気ですか？",
+      "ko": "안녕하세요! 잘 지내세요?",
+      "zh": "你好！你好吗？"
+    },
+    "pronunciation": "CHAO"
+  },
+  {
+    "id": "it_2",
+    "target_word": "Grazie",
+    "level": "A1",
+    "translations": {
+      "en": "Thank you",
+      "tr": "Teşekkür ederim",
+      "es": "Gracias",
+      "de": "Danke",
+      "fr": "Merci",
+      "pt": "Obrigado",
+      "ru": "Спасибо",
+      "ja": "ありがとう",
+      "ko": "감사합니다",
+      "zh": "谢谢"
+    },
+    "example_sentence": "Grazie mille per il tuo aiuto!",
+    "example_translation": {
+      "en": "Thank you very much for your help!",
+      "tr": "Yardımın için çok teşekkürler!",
+      "es": "¡Muchas gracias por tu ayuda!",
+      "de": "Vielen Dank für deine Hilfe!",
+      "fr": "Merci beaucoup pour ton aide!",
+      "pt": "Muito obrigado pela sua ajuda!",
+      "ru": "Большое спасибо за помощь!",
+      "ja": "助けてくれてありがとう！",
+      "ko": "도움 주셔서 정말 감사합니다!",
+      "zh": "非常感谢你的帮助！"
+    },
+    "pronunciation": "GRAH-tsyeh"
+  },
+  {
+    "id": "it_3",
+    "target_word": "Amico",
+    "level": "A1",
+    "translations": {
+      "en": "Friend",
+      "tr": "Arkadaş",
+      "es": "Amigo",
+      "de": "Freund",
+      "fr": "Ami",
+      "pt": "Amigo",
+      "ru": "Друг",
+      "ja": "友達",
+      "ko": "친구",
+      "zh": "朋友"
+    },
+    "example_sentence": "Lui è il mio migliore amico.",
+    "example_translation": {
+      "en": "He is my best friend.",
+      "tr": "O benim en iyi arkadaşım.",
+      "es": "Él es mi mejor amigo.",
+      "de": "Er ist mein bester Freund.",
+      "fr": "Il est mon meilleur ami.",
+      "pt": "Ele é meu melhor amigo.",
+      "ru": "Он мой лучший друг.",
+      "ja": "彼は私の親友です。",
+      "ko": "그는 제 가장 친한 친구입니다.",
+      "zh": "他是我最好的朋友。"
+    },
+    "pronunciation": "ah-MEE-koh"
+  },
+  {
+    "id": "it_4",
+    "target_word": "Casa",
+    "level": "A1",
+    "translations": {
+      "en": "House / Home",
+      "tr": "Ev",
+      "es": "Casa",
+      "de": "Haus",
+      "fr": "Maison",
+      "pt": "Casa",
+      "ru": "Дом",
+      "ja": "家",
+      "ko": "집",
+      "zh": "家"
+    },
+    "example_sentence": "Questa è la mia casa.",
+    "example_translation": {
+      "en": "This is my house.",
+      "tr": "Bu benim evim.",
+      "es": "Esta es mi casa.",
+      "de": "Das ist mein Haus.",
+      "fr": "C'est ma maison.",
+      "pt": "Esta é minha casa.",
+      "ru": "Это мой дом.",
+      "ja": "これは私の家です。",
+      "ko": "이것은 제 집입니다.",
+      "zh": "这是我的家。"
+    },
+    "pronunciation": "KAH-zah"
+  },
+  {
+    "id": "it_5",
+    "target_word": "Acqua",
+    "level": "A1",
+    "translations": {
+      "en": "Water",
+      "tr": "Su",
+      "es": "Agua",
+      "de": "Wasser",
+      "fr": "Eau",
+      "pt": "Água",
+      "ru": "Вода",
+      "ja": "水",
+      "ko": "물",
+      "zh": "水"
+    },
+    "example_sentence": "Ho bisogno di acqua, per favore.",
+    "example_translation": {
+      "en": "I need water, please.",
+      "tr": "Lütfen suya ihtiyacım var.",
+      "es": "Necesito agua, por favor.",
+      "de": "Ich brauche Wasser, bitte.",
+      "fr": "J'ai besoin d'eau, s'il vous plaît.",
+      "pt": "Preciso de água, por favor.",
+      "ru": "Мне нужна вода, пожалуйста.",
+      "ja": "水をください。",
+      "ko": "물 좀 주세요.",
+      "zh": "请给我水。"
+    },
+    "pronunciation": "AHK-kwah"
+  },
+  {
+    "id": "it_6",
+    "target_word": "Buongiorno",
+    "level": "A1",
+    "translations": {
+      "en": "Good morning",
+      "tr": "Günaydın",
+      "es": "Buenos días",
+      "de": "Guten Morgen",
+      "fr": "Bonjour",
+      "pt": "Bom dia",
+      "ru": "Доброе утро",
+      "ja": "おはようございます",
+      "ko": "좋은 아침이에요",
+      "zh": "早上好"
+    },
+    "example_sentence": "Buongiorno! Hai dormito bene?",
+    "example_translation": {
+      "en": "Good morning! Did you sleep well?",
+      "tr": "Günaydın! İyi uyudun mu?",
+      "es": "¡Buenos días! ¿Dormiste bien?",
+      "de": "Guten Morgen! Hast du gut geschlafen?",
+      "fr": "Bonjour! Tu as bien dormi?",
+      "pt": "Bom dia! Dormiu bem?",
+      "ru": "Доброе утро! Хорошо спалось?",
+      "ja": "おはようございます！よく眠れましたか？",
+      "ko": "좋은 아침이에요! 잘 잤어요?",
+      "zh": "早上好！睡得好吗？"
+    },
+    "pronunciation": "bwon-JOHR-noh"
+  },
+  {
+    "id": "it_7",
+    "target_word": "Per favore",
+    "level": "A1",
+    "translations": {
+      "en": "Please",
+      "tr": "Lütfen",
+      "es": "Por favor",
+      "de": "Bitte",
+      "fr": "S'il vous plaît",
+      "pt": "Por favor",
+      "ru": "Пожалуйста",
+      "ja": "お願いします",
+      "ko": "제발 / 부탁합니다",
+      "zh": "请"
+    },
+    "example_sentence": "Puoi aiutarmi, per favore?",
+    "example_translation": {
+      "en": "Can you help me, please?",
+      "tr": "Bana yardım edebilir misin, lütfen?",
+      "es": "¿Puedes ayudarme, por favor?",
+      "de": "Kannst du mir bitte helfen?",
+      "fr": "Tu peux m'aider, s'il te plaît?",
+      "pt": "Pode me ajudar, por favor?",
+      "ru": "Ты можешь мне помочь, пожалуйста?",
+      "ja": "助けてもらえますか？",
+      "ko": "도와주실 수 있나요?",
+      "zh": "你能帮帮我吗？"
+    },
+    "pronunciation": "pehr fah-VOH-reh"
+  },
+  {
+    "id": "it_8",
+    "target_word": "Capire",
+    "level": "A2",
+    "translations": {
+      "en": "To understand",
+      "tr": "Anlamak",
+      "es": "Entender",
+      "de": "Verstehen",
+      "fr": "Comprendre",
+      "pt": "Entender",
+      "ru": "Понимать",
+      "ja": "理解する",
+      "ko": "이해하다",
+      "zh": "理解"
+    },
+    "example_sentence": "Non capisco quello che dici.",
+    "example_translation": {
+      "en": "I don't understand what you're saying.",
+      "tr": "Ne dediğini anlamıyorum.",
+      "es": "No entiendo lo que dices.",
+      "de": "Ich verstehe nicht, was du sagst.",
+      "fr": "Je ne comprends pas ce que tu dis.",
+      "pt": "Não entendo o que você está dizendo.",
+      "ru": "Я не понимаю, что ты говоришь.",
+      "ja": "あなたの言っていることがわかりません。",
+      "ko": "당신이 말하는 것을 이해하지 못하겠어요.",
+      "zh": "我不明白你在说什么。"
+    },
+    "pronunciation": "kah-PEE-reh"
+  },
+  {
+    "id": "it_9",
+    "target_word": "Lavoro",
+    "level": "A2",
+    "translations": {
+      "en": "Work / Job",
+      "tr": "İş",
+      "es": "Trabajo",
+      "de": "Arbeit",
+      "fr": "Travail",
+      "pt": "Trabalho",
+      "ru": "Работа",
+      "ja": "仕事",
+      "ko": "일 / 직업",
+      "zh": "工作"
+    },
+    "example_sentence": "Ho molto lavoro oggi.",
+    "example_translation": {
+      "en": "I have a lot of work today.",
+      "tr": "Bugün çok işim var.",
+      "es": "Tengo mucho trabajo hoy.",
+      "de": "Ich habe heute viel Arbeit.",
+      "fr": "J'ai beaucoup de travail aujourd'hui.",
+      "pt": "Tenho muito trabalho hoje.",
+      "ru": "У меня сегодня много работы.",
+      "ja": "今日はたくさん仕事があります。",
+      "ko": "오늘 일이 많아요.",
+      "zh": "我今天有很多工作。"
+    },
+    "pronunciation": "lah-VOH-roh"
+  },
+  {
+    "id": "it_10",
+    "target_word": "Sempre",
+    "level": "A2",
+    "translations": {
+      "en": "Always",
+      "tr": "Her zaman",
+      "es": "Siempre",
+      "de": "Immer",
+      "fr": "Toujours",
+      "pt": "Sempre",
+      "ru": "Всегда",
+      "ja": "いつも",
+      "ko": "항상",
+      "zh": "总是"
+    },
+    "example_sentence": "Arrivo sempre in orario.",
+    "example_translation": {
+      "en": "I always arrive on time.",
+      "tr": "Her zaman zamanında gelirim.",
+      "es": "Siempre llego a tiempo.",
+      "de": "Ich komme immer pünktlich.",
+      "fr": "J'arrive toujours à l'heure.",
+      "pt": "Eu sempre chego na hora.",
+      "ru": "Я всегда прихожу вовремя.",
+      "ja": "私はいつも時間通りに着きます。",
+      "ko": "저는 항상 정시에 도착합니다.",
+      "zh": "我总是准时到达。"
+    },
+    "pronunciation": "SEHM-preh"
+  },
+  {
+    "id": "it_11",
+    "target_word": "Abbastanza",
+    "level": "A2",
+    "translations": {
+      "en": "Quite / Enough",
+      "tr": "Oldukça / Yeterince",
+      "es": "Bastante",
+      "de": "Ziemlich / Genug",
+      "fr": "Assez",
+      "pt": "Bastante",
+      "ru": "Достаточно",
+      "ja": "十分に / かなり",
+      "ko": "꽤 / 충분히",
+      "zh": "相当 / 足够"
+    },
+    "example_sentence": "Fa abbastanza freddo oggi.",
+    "example_translation": {
+      "en": "It's quite cold today.",
+      "tr": "Bugün oldukça soğuk.",
+      "es": "Hace bastante frío hoy.",
+      "de": "Heute ist es ziemlich kalt.",
+      "fr": "Il fait assez froid aujourd'hui.",
+      "pt": "Está bastante frio hoje.",
+      "ru": "Сегодня довольно холодно.",
+      "ja": "今日はかなり寒いです。",
+      "ko": "오늘 꽤 춥네요.",
+      "zh": "今天相当冷。"
+    },
+    "pronunciation": "ahb-bahs-TAHN-tsah"
+  },
+  {
+    "id": "it_12",
+    "target_word": "Sviluppare",
+    "level": "B1",
+    "translations": {
+      "en": "To develop",
+      "tr": "Geliştirmek",
+      "es": "Desarrollar",
+      "de": "Entwickeln",
+      "fr": "Développer",
+      "pt": "Desenvolver",
+      "ru": "Развивать",
+      "ja": "開発する",
+      "ko": "개발하다",
+      "zh": "发展"
+    },
+    "example_sentence": "Vogliamo sviluppare nuove competenze.",
+    "example_translation": {
+      "en": "We want to develop new skills.",
+      "tr": "Yeni beceriler geliştirmek istiyoruz.",
+      "es": "Queremos desarrollar nuevas habilidades.",
+      "de": "Wir wollen neue Fähigkeiten entwickeln.",
+      "fr": "Nous voulons développer de nouvelles compétences.",
+      "pt": "Queremos desenvolver novas competências.",
+      "ru": "Мы хотим развить новые навыки.",
+      "ja": "新しいスキルを開発したいです。",
+      "ko": "우리는 새로운 역량을 개발하고 싶습니다.",
+      "zh": "我们想发展新技能。"
+    },
+    "pronunciation": "svee-loop-PAH-reh"
+  },
+  {
+    "id": "it_13",
+    "target_word": "Tuttavia",
+    "level": "B1",
+    "translations": {
+      "en": "However / Nevertheless",
+      "tr": "Ancak / Bununla birlikte",
+      "es": "Sin embargo",
+      "de": "Jedoch / Dennoch",
+      "fr": "Cependant",
+      "pt": "No entanto",
+      "ru": "Тем не менее",
+      "ja": "しかしながら",
+      "ko": "그러나",
+      "zh": "然而"
+    },
+    "example_sentence": "È difficile, tuttavia non è impossibile.",
+    "example_translation": {
+      "en": "It's difficult, however, it's not impossible.",
+      "tr": "Zor, ancak imkansız değil.",
+      "es": "Es difícil, sin embargo, no es imposible.",
+      "de": "Es ist schwierig, jedoch nicht unmöglich.",
+      "fr": "C'est difficile, cependant, ce n'est pas impossible.",
+      "pt": "É difícil, no entanto, não é impossível.",
+      "ru": "Это сложно, тем не менее не невозможно.",
+      "ja": "難しいですが、不可能ではありません。",
+      "ko": "어렵지만, 불가능하지는 않습니다.",
+      "zh": "这很难，然而并非不可能。"
+    },
+    "pronunciation": "toot-tah-VEE-ah"
+  },
+  {
+    "id": "it_14",
+    "target_word": "Approfittare",
+    "level": "B1",
+    "translations": {
+      "en": "To take advantage of",
+      "tr": "Faydalanmak",
+      "es": "Aprovechar",
+      "de": "Nutzen / Ausnutzen",
+      "fr": "Profiter de",
+      "pt": "Aproveitar",
+      "ru": "Воспользоваться",
+      "ja": "利用する",
+      "ko": "이용하다",
+      "zh": "利用"
+    },
+    "example_sentence": "Devi approfittare di questa opportunità.",
+    "example_translation": {
+      "en": "You should take advantage of this opportunity.",
+      "tr": "Bu fırsattan faydalanmalısın.",
+      "es": "Debes aprovechar esta oportunidad.",
+      "de": "Du solltest diese Gelegenheit nutzen.",
+      "fr": "Tu devrais profiter de cette opportunité.",
+      "pt": "Você deveria aproveitar esta oportunidade.",
+      "ru": "Тебе стоит воспользоваться этой возможностью.",
+      "ja": "この機会を利用すべきです。",
+      "ko": "이 기회를 이용해야 합니다.",
+      "zh": "你应该利用这个机会。"
+    },
+    "pronunciation": "ahp-proh-feet-TAH-reh"
+  },
+  {
+    "id": "it_15",
+    "target_word": "Nonostante",
+    "level": "B2",
+    "translations": {
+      "en": "Despite / In spite of",
+      "tr": "Rağmen",
+      "es": "A pesar de",
+      "de": "Trotz",
+      "fr": "Malgré",
+      "pt": "Apesar de",
+      "ru": "Несмотря на",
+      "ja": "にもかかわらず",
+      "ko": "에도 불구하고",
+      "zh": "尽管"
+    },
+    "example_sentence": "Nonostante la pioggia, siamo usciti a passeggiare.",
+    "example_translation": {
+      "en": "Despite the rain, we went for a walk.",
+      "tr": "Yağmura rağmen yürüyüşe çıktık.",
+      "es": "A pesar de la lluvia, salimos a pasear.",
+      "de": "Trotz des Regens sind wir spazieren gegangen.",
+      "fr": "Malgré la pluie, nous sommes sortis nous promener.",
+      "pt": "Apesar da chuva, saímos para caminhar.",
+      "ru": "Несмотря на дождь, мы вышли на прогулку.",
+      "ja": "雨にもかかわらず、散歩に出かけました。",
+      "ko": "비에도 불구하고 산책하러 나갔습니다.",
+      "zh": "尽管下雨，我们还是出去散步了。"
+    },
+    "pronunciation": "noh-nohs-TAHN-teh"
+  },
+  {
+    "id": "it_16",
+    "target_word": "Indispensabile",
+    "level": "B2",
+    "translations": {
+      "en": "Essential / Indispensable",
+      "tr": "Vazgeçilmez",
+      "es": "Imprescindible",
+      "de": "Unentbehrlich",
+      "fr": "Indispensable",
+      "pt": "Indispensável",
+      "ru": "Незаменимый",
+      "ja": "不可欠な",
+      "ko": "필수적인",
+      "zh": "不可缺少的"
+    },
+    "example_sentence": "L'inglese è indispensabile per questo lavoro.",
+    "example_translation": {
+      "en": "English is essential for this job.",
+      "tr": "Bu iş için İngilizce vazgeçilmez.",
+      "es": "El inglés es imprescindible para este trabajo.",
+      "de": "Englisch ist für diese Arbeit unentbehrlich.",
+      "fr": "L'anglais est indispensable pour ce travail.",
+      "pt": "O inglês é indispensável para este trabalho.",
+      "ru": "Английский незаменим для этой работы.",
+      "ja": "この仕事には英語が不可欠です。",
+      "ko": "이 직업에는 영어가 필수적입니다.",
+      "zh": "英语对这份工作来说是不可缺少的。"
+    },
+    "pronunciation": "een-dees-pehn-SAH-bee-leh"
+  },
+  {
+    "id": "it_17",
+    "target_word": "Comportare",
+    "level": "B2",
+    "translations": {
+      "en": "To entail / To involve",
+      "tr": "Gerektirmek",
+      "es": "Conllevar",
+      "de": "Mit sich bringen",
+      "fr": "Impliquer / Comporter",
+      "pt": "Implicar",
+      "ru": "Влечь за собой",
+      "ja": "伴う",
+      "ko": "수반하다",
+      "zh": "涉及"
+    },
+    "example_sentence": "Questa posizione comporta molta responsabilità.",
+    "example_translation": {
+      "en": "This position entails a lot of responsibility.",
+      "tr": "Bu pozisyon çok sorumluluk gerektiriyor.",
+      "es": "Este puesto conlleva mucha responsabilidad.",
+      "de": "Diese Position bringt viel Verantwortung mit sich.",
+      "fr": "Ce poste comporte beaucoup de responsabilités.",
+      "pt": "Esta posição implica muita responsabilidade.",
+      "ru": "Эта должность влечёт за собой много ответственности.",
+      "ja": "この職位は多くの責任を伴います。",
+      "ko": "이 직책은 많은 책임을 수반합니다.",
+      "zh": "这个职位涉及很多责任。"
+    },
+    "pronunciation": "kohm-pohr-TAH-reh"
+  },
+  {
+    "id": "it_18",
+    "target_word": "Svolgere",
+    "level": "C1",
+    "translations": {
+      "en": "To carry out / To perform",
+      "tr": "Yerine getirmek / Yürütmek",
+      "es": "Llevar a cabo / Desempeñar",
+      "de": "Durchführen / Ausüben",
+      "fr": "Effectuer / Exercer",
+      "pt": "Realizar / Desempenhar",
+      "ru": "Выполнять / Осуществлять",
+      "ja": "遂行する",
+      "ko": "수행하다",
+      "zh": "执行 / 履行"
+    },
+    "example_sentence": "Lei svolge un ruolo fondamentale nell'azienda.",
+    "example_translation": {
+      "en": "She carries out a fundamental role in the company.",
+      "tr": "O, şirkette temel bir rol üstleniyor.",
+      "es": "Ella desempeña un papel fundamental en la empresa.",
+      "de": "Sie übt eine grundlegende Rolle im Unternehmen aus.",
+      "fr": "Elle exerce un rôle fondamental dans l'entreprise.",
+      "pt": "Ela desempenha um papel fundamental na empresa.",
+      "ru": "Она выполняет ключевую роль в компании.",
+      "ja": "彼女は会社で重要な役割を果たしています。",
+      "ko": "그녀는 회사에서 근본적인 역할을 수행합니다.",
+      "zh": "她在公司中履行着重要角色。"
+    },
+    "pronunciation": "SVOHL-jeh-reh"
+  },
+  {
+    "id": "it_19",
+    "target_word": "Ciononostante",
+    "level": "C1",
+    "translations": {
+      "en": "Nevertheless / Notwithstanding",
+      "tr": "Buna rağmen",
+      "es": "No obstante",
+      "de": "Nichtsdestoweniger",
+      "fr": "Néanmoins",
+      "pt": "Não obstante",
+      "ru": "Тем не менее",
+      "ja": "それにもかかわらず",
+      "ko": "그럼에도 불구하고",
+      "zh": "尽管如此"
+    },
+    "example_sentence": "Il progetto è ambizioso; ciononostante, è fattibile.",
+    "example_translation": {
+      "en": "The project is ambitious; nevertheless, it's feasible.",
+      "tr": "Proje iddialı; buna rağmen uygulanabilir.",
+      "es": "El proyecto es ambicioso; no obstante, es factible.",
+      "de": "Das Projekt ist ehrgeizig; nichtsdestoweniger ist es machbar.",
+      "fr": "Le projet est ambitieux; néanmoins, il est réalisable.",
+      "pt": "O projeto é ambicioso; não obstante, é viável.",
+      "ru": "Проект амбициозный; тем не менее он осуществим.",
+      "ja": "プロジェクトは野心的です。それにもかかわらず実現可能です。",
+      "ko": "프로젝트는 야심적이지만, 그럼에도 불구하고 실행 가능합니다.",
+      "zh": "该项目很有野心；尽管如此，是可行的。"
+    },
+    "pronunciation": "choh-noh-nohs-TAHN-teh"
+  },
+  {
+    "id": "it_20",
+    "target_word": "Sottendere",
+    "level": "C2",
+    "translations": {
+      "en": "To underlie / To subtend",
+      "tr": "Altında yatmak",
+      "es": "Subyacer",
+      "de": "Zugrunde liegen",
+      "fr": "Sous-tendre",
+      "pt": "Subjazer",
+      "ru": "Лежать в основе",
+      "ja": "根底にある",
+      "ko": "근저에 있다",
+      "zh": "潜在的"
+    },
+    "example_sentence": "Le tensioni che sottendono al conflitto sono complesse.",
+    "example_translation": {
+      "en": "The tensions that underlie the conflict are complex.",
+      "tr": "Çatışmanın altında yatan gerilimler karmaşık.",
+      "es": "Las tensiones que subyacen al conflicto son complejas.",
+      "de": "Die Spannungen, die dem Konflikt zugrunde liegen, sind komplex.",
+      "fr": "Les tensions qui sous-tendent le conflit sont complexes.",
+      "pt": "As tensões que subjazem ao conflito são complexas.",
+      "ru": "Напряжённости, лежащие в основе конфликта, сложны.",
+      "ja": "紛争の根底にある緊張は複雑です。",
+      "ko": "갈등의 근저에 있는 긴장은 복잡합니다.",
+      "zh": "冲突背后的紧张关系很复杂。"
+    },
+    "pronunciation": "soht-TEHN-deh-reh"
+  },
+  {
+    "id": "it_21",
+    "target_word": "Delucidare",
+    "level": "C2",
+    "translations": {
+      "en": "To elucidate / To clarify",
+      "tr": "Açıklamak / Aydınlatmak",
+      "es": "Elucidar / Aclarar",
+      "de": "Erläutern / Aufklären",
+      "fr": "Élucider / Clarifier",
+      "pt": "Elucidar / Esclarecer",
+      "ru": "Прояснять / Разъяснять",
+      "ja": "解明する",
+      "ko": "해명하다",
+      "zh": "阐明"
+    },
+    "example_sentence": "L'autore cerca di delucidare i misteri della storia.",
+    "example_translation": {
+      "en": "The author tries to elucidate the mysteries of history.",
+      "tr": "Yazar, tarihin gizemlerini açıklamaya çalışıyor.",
+      "es": "El autor intenta elucidar los misterios de la historia.",
+      "de": "Der Autor versucht, die Geheimnisse der Geschichte zu erläutern.",
+      "fr": "L'auteur tente d'élucider les mystères de l'histoire.",
+      "pt": "O autor tenta elucidar os mistérios da história.",
+      "ru": "Автор пытается прояснить тайны истории.",
+      "ja": "著者は歴史の謎を解明しようとしています。",
+      "ko": "저자는 역사의 미스터리를 해명하려고 합니다.",
+      "zh": "作者试图阐明历史之谜。"
+    },
+    "pronunciation": "deh-loo-chee-DAH-reh"
+  }
+]

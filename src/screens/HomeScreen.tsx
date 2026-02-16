@@ -493,26 +493,27 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
           </TouchableOpacity>
         </Animated.View>
         
-        {/* Bottom Tab Bar */}
-        <View style={styles.bottomBar}>
-          <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
-            <Text style={styles.tabEmoji}>🏠</Text>
-            <Text style={[styles.tabLabel, styles.tabLabelActive]}>{t('tabHome')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }}>
-            <Text style={styles.tabEmoji}>📖</Text>
-            <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToJourney(); }}>
-            <Text style={styles.tabEmoji}>🗺️</Text>
-            <Text style={styles.tabLabel}>{t('tabJourney')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToSettings(); }}>
-            <Text style={styles.tabEmoji}>⚙️</Text>
-            <Text style={styles.tabLabel}>{t('tabSettings')}</Text>
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
+
+      {/* Bottom Tab Bar - outside SafeAreaView to stick to bottom */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
+          <Text style={styles.tabEmoji}>🏠</Text>
+          <Text style={[styles.tabLabel, styles.tabLabelActive]}>{t('tabHome')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }}>
+          <Text style={styles.tabEmoji}>📖</Text>
+          <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToJourney(); }}>
+          <Text style={styles.tabEmoji}>🗺️</Text>
+          <Text style={styles.tabLabel}>{t('tabJourney')}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToSettings(); }}>
+          <Text style={styles.tabEmoji}>⚙️</Text>
+          <Text style={styles.tabLabel}>{t('tabSettings')}</Text>
+        </TouchableOpacity>
+      </View>
     </LinearGradient>
   );
 };
@@ -839,10 +840,8 @@ const styles = StyleSheet.create({
   bottomBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
-    paddingBottom: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    paddingTop: 10,
+    paddingBottom: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.08,
