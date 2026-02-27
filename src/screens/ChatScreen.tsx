@@ -18,9 +18,9 @@ import * as Haptics from 'expo-haptics';
 import { ContentItem, ChatMessage } from '../types';
 import { getTranslation, LanguageCode } from '../utils/translations';
 import { getTranslation as getContentTranslation } from '../utils/contentLoader';
-import { 
-  getAIResponse, 
-  createUserMessage, 
+import {
+  getAIResponse,
+  createUserMessage,
   getInitialGreeting,
   getQuickReplyOptions,
 } from '../services/aiChat';
@@ -38,11 +38,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  // Get translations
   const t = (key: Parameters<typeof getTranslation>[0]) => getTranslation(key, nativeLanguage);
 
-  // Animations
-  const teacherBounce = useRef(new Animated.Value(0)).current;
   const backButtonScale = useRef(new Animated.Value(1)).current;
   const sendButtonScale = useRef(new Animated.Value(1)).current;
 
@@ -50,47 +47,17 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
     const wordTranslation = getContentTranslation(word, nativeLanguage);
     const greeting = getInitialGreeting(word, nativeLanguage, targetLanguage, wordTranslation);
     setMessages([greeting]);
-    startAnimations();
   }, [word, nativeLanguage, targetLanguage]);
-
-  const startAnimations = () => {
-    // Teacher bounce animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(teacherBounce, {
-          toValue: -4,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(teacherBounce, {
-          toValue: 0,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  };
 
   const handleSend = async (text?: string) => {
     const messageText = text || inputText.trim();
     if (!messageText || isLoading) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    // Bounce animation
+
     Animated.sequence([
-      Animated.spring(sendButtonScale, {
-        toValue: 0.85,
-        useNativeDriver: true,
-      }),
-      Animated.spring(sendButtonScale, {
-        toValue: 1.1,
-        useNativeDriver: true,
-      }),
-      Animated.spring(sendButtonScale, {
-        toValue: 1,
-        useNativeDriver: true,
-      }),
+      Animated.spring(sendButtonScale, { toValue: 0.9, useNativeDriver: true }),
+      Animated.spring(sendButtonScale, { toValue: 1, useNativeDriver: true }),
     ]).start();
 
     const userMessage = createUserMessage(messageText);
@@ -131,21 +98,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
   const handleBackPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Animated.sequence([
-      Animated.spring(backButtonScale, {
-        toValue: 0.9,
-        useNativeDriver: true,
-      }),
-      Animated.spring(backButtonScale, {
-        toValue: 1,
-        useNativeDriver: true,
-      }),
+      Animated.spring(backButtonScale, { toValue: 0.9, useNativeDriver: true }),
+      Animated.spring(backButtonScale, { toValue: 1, useNativeDriver: true }),
     ]).start();
     setTimeout(() => onNavigateBack(), 100);
   };
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
-    
+
     return (
       <View
         style={[
@@ -154,14 +115,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
         ]}
       >
         {!isUser && (
-          <Animated.View 
-            style={[
-              styles.avatarContainer, 
-              { transform: [{ translateY: teacherBounce }] }
-            ]}
-          >
-            <Text style={styles.teacherEmoji}>👩‍🏫</Text>
-          </Animated.View>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>AI</Text>
+          </View>
         )}
         <View
           style={[
@@ -178,7 +134,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
         </View>
         {isUser && (
           <View style={[styles.avatarContainer, styles.userAvatar]}>
-            <Text style={styles.userEmoji}>🧑‍🎓</Text>
+            <Text style={styles.avatarText}>You</Text>
           </View>
         )}
       </View>
@@ -187,19 +143,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
 
   const renderTypingIndicator = () => {
     if (!isLoading) return null;
-    
+
     return (
       <View style={[styles.messageContainer, styles.aiMessageContainer]}>
-        <Animated.View 
-          style={[
-            styles.avatarContainer, 
-            { transform: [{ translateY: teacherBounce }] }
-          ]}
-        >
-          <Text style={styles.teacherEmoji}>👩‍🏫</Text>
-        </Animated.View>
+        <View style={styles.avatarContainer}>
+          <Text style={styles.avatarText}>AI</Text>
+        </View>
         <View style={[styles.messageBubble, styles.aiBubble, styles.typingBubble]}>
-          <ActivityIndicator size="small" color="#7EC8E3" />
+          <ActivityIndicator size="small" color="#6366F1" />
           <Text style={styles.typingText}>{t('typing')}</Text>
         </View>
       </View>
@@ -209,22 +160,22 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
   const quickReplies = getQuickReplyOptions(nativeLanguage);
 
   return (
-    <LinearGradient colors={['#E0F4FF', '#F0F9FF', '#FFFFFF']} style={styles.container}>
+    <LinearGradient colors={['#F8FAFE', '#F1F5F9', '#FFFFFF']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
           <Animated.View style={{ transform: [{ scale: backButtonScale }] }}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.backButton}
               onPress={handleBackPress}
             >
-              <Text style={styles.backArrow}>←</Text>
+              <Text style={styles.backArrow}>{'\u2190'}</Text>
             </TouchableOpacity>
           </Animated.View>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>{t('practiceTime')}</Text>
             <Text style={styles.headerSubtitle} numberOfLines={1}>
-              "{word.target_word}"
+              {word.target_word}
             </Text>
           </View>
           <View style={styles.headerSpacer} />
@@ -246,8 +197,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
 
         {/* Quick Reply Chips */}
         <View style={styles.quickReplyContainer}>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.quickReplyScroll}
           >
@@ -257,7 +208,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
                 style={styles.quickReplyChip}
                 onPress={() => handleQuickReply(option.text)}
                 disabled={isLoading}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
                 <Text style={styles.quickReplyText}>{option.text}</Text>
               </TouchableOpacity>
@@ -275,7 +226,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
               <TextInput
                 style={styles.textInput}
                 placeholder={t('writeYourSentence')}
-                placeholderTextColor="#A0C4D8"
+                placeholderTextColor="#94A3B8"
                 value={inputText}
                 onChangeText={setInputText}
                 multiline
@@ -290,9 +241,9 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
                   ]}
                   onPress={() => handleSend()}
                   disabled={!inputText.trim() || isLoading}
-                  activeOpacity={0.8}
+                  activeOpacity={0.7}
                 >
-                  <Text style={styles.sendEmoji}>🚀</Text>
+                  <Text style={styles.sendIcon}>{'\u2191'}</Text>
                 </TouchableOpacity>
               </Animated.View>
             </View>
@@ -315,45 +266,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderBottomWidth: 2,
-    borderBottomColor: '#E0F4FF',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
   backButton: {
-    backgroundColor: '#FFE5EC',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    backgroundColor: '#F1F5F9',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#FF8FAB',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
   },
   backArrow: {
-    fontSize: 24,
-    color: '#E75480',
-    fontWeight: '700',
+    fontSize: 20,
+    color: '#475569',
+    fontWeight: '600',
   },
   headerCenter: {
     flex: 1,
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#4A90B8',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1E293B',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#7EC8E3',
+    color: '#6366F1',
     marginTop: 2,
     fontWeight: '600',
   },
   headerSpacer: {
-    width: 44,
+    width: 40,
   },
   messagesList: {
     paddingHorizontal: 16,
@@ -372,149 +318,126 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   avatarContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#E0F4FF',
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#EEF2FF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
-    shadowColor: '#7EC8E3',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    marginRight: 8,
   },
-  teacherEmoji: {
-    fontSize: 24,
-  },
-  userEmoji: {
-    fontSize: 24,
+  avatarText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#6366F1',
   },
   userAvatar: {
-    backgroundColor: '#D4F5E9',
+    backgroundColor: '#F0FDF4',
     marginRight: 0,
-    marginLeft: 10,
+    marginLeft: 8,
   },
   messageBubble: {
     maxWidth: '72%',
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
   },
   userBubble: {
-    backgroundColor: '#7DDBA3',
-    borderBottomRightRadius: 8,
-    shadowColor: '#38A169',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
+    backgroundColor: '#6366F1',
+    borderBottomRightRadius: 4,
   },
   aiBubble: {
     backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 8,
-    borderWidth: 2,
-    borderColor: '#E0F4FF',
-    shadowColor: '#7EC8E3',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 3,
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   messageText: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '500',
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '400',
   },
   userMessageText: {
     color: '#FFFFFF',
   },
   aiMessageText: {
-    color: '#3D5A80',
+    color: '#334155',
   },
   typingBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 14,
   },
   typingText: {
-    fontSize: 14,
-    color: '#7EC8E3',
+    fontSize: 13,
+    color: '#94A3B8',
     marginLeft: 10,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   quickReplyContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingVertical: 12,
-    borderTopWidth: 2,
-    borderTopColor: '#E0F4FF',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
   },
   quickReplyScroll: {
     paddingHorizontal: 16,
   },
   quickReplyChip: {
-    backgroundColor: '#FFE5EC',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 24,
-    marginRight: 10,
-    shadowColor: '#FF8FAB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   quickReplyText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#E75480',
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#475569',
   },
   inputContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderTopWidth: 2,
-    borderTopColor: '#E0F4FF',
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: '#F0F9FF',
-    borderRadius: 28,
-    borderWidth: 2,
-    borderColor: '#C5EBFF',
-    paddingHorizontal: 18,
-    paddingVertical: 10,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   textInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#3D5A80',
+    fontSize: 15,
+    color: '#1E293B',
     maxHeight: 100,
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingRight: 10,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   sendButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#7DDBA3',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#6366F1',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#38A169',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
   },
   sendButtonDisabled: {
-    backgroundColor: '#C5EBFF',
-    shadowOpacity: 0.1,
+    backgroundColor: '#CBD5E1',
   },
-  sendEmoji: {
-    fontSize: 24,
+  sendIcon: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
 });
 

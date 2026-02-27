@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#E8F4FC"
+      "backgroundColor": "#F8FAFC"
     },
     "ios": {
       "supportsTablet": true,
@@ -18,7 +18,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#E8F4FC"
+        "backgroundColor": "#F8FAFC"
       },
       "package": "com.bikelime.app"
     },

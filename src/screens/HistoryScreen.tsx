@@ -29,7 +29,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
 
   const loadWords = async () => {
     const learned = await getLearnedWords();
-    setWords(learned.reverse()); // Most recent first
+    setWords(learned.reverse());
   };
 
   const handleToggleFavorite = async (wordId: string) => {
@@ -38,13 +38,13 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
     await loadWords();
   };
 
-  const filteredWords = filter === 'favorites' 
-    ? words.filter(w => w.isFavorite) 
+  const filteredWords = filter === 'favorites'
+    ? words.filter(w => w.isFavorite)
     : words;
 
   const renderWord = ({ item }: { item: LearnedWord }) => {
     const translation = item.word.translations[nativeLanguage] || item.word.translations['en'] || '';
-    
+
     return (
       <View style={styles.wordCard}>
         <View style={styles.wordLeft}>
@@ -57,11 +57,13 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
             <Text style={styles.dateText}>{item.learnedDate}</Text>
           </View>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => handleToggleFavorite(item.word.id)}
           style={styles.favButton}
         >
-          <Text style={styles.favEmoji}>{item.isFavorite ? '❤️' : '🤍'}</Text>
+          <Text style={[styles.favIcon, item.isFavorite && styles.favIconActive]}>
+            {item.isFavorite ? '\u2665' : '\u2661'}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -69,20 +71,20 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
 
   const getLevelColor = (level: string) => {
     const colors: Record<string, string> = {
-      'A1': '#4CAF50', 'A2': '#8BC34A',
-      'B1': '#FF9800', 'B2': '#FF5722',
-      'C1': '#9C27B0', 'C2': '#673AB7',
+      'A1': '#10B981', 'A2': '#34D399',
+      'B1': '#F59E0B', 'B2': '#EF4444',
+      'C1': '#8B5CF6', 'C2': '#6366F1',
     };
-    return colors[level] || '#78909C';
+    return colors[level] || '#94A3B8';
   };
 
   return (
-    <LinearGradient colors={['#F5F7FA', '#E8ECF1']} style={styles.container}>
+    <LinearGradient colors={['#F8FAFC', '#F1F5F9']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeIcon}>←</Text>
+            <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('wordHistory')}</Text>
           <View style={styles.placeholder} />
@@ -103,7 +105,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
             onPress={() => setFilter('favorites')}
           >
             <Text style={[styles.filterText, filter === 'favorites' && styles.filterTextActive]}>
-              ❤️ {t('favorites')} ({words.filter(w => w.isFavorite).length})
+              {t('favorites')} ({words.filter(w => w.isFavorite).length})
             </Text>
           </TouchableOpacity>
         </View>
@@ -111,11 +113,11 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
         {/* Word List */}
         {filteredWords.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyEmoji}>{filter === 'favorites' ? '💭' : '📭'}</Text>
+            <Text style={styles.emptyTitle}>
+              {filter === 'favorites' ? t('noFavoritesYet') : t('noWordsYet')}
+            </Text>
             <Text style={styles.emptyText}>
-              {filter === 'favorites' 
-                ? `${t('noFavoritesYet')}\n${t('noFavoritesHint')}`
-                : `${t('noWordsYet')}\n${t('noWordsHint')}`}
+              {filter === 'favorites' ? t('noFavoritesHint') : t('noWordsHint')}
             </Text>
           </View>
         ) : (
@@ -146,17 +148,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  closeIcon: { fontSize: 22, color: '#3D5A80', fontWeight: '600' },
-  headerTitle: { fontSize: 20, fontWeight: '800', color: '#3D5A80' },
+  closeIcon: { fontSize: 20, color: '#475569', fontWeight: '600' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B' },
   placeholder: { width: 40 },
   filterRow: {
     flexDirection: 'row',
@@ -165,19 +167,22 @@ const styles = StyleSheet.create({
   },
   filterTab: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   filterTabActive: {
-    backgroundColor: '#667eea',
+    backgroundColor: '#6366F1',
+    borderColor: '#6366F1',
   },
   filterText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#78909C',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#64748B',
   },
   filterTextActive: {
     color: '#FFFFFF',
@@ -188,27 +193,27 @@ const styles = StyleSheet.create({
   },
   wordCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   wordLeft: { flex: 1 },
   wordTarget: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#3D5A80',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1E293B',
     marginBottom: 4,
   },
   wordTranslation: {
-    fontSize: 15,
-    color: '#78909C',
+    fontSize: 14,
+    color: '#64748B',
     marginBottom: 8,
   },
   wordMeta: {
@@ -218,23 +223,27 @@ const styles = StyleSheet.create({
   levelBadge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
+    borderRadius: 5,
     marginRight: 8,
   },
   levelText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   dateText: {
     fontSize: 12,
-    color: '#B0BEC5',
+    color: '#CBD5E1',
   },
   favButton: {
     padding: 8,
   },
-  favEmoji: {
-    fontSize: 24,
+  favIcon: {
+    fontSize: 22,
+    color: '#CBD5E1',
+  },
+  favIconActive: {
+    color: '#EF4444',
   },
   emptyContainer: {
     flex: 1,
@@ -242,14 +251,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-  emptyEmoji: { fontSize: 60, marginBottom: 16 },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 8,
+  },
   emptyText: {
-    fontSize: 16,
-    color: '#90A4AE',
+    fontSize: 14,
+    color: '#94A3B8',
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 22,
   },
 });
 
 export default HistoryScreen;
-

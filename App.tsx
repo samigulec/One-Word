@@ -91,7 +91,7 @@ export default function App() {
   // Loading screen
   if (currentScreen === 'Loading') {
     return (
-      <LinearGradient colors={['#667eea', '#764ba2']} style={styles.loadingContainer}>
+      <LinearGradient colors={['#4F46E5', '#6366F1']} style={styles.loadingContainer}>
         <StatusBar style="light" />
         <ActivityIndicator size="large" color="#FFFFFF" />
       </LinearGradient>

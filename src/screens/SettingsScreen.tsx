@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
 import { LanguageCode, LANGUAGES, getTranslation } from '../utils/translations';
 import { ProficiencyLevel } from '../types';
 import { clearAllData } from '../utils/storage';
@@ -22,20 +21,20 @@ type SettingsScreenProps = {
   onReset: () => void;
 };
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ 
-  nativeLanguage, targetLanguage, proficiencyLevel, onClose, onReset 
+const SettingsScreen: React.FC<SettingsScreenProps> = ({
+  nativeLanguage, targetLanguage, proficiencyLevel, onClose, onReset
 }) => {
   const t = (key: Parameters<typeof getTranslation>[0]) => getTranslation(key, nativeLanguage);
   const nativeLang = LANGUAGES.find(l => l.code === nativeLanguage);
   const targetLang = LANGUAGES.find(l => l.code === targetLanguage);
 
   const levelNames: Record<string, string> = {
-    'A1': `🌱 ${t('beginner')}`,
-    'A2': '🌿 Elementary',
-    'B1': `📚 ${t('intermediate')}`,
-    'B2': '📖 Upper Intermediate',
-    'C1': `🚀 ${t('advanced')}`,
-    'C2': '⭐ Mastery',
+    'A1': t('beginner'),
+    'A2': 'Elementary',
+    'B1': t('intermediate'),
+    'B2': 'Upper Intermediate',
+    'C1': t('advanced'),
+    'C2': 'Mastery',
   };
 
   const handleReset = () => {
@@ -44,8 +43,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       t('resetConfirmMsg'),
       [
         { text: t('cancel'), style: 'cancel' },
-        { 
-          text: t('reset'), 
+        {
+          text: t('reset'),
           style: 'destructive',
           onPress: async () => {
             await clearAllData();
@@ -57,12 +56,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   return (
-    <LinearGradient colors={['#F5F7FA', '#E8ECF1']} style={styles.container}>
+    <LinearGradient colors={['#F8FAFC', '#F1F5F9']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeIcon}>←</Text>
+            <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('settings')}</Text>
           <View style={styles.placeholder} />
@@ -71,7 +70,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Current Settings */}
           <Text style={styles.sectionTitle}>{t('yourSettings')}</Text>
-          
+
           <View style={styles.card}>
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>{t('iSpeak')}</Text>
@@ -95,7 +94,9 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>{t('level')}</Text>
-              <Text style={styles.settingText}>{levelNames[proficiencyLevel] || proficiencyLevel}</Text>
+              <View style={styles.levelBadge}>
+                <Text style={styles.levelBadgeText}>{proficiencyLevel}</Text>
+              </View>
             </View>
           </View>
 
@@ -111,7 +112,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <View style={styles.divider} />
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>{t('version')}</Text>
-              <Text style={styles.settingText}>1.0.0</Text>
+              <Text style={styles.settingTextMuted}>1.0.0</Text>
             </View>
           </View>
 
@@ -141,23 +142,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  closeIcon: { fontSize: 22, color: '#3D5A80', fontWeight: '600' },
-  headerTitle: { fontSize: 20, fontWeight: '800', color: '#3D5A80' },
+  closeIcon: { fontSize: 20, color: '#475569', fontWeight: '600' },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: '#1E293B' },
   placeholder: { width: 40 },
   content: { paddingHorizontal: 20, paddingBottom: 40 },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#78909C',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#94A3B8',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginTop: 24,
@@ -165,51 +166,62 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 1,
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 14,
   },
-  settingLabel: { fontSize: 16, color: '#78909C', fontWeight: '500' },
+  settingLabel: { fontSize: 15, color: '#64748B', fontWeight: '500' },
   settingValue: { flexDirection: 'row', alignItems: 'center' },
-  settingFlag: { fontSize: 22, marginRight: 8 },
-  settingText: { fontSize: 16, fontWeight: '700', color: '#3D5A80' },
+  settingFlag: { fontSize: 20, marginRight: 8 },
+  settingText: { fontSize: 15, fontWeight: '600', color: '#1E293B' },
+  settingTextMuted: { fontSize: 15, fontWeight: '500', color: '#94A3B8' },
+  levelBadge: {
+    backgroundColor: '#EEF2FF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  levelBadgeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#6366F1',
+  },
   settingHint: {
     fontSize: 13,
-    color: '#90A4AE',
+    color: '#94A3B8',
     textAlign: 'center',
     marginTop: 12,
   },
-  divider: { height: 1, backgroundColor: '#F0F4F8', marginHorizontal: 16 },
+  divider: { height: 1, backgroundColor: '#F1F5F9', marginHorizontal: 16 },
   resetButton: {
-    backgroundColor: '#FFF0F0',
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 14,
+    padding: 18,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFCDD2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
   resetButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#E53935',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#DC2626',
   },
   resetButtonSubtext: {
     fontSize: 13,
-    color: '#EF9A9A',
+    color: '#F87171',
     marginTop: 4,
   },
 });
 
 export default SettingsScreen;
-

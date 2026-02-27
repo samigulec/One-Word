@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -20,52 +20,46 @@ type OnboardingScreenProps = {
   onComplete: (nativeLanguage: LanguageCode, targetLanguage: LanguageCode, level: ProficiencyLevel) => void;
 };
 
-// Simplified level data - maps to actual CEFR levels internally
 interface SimplifiedLevel {
   id: 'beginner' | 'intermediate' | 'advanced';
-  emoji: string;
   title: string;
   subtitle: string;
   description: string;
-  cerfLevel: ProficiencyLevel; // Internal mapping
+  cerfLevel: ProficiencyLevel;
   color: string;
   bgColor: string;
 }
 
 const SIMPLIFIED_LEVELS: SimplifiedLevel[] = [
-  { 
+  {
     id: 'beginner',
-    emoji: '🌱', 
     title: 'Beginner',
     subtitle: 'Just starting out',
     description: 'Basic words like "Hello", "Thank you"',
     cerfLevel: 'A1',
-    color: '#4CAF50',
-    bgColor: '#E8F5E9'
+    color: '#10B981',
+    bgColor: '#F0FDF4'
   },
-  { 
+  {
     id: 'intermediate',
-    emoji: '📚', 
     title: 'Intermediate',
     subtitle: 'I know the basics',
     description: 'Everyday conversations',
     cerfLevel: 'B1',
-    color: '#FF9800',
-    bgColor: '#FFF3E0'
+    color: '#F59E0B',
+    bgColor: '#FFFBEB'
   },
-  { 
+  {
     id: 'advanced',
-    emoji: '🚀', 
     title: 'Advanced',
     subtitle: 'I\'m quite confident',
     description: 'Complex topics & expressions',
     cerfLevel: 'C1',
-    color: '#9C27B0',
-    bgColor: '#F3E5F5'
+    color: '#8B5CF6',
+    bgColor: '#F5F3FF'
   },
 ];
 
-// Language Item Component
 const LanguageItem: React.FC<{
   item: Language;
   isSelected: boolean;
@@ -75,7 +69,7 @@ const LanguageItem: React.FC<{
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.spring(itemScale, { toValue: 0.92, useNativeDriver: true }),
+      Animated.spring(itemScale, { toValue: 0.95, useNativeDriver: true }),
       Animated.spring(itemScale, { toValue: 1, friction: 4, useNativeDriver: true }),
     ]).start();
     onSelect(item);
@@ -89,7 +83,7 @@ const LanguageItem: React.FC<{
           isSelected && styles.languageItemSelected,
         ]}
         onPress={handlePress}
-        activeOpacity={0.8}
+        activeOpacity={0.7}
       >
         <Text style={styles.flagEmoji}>{item.flag}</Text>
         <Text style={[styles.languageName, isSelected && styles.languageNameSelected]}>
@@ -97,7 +91,7 @@ const LanguageItem: React.FC<{
         </Text>
         {isSelected && (
           <View style={styles.checkBadge}>
-            <Text style={styles.checkMark}>✓</Text>
+            <Text style={styles.checkMark}>{'\u2713'}</Text>
           </View>
         )}
       </TouchableOpacity>
@@ -105,7 +99,6 @@ const LanguageItem: React.FC<{
   );
 };
 
-// Level Card Component
 const LevelCard: React.FC<{
   item: SimplifiedLevel;
   isSelected: boolean;
@@ -115,7 +108,7 @@ const LevelCard: React.FC<{
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.spring(cardScale, { toValue: 0.95, useNativeDriver: true }),
+      Animated.spring(cardScale, { toValue: 0.97, useNativeDriver: true }),
       Animated.spring(cardScale, { toValue: 1, friction: 4, useNativeDriver: true }),
     ]).start();
     onSelect(item);
@@ -126,25 +119,25 @@ const LevelCard: React.FC<{
       <TouchableOpacity
         style={[
           styles.levelCard,
-          { backgroundColor: isSelected ? item.bgColor : '#FFFFFF', borderColor: isSelected ? item.color : 'transparent' },
+          { backgroundColor: isSelected ? item.bgColor : '#FFFFFF', borderColor: isSelected ? item.color : '#E2E8F0' },
         ]}
         onPress={handlePress}
-        activeOpacity={0.85}
+        activeOpacity={0.8}
       >
         <View style={styles.levelCardContent}>
-          <Text style={styles.levelEmoji}>{item.emoji}</Text>
+          <View style={[styles.levelDot, { backgroundColor: item.color }]} />
           <View style={styles.levelTextContent}>
-            <Text style={[styles.levelTitle, { color: isSelected ? item.color : '#3D5A80' }]}>
+            <Text style={[styles.levelTitle, { color: isSelected ? item.color : '#1E293B' }]}>
               {item.title}
             </Text>
-            <Text style={[styles.levelSubtitle, { color: isSelected ? item.color : '#78909C' }]}>
+            <Text style={[styles.levelSubtitle, { color: isSelected ? item.color : '#64748B' }]}>
               {item.subtitle}
             </Text>
             <Text style={styles.levelDescription}>{item.description}</Text>
           </View>
           {isSelected && (
             <View style={[styles.levelCheckBadge, { backgroundColor: item.color }]}>
-              <Text style={styles.levelCheckMark}>✓</Text>
+              <Text style={styles.levelCheckMark}>{'\u2713'}</Text>
             </View>
           )}
         </View>
@@ -158,8 +151,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   const [nativeLanguage, setNativeLanguage] = useState<LanguageCode | null>(null);
   const [targetLanguage, setTargetLanguage] = useState<LanguageCode | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<SimplifiedLevel | null>(null);
-  
-  // Animations
+
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -179,7 +171,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
 
   const handleLanguageSelect = (lang: Language) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
+
     if (step === 1) {
       setNativeLanguage(lang.code);
     } else if (step === 2) {
@@ -198,7 +190,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
 
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    
+
     if (step === 1 && nativeLanguage) {
       animateTransition(() => setStep(2));
     } else if (step === 2 && targetLanguage) {
@@ -223,8 +215,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
     }
   };
 
-  const canContinue = 
-    (step === 1 && nativeLanguage) || 
+  const canContinue =
+    (step === 1 && nativeLanguage) ||
     (step === 2 && targetLanguage) ||
     (step === 3 && selectedLevel);
 
@@ -232,27 +224,24 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
     switch (step) {
       case 1:
         return {
-          emoji: '👋',
-          title: 'Welcome!',
+          title: 'Welcome',
           subtitle: 'What language do you speak?',
         };
       case 2:
         return {
-          emoji: '🎯',
-          title: 'Great choice!',
+          title: 'Great choice',
           subtitle: 'What do you want to learn?',
         };
       case 3:
         return {
-          emoji: '📊',
-          title: 'Almost done!',
+          title: 'Almost done',
           subtitle: 'What\'s your current level?',
         };
     }
   };
 
   const content = getStepContent();
-  const availableLanguages = step === 2 
+  const availableLanguages = step === 2
     ? LANGUAGES.filter(lang => lang.code !== nativeLanguage)
     : LANGUAGES;
 
@@ -265,7 +254,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   );
 
   return (
-    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.container}>
+    <LinearGradient colors={['#4F46E5', '#6366F1', '#818CF8']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
@@ -278,26 +267,25 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
         {/* Back Button */}
         {step > 1 && (
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Text style={styles.backArrow}>←</Text>
+            <Text style={styles.backArrow}>{'\u2190'}</Text>
           </TouchableOpacity>
         )}
 
         {/* Header */}
-        <Animated.View 
+        <Animated.View
           style={[
-            styles.header, 
+            styles.header,
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
           ]}
         >
-          <Text style={styles.headerEmoji}>{content.emoji}</Text>
           <Text style={styles.headerTitle}>{content.title}</Text>
           <Text style={styles.headerSubtitle}>{content.subtitle}</Text>
         </Animated.View>
 
         {/* Content */}
-        <Animated.View 
+        <Animated.View
           style={[
-            styles.contentContainer, 
+            styles.contentContainer,
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
           ]}
         >
@@ -335,10 +323,10 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
             ]}
             onPress={handleContinue}
             disabled={!canContinue}
-            activeOpacity={0.9}
+            activeOpacity={0.8}
           >
-            <Text style={styles.continueButtonText}>
-              {step === 3 ? "Let's Start! 🚀" : 'Continue'}
+            <Text style={[styles.continueButtonText, !canContinue && styles.continueButtonTextDisabled]}>
+              {step === 3 ? "Let's Start" : 'Continue'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -354,7 +342,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  
+
   // Progress
   progressContainer: {
     flexDirection: 'row',
@@ -365,19 +353,19 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     flex: 1,
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 3,
+    height: 4,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderRadius: 2,
     marginRight: 12,
   },
   progressFill: {
     height: '100%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 3,
+    borderRadius: 2,
   },
   progressText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 13,
     fontWeight: '600',
   },
 
@@ -386,16 +374,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 20,
     top: 70,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
   backArrow: {
-    fontSize: 22,
+    fontSize: 20,
     color: '#FFFFFF',
     fontWeight: '600',
   },
@@ -407,20 +395,16 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     paddingHorizontal: 24,
   },
-  headerEmoji: {
-    fontSize: 50,
-    marginBottom: 16,
-  },
   headerTitle: {
     fontSize: 28,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 8,
   },
   headerSubtitle: {
-    fontSize: 18,
-    color: 'rgba(255,255,255,0.9)',
-    fontWeight: '500',
+    fontSize: 17,
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '400',
   },
 
   // Content
@@ -435,43 +419,38 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  
+
   // Language Item
   languageItem: {
     width: (width - 48) / 2,
     backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 16,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: 'transparent',
   },
   languageItemSelected: {
-    borderColor: '#4CAF50',
+    borderColor: '#10B981',
     backgroundColor: '#FFFFFF',
   },
   flagEmoji: {
-    fontSize: 36,
+    fontSize: 32,
     marginBottom: 8,
   },
   languageName: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#3D5A80',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1E293B',
   },
   languageNameSelected: {
-    color: '#2E7D32',
+    color: '#059669',
   },
   checkBadge: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#10B981',
     width: 22,
     height: 22,
     borderRadius: 11,
@@ -480,8 +459,8 @@ const styles = StyleSheet.create({
   },
   checkMark: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '700',
   },
 
   // Level Cards
@@ -489,52 +468,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   levelCard: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 2,
   },
   levelCardContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  levelEmoji: {
-    fontSize: 40,
-    marginRight: 16,
+  levelDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 14,
   },
   levelTextContent: {
     flex: 1,
   },
   levelTitle: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 18,
+    fontWeight: '700',
   },
   levelSubtitle: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '500',
     marginTop: 2,
   },
   levelDescription: {
     fontSize: 13,
-    color: '#90A4AE',
+    color: '#94A3B8',
     marginTop: 4,
   },
   levelCheckBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     justifyContent: 'center',
     alignItems: 'center',
   },
   levelCheckMark: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
   },
 
   // Bottom / Continue
@@ -545,24 +521,20 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 18,
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
   },
   continueButtonDisabled: {
-    backgroundColor: 'rgba(255,255,255,0.4)',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   continueButtonText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#667eea',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#4F46E5',
+  },
+  continueButtonTextDisabled: {
+    color: 'rgba(255,255,255,0.6)',
   },
 });
 

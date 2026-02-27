@@ -20,7 +20,7 @@ import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../
 
 const { width } = Dimensions.get('window');
 
-type NewHomeScreenProps = {
+type HomeScreenProps = {
   onNavigateToChat: (word: ContentItem) => void;
   onNavigateToJourney: () => void;
   onNavigateToSettings: () => void;
@@ -30,67 +30,20 @@ type NewHomeScreenProps = {
   proficiencyLevel: ProficiencyLevel;
 };
 
-// Animated Cloud Component
-const Cloud: React.FC<{ delay: number; top: number; size: number; duration: number }> = ({ 
-  delay, top, size, duration 
-}) => {
-  const translateX = useRef(new Animated.Value(-200)).current;
-
-  useEffect(() => {
-    const animate = () => {
-      translateX.setValue(-200);
-      Animated.timing(translateX, {
-        toValue: width + 200,
-        duration: duration,
-        delay: delay,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }).start(() => animate());
-    };
-    animate();
-  }, []);
-
-  return (
-    <Animated.View 
-      style={[
-        styles.cloud, 
-        { 
-          top, 
-          width: size, 
-          height: size * 0.5,
-          transform: [{ translateX }] 
-        }
-      ]}
-    >
-      <View style={[styles.cloudPuff, { width: size * 0.5, height: size * 0.5, left: 0, bottom: 0 }]} />
-      <View style={[styles.cloudPuff, { width: size * 0.6, height: size * 0.6, left: size * 0.25, bottom: size * 0.15 }]} />
-      <View style={[styles.cloudPuff, { width: size * 0.45, height: size * 0.45, right: 0, bottom: 0 }]} />
-    </Animated.View>
-  );
-};
-
-const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavigateToJourney, onNavigateToSettings, onNavigateToHistory, nativeLanguage, targetLanguage, proficiencyLevel }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJourney, onNavigateToSettings, onNavigateToHistory, nativeLanguage, targetLanguage, proficiencyLevel }) => {
   const [word, setWord] = useState<ContentItem | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
   const [isFav, setIsFav] = useState(false);
 
-  // Get translations
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
 
-  // Get target language flag
-  const targetLanguageFlag = LANGUAGES.find(lang => lang.code === targetLanguage)?.flag || '🌍';
+  const targetLanguageFlag = LANGUAGES.find(lang => lang.code === targetLanguage)?.flag || '';
 
   // Animations
   const cardFloat = useRef(new Animated.Value(0)).current;
-  const cardScale = useRef(new Animated.Value(1)).current;
-  const streakPulse = useRef(new Animated.Value(1)).current;
-  const flameScale = useRef(new Animated.Value(1)).current;
-  const flameRotate = useRef(new Animated.Value(0)).current;
   const meaningButtonScale = useRef(new Animated.Value(1)).current;
   const practiceButtonScale = useRef(new Animated.Value(1)).current;
-  const sparkleOpacity = useRef(new Animated.Value(0)).current;
-  const eyeScale = useRef(new Animated.Value(1)).current;
   const meaningReveal = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -99,133 +52,23 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
   }, [targetLanguage, proficiencyLevel]);
 
   const startAnimations = () => {
-    // Card floating
+    // Subtle card floating
     Animated.loop(
       Animated.sequence([
         Animated.timing(cardFloat, {
-          toValue: -8,
-          duration: 2000,
+          toValue: -6,
+          duration: 2500,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
         Animated.timing(cardFloat, {
-          toValue: 8,
-          duration: 2000,
+          toValue: 6,
+          duration: 2500,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: true,
         }),
       ])
     ).start();
-
-    // Card breathing
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(cardScale, {
-          toValue: 1.02,
-          duration: 3000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardScale, {
-          toValue: 0.98,
-          duration: 3000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Streak pulse
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(streakPulse, {
-          toValue: 1.1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(streakPulse, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Flame animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameScale, {
-          toValue: 1.15,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameScale, {
-          toValue: 0.95,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(flameRotate, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flameRotate, {
-          toValue: -1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Sparkle animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(sparkleOpacity, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(sparkleOpacity, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Eye blink animation
-    const blinkEye = () => {
-      setTimeout(() => {
-        Animated.sequence([
-          Animated.timing(eyeScale, {
-            toValue: 0.1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(eyeScale, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(eyeScale, {
-            toValue: 0.1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(eyeScale, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-        ]).start(() => blinkEye());
-      }, 3000);
-    };
-    blinkEye();
   };
 
   const loadDailyContent = async () => {
@@ -233,13 +76,10 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
       const todaysWord = getWordOfTheDay(targetLanguage, proficiencyLevel);
       setWord(todaysWord);
       setShowMeaning(false);
-      // Update streak with word ID hash
       const idHash = parseInt(todaysWord.id.replace(/\D/g, '')) || 1;
       const updatedProgress = await updateDailyStreak(idHash);
       setProgress(updatedProgress);
-      // Save as learned
       await addLearnedWord(todaysWord);
-      // Check if favorite
       const favStatus = await isFavorite(todaysWord.id);
       setIsFav(favStatus);
     } catch (error) {
@@ -250,7 +90,6 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
   const handleSpeak = () => {
     if (!word) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // Map language codes to speech language codes
     const speechLang: Record<string, string> = {
       en: 'en-US', es: 'es-ES', de: 'de-DE', fr: 'fr-FR',
       pt: 'pt-BR', it: 'it-IT', ru: 'ru-RU', ja: 'ja-JP',
@@ -271,15 +110,10 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
 
   const handleMeaningPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    // Bounce animation
+
     Animated.sequence([
       Animated.spring(meaningButtonScale, {
-        toValue: 0.9,
-        useNativeDriver: true,
-      }),
-      Animated.spring(meaningButtonScale, {
-        toValue: 1.1,
+        toValue: 0.95,
         useNativeDriver: true,
       }),
       Animated.spring(meaningButtonScale, {
@@ -305,14 +139,10 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
 
   const handlePracticePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
+
     Animated.sequence([
       Animated.spring(practiceButtonScale, {
-        toValue: 0.85,
-        useNativeDriver: true,
-      }),
-      Animated.spring(practiceButtonScale, {
-        toValue: 1.05,
+        toValue: 0.95,
         useNativeDriver: true,
       }),
       Animated.spring(practiceButtonScale, {
@@ -322,18 +152,13 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
     ]).start();
 
     if (word) {
-      setTimeout(() => onNavigateToChat(word), 200);
+      setTimeout(() => onNavigateToChat(word), 150);
     }
   };
 
-  const flameRotateInterpolate = flameRotate.interpolate({
-    inputRange: [-1, 1],
-    outputRange: ['-5deg', '5deg'],
-  });
-
   if (!word) {
     return (
-      <LinearGradient colors={['#E0F4FF', '#B8E4FF', '#A8DAFF']} style={styles.container}>
+      <LinearGradient colors={['#F8FAFE', '#EDF2F7', '#E2E8F0']} style={styles.container}>
         <SafeAreaView style={styles.loadingContainer}>
           <Text style={styles.loadingText}>{t('loading')}</Text>
         </SafeAreaView>
@@ -345,116 +170,79 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
   const localizedExample = getExampleTranslation(word, nativeLanguage);
 
   return (
-    <LinearGradient colors={['#E0F4FF', '#C5EBFF', '#B8E4FF']} style={styles.container}>
-      {/* Animated Clouds */}
-      <Cloud delay={0} top={80} size={100} duration={25000} />
-      <Cloud delay={3000} top={150} size={80} duration={30000} />
-      <Cloud delay={8000} top={50} size={120} duration={28000} />
-      <Cloud delay={12000} top={200} size={90} duration={32000} />
-
+    <LinearGradient colors={['#F8FAFE', '#EEF2F7', '#E8EDF3']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.appTitle}>{t('appName')}</Text>
           <View style={styles.headerRight}>
-            {/* Target Language Flag */}
             <View style={styles.targetLanguageBadge}>
               <Text style={styles.targetLanguageFlag}>{targetLanguageFlag}</Text>
             </View>
-            {/* Streak Counter - Tappable to Journey */}
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onNavigateToJourney();
               }}
-              activeOpacity={0.8}
+              activeOpacity={0.7}
             >
-              <Animated.View style={[styles.streakBubble, { transform: [{ scale: streakPulse }] }]}>
-                <Animated.Text 
-                  style={[
-                    styles.flameEmoji, 
-                    { 
-                      transform: [
-                        { scale: flameScale }, 
-                        { rotate: flameRotateInterpolate }
-                      ] 
-                    }
-                  ]}
-                >
-                  {progress && progress.streak > 0 ? '🔥' : '🗺️'}
-                </Animated.Text>
+              <View style={styles.streakBubble}>
+                <Text style={styles.streakIcon}>
+                  {progress && progress.streak > 0 ? '\u{1F525}' : '\u{2014}'}
+                </Text>
                 <Text style={styles.streakText}>
                   {progress && progress.streak > 0 ? `${progress.streak} ${t('dayStreak')}` : 'Start'}
                 </Text>
-              </Animated.View>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Main Floating Card */}
+        {/* Main Card */}
         <View style={styles.cardWrapper}>
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.flashcard, 
-              { 
-                transform: [
-                  { translateY: cardFloat }, 
-                  { scale: cardScale }
-                ] 
-              }
+              styles.flashcard,
+              { transform: [{ translateY: cardFloat }] }
             ]}
           >
-            {/* Word Label */}
             <View style={styles.levelBadge}>
               <Text style={styles.levelText}>{word.level}</Text>
             </View>
             <Text style={styles.idiomLabel}>{t('idiomOfTheDay')}</Text>
-            
-            {/* Target Word */}
-            <Text style={styles.idiomText}>"{word.target_word}"</Text>
-            
-            {/* Speak & Favorite Row */}
+
+            <Text style={styles.idiomText}>{word.target_word}</Text>
+
+            {/* Action Row */}
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.speakButton} onPress={handleSpeak}>
-                <Text style={styles.speakEmoji}>🔊</Text>
-                <Text style={styles.speakText}>{word.pronunciation || 'Listen'}</Text>
+                <Text style={styles.speakIcon}>{'  \u25B6  '}</Text>
+                <Text style={styles.speakText}>{word.pronunciation || t('listen')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.favButtonCard} onPress={handleToggleFavorite}>
-                <Text style={styles.favEmoji}>{isFav ? '❤️' : '🤍'}</Text>
+                <Text style={styles.favIcon}>{isFav ? '\u2665' : '\u2661'}</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Meaning Button with Sparkles */}
-            <View style={styles.meaningButtonWrapper}>
-              <Animated.View style={[styles.sparkle, styles.sparkle1, { opacity: sparkleOpacity }]}>
-                <Text style={styles.sparkleText}>✨</Text>
-              </Animated.View>
-              <Animated.View style={[styles.sparkle, styles.sparkle2, { opacity: sparkleOpacity }]}>
-                <Text style={styles.sparkleText}>✨</Text>
-              </Animated.View>
-              
-              <Animated.View style={{ transform: [{ scale: meaningButtonScale }] }}>
-                <TouchableOpacity 
-                  style={[styles.meaningButton, showMeaning && styles.meaningButtonActive]}
-                  onPress={handleMeaningPress}
-                  activeOpacity={0.9}
-                >
-                  <Animated.Text style={[styles.eyeEmoji, { transform: [{ scaleY: eyeScale }] }]}>
-                    👀
-                  </Animated.Text>
-                  <Text style={styles.meaningButtonText}>
-                    {showMeaning ? t('hideMeaning') : t('showMeaning')}
-                  </Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
+            {/* Meaning Button */}
+            <Animated.View style={{ transform: [{ scale: meaningButtonScale }] }}>
+              <TouchableOpacity
+                style={[styles.meaningButton, showMeaning && styles.meaningButtonActive]}
+                onPress={handleMeaningPress}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.meaningButtonText}>
+                  {showMeaning ? t('hideMeaning') : t('showMeaning')}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
 
-            {/* Localized Meaning (Animated Reveal) */}
+            {/* Meaning Reveal */}
             {showMeaning && (
-              <Animated.View 
+              <Animated.View
                 style={[
-                  styles.meaningContainer, 
-                  { 
+                  styles.meaningContainer,
+                  {
                     opacity: meaningReveal,
                     transform: [{ scale: meaningReveal }]
                   }
@@ -466,13 +254,9 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
             )}
 
             {/* Divider */}
-            <View style={styles.divider}>
-              <View style={styles.dividerDot} />
-              <View style={styles.dividerLine} />
-              <View style={styles.dividerDot} />
-            </View>
+            <View style={styles.divider} />
 
-            {/* Example Sentence */}
+            {/* Example */}
             <Text style={styles.exampleLabel}>{t('exampleSentence')}</Text>
             <Text style={styles.exampleText}>"{word.example_sentence}"</Text>
             {localizedExample && (
@@ -483,34 +267,34 @@ const NewHomeScreen: React.FC<NewHomeScreenProps> = ({ onNavigateToChat, onNavig
 
         {/* Practice Button */}
         <Animated.View style={[styles.practiceButtonWrapper, { transform: [{ scale: practiceButtonScale }] }]}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.practiceButton}
             onPress={handlePracticePress}
-            activeOpacity={0.9}
+            activeOpacity={0.8}
           >
-            <Text style={styles.practiceEmoji}>💬</Text>
             <Text style={styles.practiceButtonText}>{t('practiceWithAI')}</Text>
+            <Text style={styles.practiceArrow}>{'\u2192'}</Text>
           </TouchableOpacity>
         </Animated.View>
-        
+
       </SafeAreaView>
 
-      {/* Bottom Tab Bar - outside SafeAreaView to stick to bottom */}
+      {/* Bottom Tab Bar */}
       <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
-          <Text style={styles.tabEmoji}>🏠</Text>
+          <View style={[styles.tabIndicator, styles.tabIndicatorActive]} />
           <Text style={[styles.tabLabel, styles.tabLabelActive]}>{t('tabHome')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }}>
-          <Text style={styles.tabEmoji}>📖</Text>
+          <View style={styles.tabIndicator} />
           <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToJourney(); }}>
-          <Text style={styles.tabEmoji}>🗺️</Text>
+          <View style={styles.tabIndicator} />
           <Text style={styles.tabLabel}>{t('tabJourney')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToSettings(); }}>
-          <Text style={styles.tabEmoji}>⚙️</Text>
+          <View style={styles.tabIndicator} />
           <Text style={styles.tabLabel}>{t('tabSettings')}</Text>
         </TouchableOpacity>
       </View>
@@ -531,20 +315,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 22,
-    color: '#5B8FB9',
-    fontWeight: '700',
-  },
-  
-  // Clouds
-  cloud: {
-    position: 'absolute',
-    zIndex: 1,
-  },
-  cloudPuff: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 100,
+    fontSize: 18,
+    color: '#64748B',
+    fontWeight: '600',
   },
 
   // Header
@@ -555,12 +328,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 8,
-    zIndex: 10,
   },
   appTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#4A90B8',
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1E293B',
     letterSpacing: -0.5,
   },
   headerRight: {
@@ -571,38 +343,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 12,
     marginRight: 8,
-    shadowColor: '#5B8FB9',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#94A3B8',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 2,
   },
   targetLanguageFlag: {
-    fontSize: 24,
+    fontSize: 22,
   },
   streakBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFD4A8',
-    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 25,
-    shadowColor: '#FF9F43',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    borderRadius: 12,
+    shadowColor: '#94A3B8',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  flameEmoji: {
-    fontSize: 20,
+  streakIcon: {
+    fontSize: 16,
     marginRight: 6,
   },
   streakText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#E67E22',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#475569',
   },
 
   // Card
@@ -611,262 +383,228 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    zIndex: 5,
   },
   flashcard: {
     width: width - 40,
-    backgroundColor: '#FFFEFA',
-    borderRadius: 32,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
     padding: 28,
     alignItems: 'center',
-    shadowColor: '#5B8FB9',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    elevation: 15,
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
+    shadowColor: '#64748B',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
   },
   levelBadge: {
     position: 'absolute',
     top: 16,
     right: 16,
-    backgroundColor: '#7DDBA3',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: '#10B981',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
   },
   levelText: {
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   idiomLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#7EC8E3',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#94A3B8',
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1.5,
     marginBottom: 16,
   },
   idiomText: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#3D5A80',
+    fontSize: 30,
+    fontWeight: '700',
+    color: '#1E293B',
     textAlign: 'center',
-    lineHeight: 42,
-    marginBottom: 12,
+    lineHeight: 40,
+    marginBottom: 16,
   },
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    width: '100%',
   },
   speakButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F9FF',
+    backgroundColor: '#F1F5F9',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: 12,
     flex: 1,
     marginRight: 10,
   },
-  speakEmoji: {
-    fontSize: 18,
-    marginRight: 8,
+  speakIcon: {
+    fontSize: 12,
+    color: '#6366F1',
+    marginRight: 6,
   },
   speakText: {
     fontSize: 14,
-    color: '#5B8FB9',
-    fontWeight: '600',
+    color: '#475569',
+    fontWeight: '500',
   },
   favButtonCard: {
-    backgroundColor: '#FFF0F5',
+    backgroundColor: '#FEF2F2',
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  favEmoji: {
+  favIcon: {
     fontSize: 22,
+    color: '#EF4444',
   },
 
   // Meaning Button
-  meaningButtonWrapper: {
-    position: 'relative',
-    marginVertical: 10,
-  },
-  sparkle: {
-    position: 'absolute',
-    zIndex: 10,
-  },
-  sparkle1: {
-    top: -10,
-    left: -15,
-  },
-  sparkle2: {
-    top: -5,
-    right: -15,
-  },
-  sparkleText: {
-    fontSize: 18,
-  },
   meaningButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFE5EC',
+    backgroundColor: '#6366F1',
     paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: 30,
-    shadowColor: '#FF8FAB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginVertical: 8,
   },
   meaningButtonActive: {
-    backgroundColor: '#FFECD2',
-  },
-  eyeEmoji: {
-    fontSize: 22,
-    marginRight: 10,
+    backgroundColor: '#4F46E5',
   },
   meaningButtonText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#E75480',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 
   // Meaning Container
   meaningContainer: {
-    backgroundColor: '#F0FFF4',
-    borderRadius: 20,
-    padding: 20,
-    marginTop: 16,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 16,
+    padding: 18,
+    marginTop: 12,
     width: '100%',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#9AE6B4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
   },
   meaningLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#38A169',
-    marginBottom: 8,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#16A34A',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 6,
   },
   meaningText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#276749',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#166534',
     textAlign: 'center',
-    lineHeight: 28,
+    lineHeight: 26,
   },
 
   // Divider
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
     width: '80%',
-  },
-  dividerLine: {
-    flex: 1,
-    height: 2,
+    height: 1,
     backgroundColor: '#E2E8F0',
-    borderRadius: 1,
-  },
-  dividerDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#7EC8E3',
-    marginHorizontal: 10,
+    marginVertical: 18,
   },
 
   // Example
   exampleLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#A0AEC0',
-    marginBottom: 10,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#94A3B8',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
   },
   exampleText: {
-    fontSize: 17,
-    color: '#4A5568',
+    fontSize: 16,
+    color: '#475569',
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 24,
     fontStyle: 'italic',
   },
   exampleTranslation: {
-    fontSize: 15,
-    color: '#718096',
+    fontSize: 14,
+    color: '#94A3B8',
     textAlign: 'center',
-    lineHeight: 24,
-    marginTop: 8,
+    lineHeight: 22,
+    marginTop: 6,
   },
 
   // Practice Button
   practiceButtonWrapper: {
     paddingHorizontal: 24,
     paddingBottom: 10,
-    zIndex: 10,
   },
   practiceButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#7DDBA3',
-    borderRadius: 28,
-    paddingVertical: 20,
-    shadowColor: '#38A169',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 10,
-  },
-  practiceEmoji: {
-    fontSize: 26,
-    marginRight: 12,
+    backgroundColor: '#6366F1',
+    borderRadius: 16,
+    paddingVertical: 18,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 6,
   },
   practiceButtonText: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
+  practiceArrow: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    marginLeft: 8,
+    fontWeight: '600',
+  },
+
   // Bottom Tab Bar
   bottomBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    paddingTop: 10,
-    paddingBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 10,
-    zIndex: 20,
+    paddingTop: 8,
+    paddingBottom: 28,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
-  tabEmoji: {
-    fontSize: 22,
-    marginBottom: 4,
+  tabIndicator: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'transparent',
+    marginBottom: 6,
+  },
+  tabIndicatorActive: {
+    backgroundColor: '#6366F1',
   },
   tabLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#90A4AE',
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#94A3B8',
   },
   tabLabelActive: {
-    color: '#667eea',
+    color: '#6366F1',
+    fontWeight: '600',
   },
 });
 
-export default NewHomeScreen;
-
+export default HomeScreen;
