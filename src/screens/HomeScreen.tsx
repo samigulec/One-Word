@@ -20,6 +20,59 @@ import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../
 
 const { width, height } = Dimensions.get('window');
 
+// Mini confetti burst component
+const CONFETTI_EMOJIS = ['\u2728', '\u{1F389}', '\u{1F31F}', '\u2764\uFE0F', '\u{1F525}', '\u{1F4AB}', '\u{1F308}', '\u{1F38A}'];
+
+const ConfettiBurst: React.FC<{ active: boolean }> = ({ active }) => {
+  const anims = useRef(
+    Array.from({ length: 8 }, () => ({
+      x: new Animated.Value(0),
+      y: new Animated.Value(0),
+      opacity: new Animated.Value(0),
+    }))
+  ).current;
+
+  useEffect(() => {
+    if (active) {
+      anims.forEach((a, i) => {
+        a.x.setValue(0);
+        a.y.setValue(0);
+        a.opacity.setValue(1);
+        const angle = (i / 8) * Math.PI * 2;
+        const dist = 60 + Math.random() * 40;
+        Animated.parallel([
+          Animated.timing(a.x, { toValue: Math.cos(angle) * dist, duration: 600, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+          Animated.timing(a.y, { toValue: Math.sin(angle) * dist - 20, duration: 600, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+          Animated.sequence([
+            Animated.delay(300),
+            Animated.timing(a.opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+          ]),
+        ]).start();
+      });
+    }
+  }, [active]);
+
+  if (!active) return null;
+
+  return (
+    <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center', width: '100%', top: -10 }} pointerEvents="none">
+      {anims.map((a, i) => (
+        <Animated.Text
+          key={i}
+          style={{
+            position: 'absolute',
+            fontSize: 16,
+            opacity: a.opacity,
+            transform: [{ translateX: a.x }, { translateY: a.y }],
+          }}
+        >
+          {CONFETTI_EMOJIS[i]}
+        </Animated.Text>
+      ))}
+    </View>
+  );
+};
+
 type HomeScreenProps = {
   onNavigateToChat: (word: ContentItem) => void;
   onNavigateToJourney: () => void;
@@ -117,10 +170,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
   const [isFav, setIsFav] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
 
   const targetLanguageFlag = LANGUAGES.find(lang => lang.code === targetLanguage)?.flag || '';
+  const nativeLanguageFlag = LANGUAGES.find(lang => lang.code === nativeLanguage)?.flag || '';
 
   // Animations
   const cardFloat = useRef(new Animated.Value(0)).current;
@@ -304,6 +359,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
 
     if (!showMeaning) {
       setShowMeaning(true);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 800);
       Animated.spring(meaningReveal, {
         toValue: 1,
         tension: 50,
@@ -379,7 +436,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
         {/* Header */}
         <Animated.View style={[styles.header, { opacity: headerOpacity, transform: [{ translateY: headerSlide }] }]}>
           <View style={styles.appTitleContainer}>
-            <Text style={styles.appTitleAccent}>{'\u2726'}</Text>
+            <Text style={styles.appTitleAccent}>{'\u2728'}</Text>
             <Text style={styles.appTitle}>{t('appName')}</Text>
           </View>
           <View style={styles.headerRight}>
@@ -442,7 +499,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
                 <Text style={styles.levelText}>{word.level}</Text>
               </LinearGradient>
 
-              <Text style={styles.idiomLabel}>{t('idiomOfTheDay')}</Text>
+              <View style={styles.idiomLabelRow}>
+                <Text style={styles.idiomLabel}>{t('idiomOfTheDay')}</Text>
+              </View>
 
               {/* Word with glow effect */}
               <View style={styles.wordContainer}>
@@ -507,7 +566,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
                     }
                   ]}
                 >
-                  <Text style={styles.meaningLabel}>{t('meaning')}</Text>
+                  <ConfettiBurst active={showConfetti} />
+                  <Text style={styles.meaningLabel}>{'\u{1F4A1}'} {t('meaning')}</Text>
                   <Text style={styles.meaningText}>{localizedMeaning}</Text>
                 </Animated.View>
               )}
@@ -521,9 +581,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
 
               {/* Example */}
               <Text style={styles.exampleLabel}>{t('exampleSentence')}</Text>
-              <Text style={styles.exampleText}>"{word.example_sentence}"</Text>
+              <View style={styles.exampleRow}>
+                <Text style={styles.exampleFlag}>{targetLanguageFlag}</Text>
+                <Text style={styles.exampleText}>"{word.example_sentence}"</Text>
+              </View>
               {localizedExample && (
-                <Text style={styles.exampleTranslation}>{localizedExample}</Text>
+                <View style={styles.exampleRow}>
+                  <Text style={styles.exampleFlag}>{nativeLanguageFlag}</Text>
+                  <Text style={styles.exampleTranslation}>{localizedExample}</Text>
+                </View>
               )}
             </LinearGradient>
           </Animated.View>
@@ -544,7 +610,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
               <Animated.View style={[styles.practiceButtonGlow, { opacity: practiceGlow }]} />
               <Text style={styles.practiceEmoji}>{'\u{1F4AC}'}</Text>
               <Text style={styles.practiceButtonText}>{t('practiceWithAI')}</Text>
-              <Text style={styles.practiceArrow}>{'\u2192'}</Text>
+              <Text style={styles.practiceArrow}>{'\u{1F525}'}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
@@ -555,19 +621,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
       <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => {}}>
           <Text style={styles.tabIcon}>{'\u{1F3E0}'}</Text>
-          <View style={styles.tabDotActive} />
+          <Text style={styles.tabLabelActive}>{t('tabHome')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }}>
           <Text style={styles.tabIcon}>{'\u{1F4DA}'}</Text>
-          <View style={styles.tabDot} />
+          <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToJourney(); }}>
           <Text style={styles.tabIcon}>{'\u{1F680}'}</Text>
-          <View style={styles.tabDot} />
+          <Text style={styles.tabLabel}>{t('tabJourney')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToSettings(); }}>
           <Text style={styles.tabIcon}>{'\u{2699}\u{FE0F}'}</Text>
-          <View style={styles.tabDot} />
+          <Text style={styles.tabLabel}>{t('tabSettings')}</Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
@@ -715,14 +781,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: 0.5,
   },
+  idiomLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 4,
+  },
   idiomLabel: {
     fontSize: 11,
     fontWeight: '700',
     color: 'rgba(255,255,255,0.45)',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    marginBottom: 16,
-    marginTop: 4,
   },
 
   // Word
@@ -868,21 +938,33 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.4)',
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 8,
+    marginBottom: 10,
+  },
+  exampleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+    paddingHorizontal: 4,
+    width: '100%',
+  },
+  exampleFlag: {
+    fontSize: 16,
+    marginRight: 8,
+    marginTop: 2,
   },
   exampleText: {
+    flex: 1,
     fontSize: 16,
-    color: 'rgba(255,255,255,0.8)',
-    textAlign: 'center',
+    color: 'rgba(255,255,255,0.85)',
     lineHeight: 24,
     fontStyle: 'italic',
+    fontWeight: '600',
   },
   exampleTranslation: {
+    flex: 1,
     fontSize: 14,
-    color: 'rgba(255,255,255,0.4)',
-    textAlign: 'center',
+    color: 'rgba(255,255,255,0.5)',
     lineHeight: 22,
-    marginTop: 6,
   },
 
   // Practice Button
@@ -934,19 +1016,19 @@ const styles = StyleSheet.create({
   },
   tabIcon: {
     fontSize: 22,
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  tabDotActive: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: '#8B5CF6',
+  tabLabelActive: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#A78BFA',
+    marginTop: 2,
   },
-  tabDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: 'transparent',
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.35)',
+    marginTop: 2,
   },
 });
 
