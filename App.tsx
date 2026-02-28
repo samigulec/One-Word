@@ -91,18 +91,16 @@ export default function App() {
   // Loading screen
   if (currentScreen === 'Loading') {
     return (
-      <LinearGradient colors={['#4F46E5', '#6366F1']} style={styles.loadingContainer}>
+      <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.loadingContainer}>
         <StatusBar style="light" />
-        <ActivityIndicator size="large" color="#FFFFFF" />
+        <ActivityIndicator size="large" color="#8B5CF6" />
       </LinearGradient>
     );
   }
 
   return (
     <>
-      <StatusBar style={
-        currentScreen === 'Onboarding' || currentScreen === 'Journey' ? 'light' : 'dark'
-      } />
+      <StatusBar style="light" />
       {currentScreen === 'Onboarding' && (
         <OnboardingScreen onComplete={handleOnboardingComplete} />
       )}

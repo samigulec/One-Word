@@ -8,6 +8,7 @@ import {
   ScrollView,
   Dimensions,
   Animated,
+  Easing,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -57,20 +58,30 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
 
   const headerScale = useRef(new Animated.Value(0)).current;
   const pathOpacity = useRef(new Animated.Value(0)).current;
+  const statSlide1 = useRef(new Animated.Value(50)).current;
+  const statSlide2 = useRef(new Animated.Value(50)).current;
+  const statSlide3 = useRef(new Animated.Value(50)).current;
+  const statOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.sequence([
-      Animated.spring(headerScale, { toValue: 1, useNativeDriver: true }),
+    Animated.stagger(100, [
+      Animated.parallel([
+        Animated.spring(headerScale, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
+        Animated.timing(statOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+      ]),
+      Animated.spring(statSlide1, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
+      Animated.spring(statSlide2, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
+      Animated.spring(statSlide3, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
       Animated.timing(pathOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
     ]).start();
   }, []);
 
-  const getMilestone = (day: number): { label: string } | null => {
-    if (day === 7) return { label: t('week1') };
-    if (day === 14) return { label: t('weeks2') };
-    if (day === 30) return { label: t('month1') };
-    if (day === 60) return { label: t('months2') };
-    if (day === 100) return { label: t('days100') };
+  const getMilestone = (day: number): { label: string; emoji: string } | null => {
+    if (day === 7) return { label: t('week1'), emoji: '\u{2B50}' };
+    if (day === 14) return { label: t('weeks2'), emoji: '\u{1F31F}' };
+    if (day === 30) return { label: t('month1'), emoji: '\u{1F3C6}' };
+    if (day === 60) return { label: t('months2'), emoji: '\u{1F48E}' };
+    if (day === 100) return { label: t('days100'), emoji: '\u{1F451}' };
     return null;
   };
 
@@ -79,35 +90,45 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
     const milestone = getMilestone(node.day);
 
     const nodeAnim = useRef(new Animated.Value(0)).current;
+    const pulseAnim = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
       Animated.timing(nodeAnim, {
         toValue: 1,
-        duration: 300,
-        delay: index * 50,
+        duration: 400,
+        delay: index * 60,
+        easing: Easing.out(Easing.back(1.5)),
         useNativeDriver: true,
       }).start();
-    }, []);
 
-    const getNodeStyle = () => {
-      switch (node.status) {
-        case 'completed':
-          return styles.nodeCompleted;
-        case 'current':
-          return styles.nodeCurrent;
-        case 'locked':
-          return styles.nodeLocked;
+      if (node.status === 'current') {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnim, {
+              toValue: 1.2,
+              duration: 1000,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnim, {
+              toValue: 1,
+              duration: 1000,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+          ])
+        ).start();
       }
-    };
+    }, []);
 
     const getNodeContent = () => {
       switch (node.status) {
         case 'completed':
           return <Text style={styles.nodeIcon}>{'\u2713'}</Text>;
         case 'current':
-          return <Text style={styles.nodeIconCurrent}>{'\u2022'}</Text>;
+          return <Text style={styles.nodeIconCurrent}>{'\u{2728}'}</Text>;
         case 'locked':
-          return <Text style={styles.nodeIconLocked}>{'\u2014'}</Text>;
+          return <Text style={styles.nodeIconLocked}>{'\u{1F512}'}</Text>;
       }
     };
 
@@ -116,7 +137,16 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
         key={node.day}
         style={[
           styles.nodeRow,
-          { opacity: nodeAnim, transform: [{ scale: nodeAnim }] }
+          {
+            opacity: nodeAnim,
+            transform: [
+              { scale: nodeAnim },
+              { translateX: nodeAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [isLeft ? -30 : 30, 0],
+              })},
+            ]
+          }
         ]}
       >
         {index > 0 && (
@@ -133,55 +163,103 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
               {t('day')} {node.day}
             </Text>
             {milestone && (
-              <View style={styles.milestoneBadge}>
+              <LinearGradient
+                colors={['rgba(139,92,246,0.3)', 'rgba(99,102,241,0.3)']}
+                style={styles.milestoneBadge}
+              >
+                <Text style={styles.milestoneEmoji}>{milestone.emoji}</Text>
                 <Text style={styles.milestoneLabel}>{milestone.label}</Text>
-              </View>
+              </LinearGradient>
             )}
           </View>
 
-          <TouchableOpacity
-            style={[styles.node, getNodeStyle()]}
-            disabled={node.status === 'locked'}
-            onPress={() => {
-              if (node.status !== 'locked') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-            }}
-          >
-            {getNodeContent()}
-            {node.status === 'current' && <View style={styles.currentPulse} />}
-          </TouchableOpacity>
+          <Animated.View style={node.status === 'current' ? { transform: [{ scale: pulseAnim }] } : undefined}>
+            <TouchableOpacity
+              disabled={node.status === 'locked'}
+              onPress={() => {
+                if (node.status !== 'locked') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+              }}
+            >
+              {node.status === 'completed' ? (
+                <LinearGradient
+                  colors={['#10B981', '#059669']}
+                  style={[styles.node, styles.nodeCompleted]}
+                >
+                  {getNodeContent()}
+                </LinearGradient>
+              ) : node.status === 'current' ? (
+                <LinearGradient
+                  colors={['#6366F1', '#8B5CF6']}
+                  style={[styles.node, styles.nodeCurrent]}
+                >
+                  {getNodeContent()}
+                  <View style={styles.currentPulse} />
+                </LinearGradient>
+              ) : (
+                <View style={[styles.node, styles.nodeLocked]}>
+                  {getNodeContent()}
+                </View>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
         </View>
       </Animated.View>
     );
   };
 
+  const getMotivationEmoji = () => {
+    if (currentStreak === 0) return '\u{1F331}';
+    if (currentStreak < 7) return '\u{1F4AA}';
+    if (currentStreak < 30) return '\u{1F525}';
+    return '\u{1F451}';
+  };
+
   return (
-    <LinearGradient colors={['#1E1B4B', '#312E81', '#3730A3']} style={styles.container}>
+    <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('yourJourney')}</Text>
+          <Text style={styles.headerTitle}>{'\u{1F680}'} {t('yourJourney')}</Text>
           <View style={styles.placeholder} />
         </View>
 
         {/* Stats */}
-        <Animated.View style={[styles.statsContainer, { transform: [{ scale: headerScale }] }]}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{currentStreak}</Text>
-            <Text style={styles.statLabel}>{t('dayStreak')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{totalWordsLearned}</Text>
-            <Text style={styles.statLabel}>{t('words')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{Math.floor(currentStreak / 7)}</Text>
-            <Text style={styles.statLabel}>{t('weeks')}</Text>
-          </View>
+        <Animated.View style={[styles.statsContainer, { opacity: statOpacity }]}>
+          <Animated.View style={{ transform: [{ translateY: statSlide1 }] }}>
+            <LinearGradient
+              colors={['rgba(245,158,11,0.15)', 'rgba(239,68,68,0.15)']}
+              style={styles.statCard}
+            >
+              <Text style={styles.statEmoji}>{'\u{1F525}'}</Text>
+              <Text style={styles.statValue}>{currentStreak}</Text>
+              <Text style={styles.statLabel}>{t('dayStreak')}</Text>
+            </LinearGradient>
+          </Animated.View>
+          <Animated.View style={{ transform: [{ translateY: statSlide2 }] }}>
+            <LinearGradient
+              colors={['rgba(99,102,241,0.15)', 'rgba(139,92,246,0.15)']}
+              style={styles.statCard}
+            >
+              <Text style={styles.statEmoji}>{'\u{1F4DA}'}</Text>
+              <Text style={styles.statValue}>{totalWordsLearned}</Text>
+              <Text style={styles.statLabel}>{t('words')}</Text>
+            </LinearGradient>
+          </Animated.View>
+          <Animated.View style={{ transform: [{ translateY: statSlide3 }] }}>
+            <LinearGradient
+              colors={['rgba(16,185,129,0.15)', 'rgba(5,150,105,0.15)']}
+              style={styles.statCard}
+            >
+              <Text style={styles.statEmoji}>{'\u{1F4C5}'}</Text>
+              <Text style={styles.statValue}>{Math.floor(currentStreak / 7)}</Text>
+              <Text style={styles.statLabel}>{t('weeks')}</Text>
+            </LinearGradient>
+          </Animated.View>
         </Animated.View>
 
         {/* Journey Path */}
@@ -198,7 +276,11 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
             </View>
 
             {/* Bottom Motivation */}
-            <View style={styles.motivationContainer}>
+            <LinearGradient
+              colors={['rgba(99,102,241,0.1)', 'rgba(139,92,246,0.1)']}
+              style={styles.motivationContainer}
+            >
+              <Text style={styles.motivationEmoji}>{getMotivationEmoji()}</Text>
               <Text style={styles.motivationText}>
                 {currentStreak === 0
                   ? t('startJourney')
@@ -208,7 +290,7 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
                       ? t('amazingProgress')
                       : t('champion')}
               </Text>
-            </View>
+            </LinearGradient>
           </ScrollView>
         </Animated.View>
       </SafeAreaView>
@@ -233,12 +315,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   closeButton: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   closeIcon: {
     fontSize: 20,
@@ -246,39 +330,44 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#FFFFFF',
   },
   placeholder: {
-    width: 40,
+    width: 42,
   },
 
   // Stats
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   statCard: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 14,
+    borderRadius: 18,
     padding: 16,
     alignItems: 'center',
-    minWidth: 90,
+    minWidth: 95,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  statEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 30,
+    fontWeight: '800',
     color: '#FFFFFF',
   },
   statLabel: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.6)',
-    marginTop: 4,
-    fontWeight: '500',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 2,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 
   // Journey
@@ -287,15 +376,15 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   journeyTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 16,
   },
   journeySubtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
+    color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
     marginTop: 8,
     marginBottom: 24,
@@ -339,34 +428,32 @@ const styles = StyleSheet.create({
     right: width / 2 - 30,
   },
   connectorLocked: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
 
   // Node
   node: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
   },
   nodeCompleted: {
-    backgroundColor: '#10B981',
     borderColor: '#34D399',
   },
   nodeCurrent: {
-    backgroundColor: '#6366F1',
     borderColor: '#818CF8',
     shadowColor: '#6366F1',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
+    shadowOpacity: 0.6,
+    shadowRadius: 14,
+    elevation: 8,
   },
   nodeLocked: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   nodeIcon: {
     fontSize: 20,
@@ -374,21 +461,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   nodeIconCurrent: {
-    fontSize: 24,
-    color: '#FFFFFF',
+    fontSize: 20,
   },
   nodeIconLocked: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.3)',
+    fontSize: 14,
   },
   currentPulse: {
     position: 'absolute',
-    width: 64,
-    height: 64,
-    borderRadius: 18,
+    width: 68,
+    height: 68,
+    borderRadius: 22,
     borderWidth: 2,
     borderColor: '#6366F1',
-    opacity: 0.25,
+    opacity: 0.2,
   },
 
   // Day Label
@@ -403,44 +488,53 @@ const styles = StyleSheet.create({
   },
   dayLabel: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.8)',
   },
   dayLabelLocked: {
-    color: 'rgba(255,255,255,0.35)',
+    color: 'rgba(255,255,255,0.25)',
   },
 
   // Milestone
   milestoneBadge: {
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 10,
     marginTop: 4,
     borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.3)',
+    borderColor: 'rgba(139,92,246,0.3)',
+  },
+  milestoneEmoji: {
+    fontSize: 12,
+    marginRight: 4,
   },
   milestoneLabel: {
     fontSize: 11,
-    fontWeight: '600',
-    color: '#A5B4FC',
+    fontWeight: '700',
+    color: '#A78BFA',
   },
 
   // Motivation
   motivationContainer: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 14,
-    padding: 20,
+    borderRadius: 18,
+    padding: 24,
     alignItems: 'center',
     marginTop: 32,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(99,102,241,0.15)',
+  },
+  motivationEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
   },
   motivationText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.75)',
     textAlign: 'center',
+    lineHeight: 24,
   },
 });
 

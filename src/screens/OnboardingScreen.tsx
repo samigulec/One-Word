@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   Dimensions,
   Animated,
+  Easing,
   FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,7 +15,7 @@ import * as Haptics from 'expo-haptics';
 import { LANGUAGES, Language, LanguageCode, getTranslation } from '../utils/translations';
 import { ProficiencyLevel } from '../types';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 type OnboardingScreenProps = {
   onComplete: (nativeLanguage: LanguageCode, targetLanguage: LanguageCode, level: ProficiencyLevel) => void;
@@ -28,6 +29,7 @@ interface SimplifiedLevel {
   cerfLevel: ProficiencyLevel;
   color: string;
   bgColor: string;
+  emoji: string;
 }
 
 const SIMPLIFIED_LEVELS: SimplifiedLevel[] = [
@@ -38,7 +40,8 @@ const SIMPLIFIED_LEVELS: SimplifiedLevel[] = [
     description: '',
     cerfLevel: 'A1',
     color: '#10B981',
-    bgColor: '#F0FDF4'
+    bgColor: 'rgba(16,185,129,0.15)',
+    emoji: '\u{1F331}',
   },
   {
     id: 'intermediate',
@@ -47,7 +50,8 @@ const SIMPLIFIED_LEVELS: SimplifiedLevel[] = [
     description: '',
     cerfLevel: 'B1',
     color: '#F59E0B',
-    bgColor: '#FFFBEB'
+    bgColor: 'rgba(245,158,11,0.15)',
+    emoji: '\u{1F525}',
   },
   {
     id: 'advanced',
@@ -56,9 +60,61 @@ const SIMPLIFIED_LEVELS: SimplifiedLevel[] = [
     description: '',
     cerfLevel: 'C1',
     color: '#8B5CF6',
-    bgColor: '#F5F3FF'
+    bgColor: 'rgba(139,92,246,0.15)',
+    emoji: '\u{1F680}',
   },
 ];
+
+// Floating orb for background
+const FloatingOrb: React.FC<{ delay: number; size: number; x: number; y: number; color: string }> = ({ delay, size, x, y, color }) => {
+  const anim = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(scale, {
+      toValue: 1,
+      duration: 1000,
+      delay,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 3000 + Math.random() * 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(anim, {
+          toValue: 0,
+          duration: 3000 + Math.random() * 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        opacity: 0.15,
+        transform: [
+          { scale: Animated.multiply(scale, anim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.3] })) },
+          { translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [-10, 10] }) },
+        ],
+      }}
+    />
+  );
+};
 
 const LanguageItem: React.FC<{
   item: Language;
@@ -69,8 +125,8 @@ const LanguageItem: React.FC<{
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.spring(itemScale, { toValue: 0.95, useNativeDriver: true }),
-      Animated.spring(itemScale, { toValue: 1, friction: 4, useNativeDriver: true }),
+      Animated.spring(itemScale, { toValue: 0.92, useNativeDriver: true }),
+      Animated.spring(itemScale, { toValue: 1, friction: 3, tension: 100, useNativeDriver: true }),
     ]).start();
     onSelect(item);
   };
@@ -108,8 +164,8 @@ const LevelCard: React.FC<{
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.spring(cardScale, { toValue: 0.97, useNativeDriver: true }),
-      Animated.spring(cardScale, { toValue: 1, friction: 4, useNativeDriver: true }),
+      Animated.spring(cardScale, { toValue: 0.95, useNativeDriver: true }),
+      Animated.spring(cardScale, { toValue: 1, friction: 3, tension: 100, useNativeDriver: true }),
     ]).start();
     onSelect(item);
   };
@@ -119,18 +175,23 @@ const LevelCard: React.FC<{
       <TouchableOpacity
         style={[
           styles.levelCard,
-          { backgroundColor: isSelected ? item.bgColor : '#FFFFFF', borderColor: isSelected ? item.color : '#E2E8F0' },
+          {
+            backgroundColor: isSelected ? item.bgColor : 'rgba(255,255,255,0.06)',
+            borderColor: isSelected ? item.color : 'rgba(255,255,255,0.1)',
+          },
         ]}
         onPress={handlePress}
         activeOpacity={0.8}
       >
         <View style={styles.levelCardContent}>
-          <View style={[styles.levelDot, { backgroundColor: item.color }]} />
+          <View style={[styles.levelEmoji, { backgroundColor: isSelected ? `${item.color}30` : 'rgba(255,255,255,0.08)' }]}>
+            <Text style={styles.levelEmojiText}>{item.emoji}</Text>
+          </View>
           <View style={styles.levelTextContent}>
-            <Text style={[styles.levelTitle, { color: isSelected ? item.color : '#1E293B' }]}>
+            <Text style={[styles.levelTitle, { color: isSelected ? item.color : 'rgba(255,255,255,0.9)' }]}>
               {item.title}
             </Text>
-            <Text style={[styles.levelSubtitle, { color: isSelected ? item.color : '#64748B' }]}>
+            <Text style={[styles.levelSubtitle, { color: isSelected ? item.color : 'rgba(255,255,255,0.5)' }]}>
               {item.subtitle}
             </Text>
             <Text style={styles.levelDescription}>{item.description}</Text>
@@ -154,17 +215,28 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const continueScale = useRef(new Animated.Value(1)).current;
+
+  const orbs = useMemo(() => [
+    { delay: 0, size: 120, x: -30, y: height * 0.15, color: '#8B5CF6' },
+    { delay: 300, size: 80, x: width - 60, y: height * 0.3, color: '#6366F1' },
+    { delay: 600, size: 100, x: width * 0.3, y: height * 0.7, color: '#A78BFA' },
+    { delay: 900, size: 60, x: width * 0.7, y: height * 0.55, color: '#818CF8' },
+    { delay: 1200, size: 90, x: 20, y: height * 0.8, color: '#C4B5FD' },
+  ], []);
+
+  const stepEmojis = ['\u{1F30D}', '\u{1F3AF}', '\u{1F4AA}'];
 
   const animateTransition = (callback: () => void) => {
     Animated.parallel([
       Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: -30, duration: 150, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: -40, duration: 150, useNativeDriver: true }),
     ]).start(() => {
       callback();
-      slideAnim.setValue(30);
+      slideAnim.setValue(40);
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-        Animated.timing(slideAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.spring(slideAnim, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
       ]).start();
     });
   };
@@ -190,6 +262,11 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
 
   const handleContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+    Animated.sequence([
+      Animated.spring(continueScale, { toValue: 0.95, useNativeDriver: true }),
+      Animated.spring(continueScale, { toValue: 1, friction: 3, useNativeDriver: true }),
+    ]).start();
 
     if (step === 1 && nativeLanguage) {
       animateTransition(() => setStep(2));
@@ -257,14 +334,33 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
   );
 
   return (
-    <LinearGradient colors={['#4F46E5', '#6366F1', '#818CF8']} style={styles.container}>
+    <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.container}>
+      {/* Floating Orbs */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        {orbs.map((orb, i) => (
+          <FloatingOrb key={i} {...orb} />
+        ))}
+      </View>
+
       <SafeAreaView style={styles.safeArea}>
-        {/* Progress Bar */}
+        {/* Progress Dots */}
         <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${(step / 3) * 100}%` }]} />
-          </View>
-          <Text style={styles.progressText}>{step}/3</Text>
+          {[1, 2, 3].map((s) => (
+            <View key={s} style={styles.progressStep}>
+              <View style={[
+                styles.progressDot,
+                s <= step && styles.progressDotActive,
+                s === step && styles.progressDotCurrent,
+              ]}>
+                <Text style={[styles.progressDotText, s <= step && styles.progressDotTextActive]}>
+                  {s < step ? '\u2713' : s === step ? stepEmojis[step - 1] : s}
+                </Text>
+              </View>
+              {s < 3 && (
+                <View style={[styles.progressLine, s < step && styles.progressLineActive]} />
+              )}
+            </View>
+          ))}
         </View>
 
         {/* Back Button */}
@@ -281,6 +377,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
           ]}
         >
+          <Text style={styles.stepEmoji}>{stepEmojis[step - 1]}</Text>
           <Text style={styles.headerTitle}>{content.title}</Text>
           <Text style={styles.headerSubtitle}>{content.subtitle}</Text>
         </Animated.View>
@@ -324,19 +421,26 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
 
         {/* Continue Button */}
         <View style={styles.bottomContainer}>
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              !canContinue && styles.continueButtonDisabled
-            ]}
-            onPress={handleContinue}
-            disabled={!canContinue}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.continueButtonText, !canContinue && styles.continueButtonTextDisabled]}>
-              {step === 3 ? t('letsStart') : t('continue')}
-            </Text>
-          </TouchableOpacity>
+          <Animated.View style={{ transform: [{ scale: continueScale }] }}>
+            <TouchableOpacity
+              onPress={handleContinue}
+              disabled={!canContinue}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={canContinue
+                  ? (step === 3 ? ['#10B981', '#059669'] : ['#6366F1', '#8B5CF6'])
+                  : ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.continueButton}
+              >
+                <Text style={[styles.continueButtonText, !canContinue && styles.continueButtonTextDisabled]}>
+                  {step === 3 ? `${t('letsStart')} \u{1F389}` : t('continue')}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -351,44 +455,74 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Progress
+  // Progress Dots
   progressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    justifyContent: 'center',
     paddingTop: 16,
     paddingBottom: 8,
+    paddingHorizontal: 40,
   },
-  progressBar: {
-    flex: 1,
-    height: 4,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderRadius: 2,
-    marginRight: 12,
+  progressStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 2,
+  progressDot: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  progressText: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 13,
-    fontWeight: '600',
+  progressDotActive: {
+    backgroundColor: 'rgba(99,102,241,0.3)',
+    borderColor: '#6366F1',
+  },
+  progressDotCurrent: {
+    backgroundColor: '#6366F1',
+    borderColor: '#818CF8',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  progressDotText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.3)',
+  },
+  progressDotTextActive: {
+    color: '#FFFFFF',
+  },
+  progressLine: {
+    width: 50,
+    height: 2,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginHorizontal: 8,
+  },
+  progressLineActive: {
+    backgroundColor: '#6366F1',
   },
 
   // Back Button
   backButton: {
     position: 'absolute',
     left: 20,
-    top: 70,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    top: 76,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   backArrow: {
     fontSize: 20,
@@ -399,20 +533,26 @@ const styles = StyleSheet.create({
   // Header
   header: {
     alignItems: 'center',
-    paddingTop: 30,
-    paddingBottom: 24,
+    paddingTop: 20,
+    paddingBottom: 20,
     paddingHorizontal: 24,
   },
+  stepEmoji: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 30,
+    fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: 8,
+    textAlign: 'center',
   },
   headerSubtitle: {
-    fontSize: 17,
-    color: 'rgba(255,255,255,0.85)',
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.6)',
     fontWeight: '400',
+    textAlign: 'center',
   },
 
   // Content
@@ -431,37 +571,37 @@ const styles = StyleSheet.create({
   // Language Item
   languageItem: {
     width: (width - 48) / 2,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 14,
-    padding: 16,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 18,
+    padding: 18,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   languageItemSelected: {
     borderColor: '#10B981',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(16,185,129,0.12)',
   },
   flagEmoji: {
-    fontSize: 32,
-    marginBottom: 8,
+    fontSize: 36,
+    marginBottom: 10,
   },
   languageName: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.8)',
   },
   languageNameSelected: {
-    color: '#059669',
+    color: '#34D399',
   },
   checkBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
     backgroundColor: '#10B981',
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -476,8 +616,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   levelCard: {
-    borderRadius: 14,
-    padding: 18,
+    borderRadius: 18,
+    padding: 20,
     marginBottom: 14,
     borderWidth: 2,
   },
@@ -485,18 +625,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  levelDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  levelEmoji: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 14,
+  },
+  levelEmojiText: {
+    fontSize: 24,
   },
   levelTextContent: {
     flex: 1,
   },
   levelTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   levelSubtitle: {
     fontSize: 14,
@@ -505,13 +650,13 @@ const styles = StyleSheet.create({
   },
   levelDescription: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: 'rgba(255,255,255,0.35)',
     marginTop: 4,
   },
   levelCheckBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -528,21 +673,17 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   continueButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 16,
+    borderRadius: 18,
+    paddingVertical: 18,
     alignItems: 'center',
   },
-  continueButtonDisabled: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
-  },
   continueButtonText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#4F46E5',
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   continueButtonTextDisabled: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(255,255,255,0.3)',
   },
 });
 
