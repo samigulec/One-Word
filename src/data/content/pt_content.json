@@ -1,0 +1,191 @@
+[
+  {
+    "id": "pt_1",
+    "target_word": "Olá",
+    "level": "A1",
+    "translations": { "en": "Hello", "tr": "Merhaba", "es": "Hola", "de": "Hallo", "fr": "Bonjour" },
+    "example_sentence": "Olá! Como você está?",
+    "example_translation": { "en": "Hello! How are you?", "tr": "Merhaba! Nasılsın?", "de": "Hallo! Wie geht es dir?" },
+    "pronunciation": "oh-LAH"
+  },
+  {
+    "id": "pt_2",
+    "target_word": "Obrigado",
+    "level": "A1",
+    "translations": { "en": "Thank you", "tr": "Teşekkür ederim", "es": "Gracias", "de": "Danke", "fr": "Merci" },
+    "example_sentence": "Obrigado pela sua ajuda!",
+    "example_translation": { "en": "Thank you for your help!", "tr": "Yardımın için teşekkürler!", "de": "Danke für deine Hilfe!" },
+    "pronunciation": "oh-bree-GAH-doo"
+  },
+  {
+    "id": "pt_3",
+    "target_word": "Amigo",
+    "level": "A1",
+    "translations": { "en": "Friend", "tr": "Arkadaş", "es": "Amigo", "de": "Freund", "fr": "Ami" },
+    "example_sentence": "Ele é meu melhor amigo.",
+    "example_translation": { "en": "He is my best friend.", "tr": "O benim en iyi arkadaşım.", "de": "Er ist mein bester Freund." },
+    "pronunciation": "ah-MEE-goo"
+  },
+  {
+    "id": "pt_4",
+    "target_word": "Casa",
+    "level": "A1",
+    "translations": { "en": "House / Home", "tr": "Ev", "es": "Casa", "de": "Haus", "fr": "Maison" },
+    "example_sentence": "Estou indo para casa agora.",
+    "example_translation": { "en": "I'm going home now.", "tr": "Şimdi eve gidiyorum.", "de": "Ich gehe jetzt nach Hause." },
+    "pronunciation": "KAH-zah"
+  },
+  {
+    "id": "pt_5",
+    "target_word": "Água",
+    "level": "A1",
+    "translations": { "en": "Water", "tr": "Su", "es": "Agua", "de": "Wasser", "fr": "Eau" },
+    "example_sentence": "Posso ter um copo de água, por favor?",
+    "example_translation": { "en": "Can I have a glass of water, please?", "tr": "Bir bardak su alabilir miyim, lütfen?", "de": "Kann ich ein Glas Wasser haben, bitte?" },
+    "pronunciation": "AH-gwah"
+  },
+  {
+    "id": "pt_6",
+    "target_word": "Bom dia",
+    "level": "A1",
+    "translations": { "en": "Good morning", "tr": "Günaydın", "es": "Buenos días", "de": "Guten Morgen", "fr": "Bonjour" },
+    "example_sentence": "Bom dia! Dormiu bem?",
+    "example_translation": { "en": "Good morning! Did you sleep well?", "tr": "Günaydın! İyi uyudun mu?", "de": "Guten Morgen! Hast du gut geschlafen?" },
+    "pronunciation": "bohm JEE-ah"
+  },
+  {
+    "id": "pt_7",
+    "target_word": "Por favor",
+    "level": "A1",
+    "translations": { "en": "Please", "tr": "Lütfen", "es": "Por favor", "de": "Bitte", "fr": "S'il vous plaît" },
+    "example_sentence": "Pode me ajudar, por favor?",
+    "example_translation": { "en": "Can you help me, please?", "tr": "Bana yardım edebilir misin, lütfen?", "de": "Können Sie mir bitte helfen?" },
+    "pronunciation": "pohr fah-VOHR"
+  },
+  {
+    "id": "pt_8",
+    "target_word": "Entender",
+    "level": "A2",
+    "translations": { "en": "To understand", "tr": "Anlamak", "es": "Entender", "de": "Verstehen", "fr": "Comprendre" },
+    "example_sentence": "Não entendo o que você quer dizer.",
+    "example_translation": { "en": "I don't understand what you mean.", "tr": "Ne demek istediğini anlamıyorum.", "de": "Ich verstehe nicht, was du meinst." },
+    "pronunciation": "ehn-tehn-DEHR"
+  },
+  {
+    "id": "pt_9",
+    "target_word": "Trabalho",
+    "level": "A2",
+    "translations": { "en": "Work / Job", "tr": "İş", "es": "Trabajo", "de": "Arbeit", "fr": "Travail" },
+    "example_sentence": "Tenho muito trabalho hoje.",
+    "example_translation": { "en": "I have a lot of work today.", "tr": "Bugün çok işim var.", "de": "Ich habe heute viel Arbeit." },
+    "pronunciation": "trah-BAH-lyoo"
+  },
+  {
+    "id": "pt_10",
+    "target_word": "Sempre",
+    "level": "A2",
+    "translations": { "en": "Always", "tr": "Her zaman", "es": "Siempre", "de": "Immer", "fr": "Toujours" },
+    "example_sentence": "Eu sempre acordo cedo.",
+    "example_translation": { "en": "I always wake up early.", "tr": "Her zaman erken kalkarım.", "de": "Ich stehe immer früh auf." },
+    "pronunciation": "SEHM-preh"
+  },
+  {
+    "id": "pt_11",
+    "target_word": "Bastante",
+    "level": "A2",
+    "translations": { "en": "Quite / Enough", "tr": "Oldukça", "es": "Bastante", "de": "Ziemlich", "fr": "Assez" },
+    "example_sentence": "O filme foi bastante interessante.",
+    "example_translation": { "en": "The movie was quite interesting.", "tr": "Film oldukça ilginçti.", "de": "Der Film war ziemlich interessant." },
+    "pronunciation": "bahs-TAHN-chee"
+  },
+  {
+    "id": "pt_12",
+    "target_word": "Desenvolver",
+    "level": "B1",
+    "translations": { "en": "To develop", "tr": "Geliştirmek", "es": "Desarrollar", "de": "Entwickeln", "fr": "Développer" },
+    "example_sentence": "Precisamos desenvolver novas estratégias.",
+    "example_translation": { "en": "We need to develop new strategies.", "tr": "Yeni stratejiler geliştirmemiz gerekiyor.", "de": "Wir müssen neue Strategien entwickeln." },
+    "pronunciation": "deh-zehn-vol-VEHR"
+  },
+  {
+    "id": "pt_13",
+    "target_word": "No entanto",
+    "level": "B1",
+    "translations": { "en": "However", "tr": "Ancak", "es": "Sin embargo", "de": "Jedoch", "fr": "Cependant" },
+    "example_sentence": "É caro; no entanto, vale a pena.",
+    "example_translation": { "en": "It's expensive; however, it's worth it.", "tr": "Pahalı; ancak buna değer.", "de": "Es ist teuer; jedoch lohnt es sich." },
+    "pronunciation": "noo ehn-TAHN-too"
+  },
+  {
+    "id": "pt_14",
+    "target_word": "Aproveitar",
+    "level": "B1",
+    "translations": { "en": "To take advantage of", "tr": "Faydalanmak", "es": "Aprovechar", "de": "Nutzen", "fr": "Profiter de" },
+    "example_sentence": "Você deveria aproveitar esta oportunidade.",
+    "example_translation": { "en": "You should take advantage of this opportunity.", "tr": "Bu fırsattan faydalanmalısın.", "de": "Du solltest diese Gelegenheit nutzen." },
+    "pronunciation": "ah-proh-vey-TAHR"
+  },
+  {
+    "id": "pt_15",
+    "target_word": "Apesar de",
+    "level": "B2",
+    "translations": { "en": "Despite", "tr": "Rağmen", "es": "A pesar de", "de": "Trotz", "fr": "Malgré" },
+    "example_sentence": "Apesar da chuva, fomos caminhar.",
+    "example_translation": { "en": "Despite the rain, we went for a walk.", "tr": "Yağmura rağmen yürüyüşe çıktık.", "de": "Trotz des Regens gingen wir spazieren." },
+    "pronunciation": "ah-peh-ZAHR deh"
+  },
+  {
+    "id": "pt_16",
+    "target_word": "Indispensável",
+    "level": "B2",
+    "translations": { "en": "Essential", "tr": "Vazgeçilmez", "es": "Imprescindible", "de": "Unentbehrlich", "fr": "Indispensable" },
+    "example_sentence": "A comunicação é indispensável para este cargo.",
+    "example_translation": { "en": "Communication is essential for this role.", "tr": "İletişim bu rol için vazgeçilmez.", "de": "Kommunikation ist für diese Stelle unentbehrlich." },
+    "pronunciation": "een-jees-pehn-SAH-vel"
+  },
+  {
+    "id": "pt_17",
+    "target_word": "Acarretar",
+    "level": "B2",
+    "translations": { "en": "To entail", "tr": "Gerektirmek", "es": "Conllevar", "de": "Mit sich bringen", "fr": "Impliquer" },
+    "example_sentence": "Este projeto vai acarretar muita pesquisa.",
+    "example_translation": { "en": "This project will entail a lot of research.", "tr": "Bu proje çok fazla araştırma gerektirecek.", "de": "Dieses Projekt wird viel Recherche mit sich bringen." },
+    "pronunciation": "ah-kah-heh-TAHR"
+  },
+  {
+    "id": "pt_18",
+    "target_word": "Realizar",
+    "level": "C1",
+    "translations": { "en": "To carry out", "tr": "Gerçekleştirmek", "es": "Realizar", "de": "Durchführen", "fr": "Effectuer" },
+    "example_sentence": "Precisamos realizar uma investigação completa.",
+    "example_translation": { "en": "We need to carry out a complete investigation.", "tr": "Kapsamlı bir soruşturma gerçekleştirmemiz gerekiyor.", "de": "Wir müssen eine vollständige Untersuchung durchführen." },
+    "pronunciation": "heh-ah-lee-ZAHR"
+  },
+  {
+    "id": "pt_19",
+    "target_word": "Não obstante",
+    "level": "C1",
+    "translations": { "en": "Nevertheless", "tr": "Buna rağmen", "es": "No obstante", "de": "Nichtsdestoweniger", "fr": "Néanmoins" },
+    "example_sentence": "O projeto é ambicioso; não obstante, é viável.",
+    "example_translation": { "en": "The project is ambitious; nevertheless, it's feasible.", "tr": "Proje iddialı; buna rağmen uygulanabilir.", "de": "Das Projekt ist ehrgeizig; nichtsdestoweniger ist es machbar." },
+    "pronunciation": "nowng ohbs-TAHN-chee"
+  },
+  {
+    "id": "pt_20",
+    "target_word": "Subjazar",
+    "level": "C2",
+    "translations": { "en": "To underlie", "tr": "Altında yatmak", "es": "Subyacer", "de": "Zugrunde liegen", "fr": "Sous-tendre" },
+    "example_sentence": "As tensões que subjazem ao conflito são complexas.",
+    "example_translation": { "en": "The tensions that underlie the conflict are complex.", "tr": "Çatışmanın altında yatan gerilimler karmaşık.", "de": "Die Spannungen, die dem Konflikt zugrunde liegen, sind komplex." },
+    "pronunciation": "soob-zhah-ZEHR"
+  },
+  {
+    "id": "pt_21",
+    "target_word": "Elucidar",
+    "level": "C2",
+    "translations": { "en": "To elucidate", "tr": "Açıklamak", "es": "Elucidar", "de": "Erläutern", "fr": "Élucider" },
+    "example_sentence": "O professor elucidou a teoria complexa.",
+    "example_translation": { "en": "The professor elucidated the complex theory.", "tr": "Profesör karmaşık teoriyi açıkladı.", "de": "Der Professor erläuterte die komplexe Theorie." },
+    "pronunciation": "eh-loo-see-DAHR"
+  }
+]

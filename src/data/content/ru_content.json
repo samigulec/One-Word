@@ -1,0 +1,191 @@
+[
+  {
+    "id": "ru_1",
+    "target_word": "Привет",
+    "level": "A1",
+    "translations": { "en": "Hello / Hi", "tr": "Merhaba", "de": "Hallo", "es": "Hola", "fr": "Salut" },
+    "example_sentence": "Привет! Как дела?",
+    "example_translation": { "en": "Hi! How are you?", "tr": "Merhaba! Nasılsın?", "de": "Hallo! Wie geht's?" },
+    "pronunciation": "pree-VYET"
+  },
+  {
+    "id": "ru_2",
+    "target_word": "Спасибо",
+    "level": "A1",
+    "translations": { "en": "Thank you", "tr": "Teşekkür ederim", "de": "Danke", "es": "Gracias", "fr": "Merci" },
+    "example_sentence": "Спасибо за помощь!",
+    "example_translation": { "en": "Thank you for your help!", "tr": "Yardımın için teşekkürler!", "de": "Danke für deine Hilfe!" },
+    "pronunciation": "spah-SEE-bah"
+  },
+  {
+    "id": "ru_3",
+    "target_word": "Друг",
+    "level": "A1",
+    "translations": { "en": "Friend", "tr": "Arkadaş", "de": "Freund", "es": "Amigo", "fr": "Ami" },
+    "example_sentence": "Он мой лучший друг.",
+    "example_translation": { "en": "He is my best friend.", "tr": "O benim en iyi arkadaşım.", "de": "Er ist mein bester Freund." },
+    "pronunciation": "DROOG"
+  },
+  {
+    "id": "ru_4",
+    "target_word": "Дом",
+    "level": "A1",
+    "translations": { "en": "House / Home", "tr": "Ev", "de": "Haus", "es": "Casa", "fr": "Maison" },
+    "example_sentence": "Я иду домой.",
+    "example_translation": { "en": "I'm going home.", "tr": "Eve gidiyorum.", "de": "Ich gehe nach Hause." },
+    "pronunciation": "DOHM"
+  },
+  {
+    "id": "ru_5",
+    "target_word": "Вода",
+    "level": "A1",
+    "translations": { "en": "Water", "tr": "Su", "de": "Wasser", "es": "Agua", "fr": "Eau" },
+    "example_sentence": "Можно мне воды, пожалуйста?",
+    "example_translation": { "en": "Can I have some water, please?", "tr": "Biraz su alabilir miyim, lütfen?", "de": "Kann ich bitte etwas Wasser haben?" },
+    "pronunciation": "vah-DAH"
+  },
+  {
+    "id": "ru_6",
+    "target_word": "Доброе утро",
+    "level": "A1",
+    "translations": { "en": "Good morning", "tr": "Günaydın", "de": "Guten Morgen", "es": "Buenos días", "fr": "Bonjour" },
+    "example_sentence": "Доброе утро! Как спалось?",
+    "example_translation": { "en": "Good morning! How did you sleep?", "tr": "Günaydın! Nasıl uyudun?", "de": "Guten Morgen! Wie hast du geschlafen?" },
+    "pronunciation": "DOH-broh-yeh OO-trah"
+  },
+  {
+    "id": "ru_7",
+    "target_word": "Пожалуйста",
+    "level": "A1",
+    "translations": { "en": "Please / You're welcome", "tr": "Lütfen / Rica ederim", "de": "Bitte", "es": "Por favor / De nada", "fr": "S'il vous plaît / De rien" },
+    "example_sentence": "Помогите мне, пожалуйста.",
+    "example_translation": { "en": "Help me, please.", "tr": "Bana yardım edin, lütfen.", "de": "Helfen Sie mir, bitte." },
+    "pronunciation": "pah-ZHAH-loo-stah"
+  },
+  {
+    "id": "ru_8",
+    "target_word": "Понимать",
+    "level": "A2",
+    "translations": { "en": "To understand", "tr": "Anlamak", "de": "Verstehen", "es": "Entender", "fr": "Comprendre" },
+    "example_sentence": "Я не понимаю, что ты имеешь в виду.",
+    "example_translation": { "en": "I don't understand what you mean.", "tr": "Ne demek istediğini anlamıyorum.", "de": "Ich verstehe nicht, was du meinst." },
+    "pronunciation": "pah-nee-MAHT"
+  },
+  {
+    "id": "ru_9",
+    "target_word": "Работа",
+    "level": "A2",
+    "translations": { "en": "Work / Job", "tr": "İş", "de": "Arbeit", "es": "Trabajo", "fr": "Travail" },
+    "example_sentence": "У меня сегодня много работы.",
+    "example_translation": { "en": "I have a lot of work today.", "tr": "Bugün çok işim var.", "de": "Ich habe heute viel Arbeit." },
+    "pronunciation": "rah-BOH-tah"
+  },
+  {
+    "id": "ru_10",
+    "target_word": "Всегда",
+    "level": "A2",
+    "translations": { "en": "Always", "tr": "Her zaman", "de": "Immer", "es": "Siempre", "fr": "Toujours" },
+    "example_sentence": "Я всегда встаю рано.",
+    "example_translation": { "en": "I always get up early.", "tr": "Her zaman erken kalkarım.", "de": "Ich stehe immer früh auf." },
+    "pronunciation": "vsyeg-DAH"
+  },
+  {
+    "id": "ru_11",
+    "target_word": "Довольно",
+    "level": "A2",
+    "translations": { "en": "Quite / Rather", "tr": "Oldukça", "de": "Ziemlich", "es": "Bastante", "fr": "Assez" },
+    "example_sentence": "Фильм был довольно интересный.",
+    "example_translation": { "en": "The movie was quite interesting.", "tr": "Film oldukça ilginçti.", "de": "Der Film war ziemlich interessant." },
+    "pronunciation": "dah-VOHL-nah"
+  },
+  {
+    "id": "ru_12",
+    "target_word": "Развивать",
+    "level": "B1",
+    "translations": { "en": "To develop", "tr": "Geliştirmek", "de": "Entwickeln", "es": "Desarrollar", "fr": "Développer" },
+    "example_sentence": "Нам нужно развивать новые стратегии.",
+    "example_translation": { "en": "We need to develop new strategies.", "tr": "Yeni stratejiler geliştirmemiz gerekiyor.", "de": "Wir müssen neue Strategien entwickeln." },
+    "pronunciation": "rahz-vee-VAHT"
+  },
+  {
+    "id": "ru_13",
+    "target_word": "Однако",
+    "level": "B1",
+    "translations": { "en": "However", "tr": "Ancak", "de": "Jedoch", "es": "Sin embargo", "fr": "Cependant" },
+    "example_sentence": "Это дорого; однако, оно того стоит.",
+    "example_translation": { "en": "It's expensive; however, it's worth it.", "tr": "Pahalı; ancak buna değer.", "de": "Es ist teuer; jedoch lohnt es sich." },
+    "pronunciation": "ahd-NAH-kah"
+  },
+  {
+    "id": "ru_14",
+    "target_word": "Воспользоваться",
+    "level": "B1",
+    "translations": { "en": "To take advantage of", "tr": "Faydalanmak", "de": "Nutzen", "es": "Aprovechar", "fr": "Profiter de" },
+    "example_sentence": "Тебе стоит воспользоваться этой возможностью.",
+    "example_translation": { "en": "You should take advantage of this opportunity.", "tr": "Bu fırsattan faydalanmalısın.", "de": "Du solltest diese Gelegenheit nutzen." },
+    "pronunciation": "vahs-POHL-zah-vat-sah"
+  },
+  {
+    "id": "ru_15",
+    "target_word": "Несмотря на",
+    "level": "B2",
+    "translations": { "en": "Despite", "tr": "Rağmen", "de": "Trotz", "es": "A pesar de", "fr": "Malgré" },
+    "example_sentence": "Несмотря на дождь, мы пошли гулять.",
+    "example_translation": { "en": "Despite the rain, we went for a walk.", "tr": "Yağmura rağmen yürüyüşe çıktık.", "de": "Trotz des Regens gingen wir spazieren." },
+    "pronunciation": "nyes-maht-RYAH nah"
+  },
+  {
+    "id": "ru_16",
+    "target_word": "Незаменимый",
+    "level": "B2",
+    "translations": { "en": "Indispensable", "tr": "Vazgeçilmez", "de": "Unentbehrlich", "es": "Imprescindible", "fr": "Indispensable" },
+    "example_sentence": "Навыки общения незаменимы для этой роли.",
+    "example_translation": { "en": "Communication skills are indispensable for this role.", "tr": "İletişim becerileri bu rol için vazgeçilmez.", "de": "Kommunikationsfähigkeiten sind für diese Rolle unentbehrlich." },
+    "pronunciation": "nyeh-zah-myeh-NEE-miy"
+  },
+  {
+    "id": "ru_17",
+    "target_word": "Влечь за собой",
+    "level": "B2",
+    "translations": { "en": "To entail", "tr": "Gerektirmek", "de": "Mit sich bringen", "es": "Conllevar", "fr": "Impliquer" },
+    "example_sentence": "Этот проект влечёт за собой много исследований.",
+    "example_translation": { "en": "This project entails a lot of research.", "tr": "Bu proje çok fazla araştırma gerektiriyor.", "de": "Dieses Projekt bringt viel Recherche mit sich." },
+    "pronunciation": "VLYECH zah sah-BOY"
+  },
+  {
+    "id": "ru_18",
+    "target_word": "Проводить",
+    "level": "C1",
+    "translations": { "en": "To carry out / To conduct", "tr": "Yürütmek", "de": "Durchführen", "es": "Llevar a cabo", "fr": "Effectuer" },
+    "example_sentence": "Нам нужно провести тщательное расследование.",
+    "example_translation": { "en": "We need to carry out a thorough investigation.", "tr": "Kapsamlı bir soruşturma yürütmemiz gerekiyor.", "de": "Wir müssen eine gründliche Untersuchung durchführen." },
+    "pronunciation": "prah-vah-DEET"
+  },
+  {
+    "id": "ru_19",
+    "target_word": "Тем не менее",
+    "level": "C1",
+    "translations": { "en": "Nevertheless", "tr": "Buna rağmen", "de": "Nichtsdestoweniger", "es": "No obstante", "fr": "Néanmoins" },
+    "example_sentence": "Задача была сложной; тем не менее, мы справились вовремя.",
+    "example_translation": { "en": "The task was difficult; nevertheless, we completed it on time.", "tr": "Görev zordu; buna rağmen zamanında tamamladık.", "de": "Die Aufgabe war schwierig; nichtsdestoweniger haben wir sie rechtzeitig erledigt." },
+    "pronunciation": "tyem nyeh MYEH-nyeh-yeh"
+  },
+  {
+    "id": "ru_20",
+    "target_word": "Лежать в основе",
+    "level": "C2",
+    "translations": { "en": "To underlie", "tr": "Altında yatmak", "de": "Zugrunde liegen", "es": "Subyacer", "fr": "Sous-tendre" },
+    "example_sentence": "Культурные различия лежат в основе многих конфликтов.",
+    "example_translation": { "en": "Cultural differences underlie many conflicts.", "tr": "Kültürel farklılıklar birçok çatışmanın altında yatıyor.", "de": "Kulturelle Unterschiede liegen vielen Konflikten zugrunde." },
+    "pronunciation": "lyeh-ZHAHT v ahs-NOH-vyeh"
+  },
+  {
+    "id": "ru_21",
+    "target_word": "Разъяснять",
+    "level": "C2",
+    "translations": { "en": "To elucidate", "tr": "Açıklamak", "de": "Erläutern", "es": "Elucidar", "fr": "Élucider" },
+    "example_sentence": "Профессор разъяснил сложную теорию.",
+    "example_translation": { "en": "The professor elucidated the complex theory.", "tr": "Profesör karmaşık teoriyi açıkladı.", "de": "Der Professor erläuterte die komplexe Theorie." },
+    "pronunciation": "rahz-yahs-NYAHT"
+  }
+]

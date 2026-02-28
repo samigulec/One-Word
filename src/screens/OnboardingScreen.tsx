@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { LANGUAGES, Language, LanguageCode } from '../utils/translations';
+import { LANGUAGES, Language, LanguageCode, getTranslation } from '../utils/translations';
 import { ProficiencyLevel } from '../types';
 
 const { width } = Dimensions.get('window');
@@ -33,27 +33,27 @@ interface SimplifiedLevel {
 const SIMPLIFIED_LEVELS: SimplifiedLevel[] = [
   {
     id: 'beginner',
-    title: 'Beginner',
-    subtitle: 'Just starting out',
-    description: 'Basic words like "Hello", "Thank you"',
+    title: '',
+    subtitle: '',
+    description: '',
     cerfLevel: 'A1',
     color: '#10B981',
     bgColor: '#F0FDF4'
   },
   {
     id: 'intermediate',
-    title: 'Intermediate',
-    subtitle: 'I know the basics',
-    description: 'Everyday conversations',
+    title: '',
+    subtitle: '',
+    description: '',
     cerfLevel: 'B1',
     color: '#F59E0B',
     bgColor: '#FFFBEB'
   },
   {
     id: 'advanced',
-    title: 'Advanced',
-    subtitle: 'I\'m quite confident',
-    description: 'Complex topics & expressions',
+    title: '',
+    subtitle: '',
+    description: '',
     cerfLevel: 'C1',
     color: '#8B5CF6',
     bgColor: '#F5F3FF'
@@ -220,22 +220,25 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
     (step === 2 && targetLanguage) ||
     (step === 3 && selectedLevel);
 
+  const t = (key: Parameters<typeof getTranslation>[0]) =>
+    getTranslation(key, nativeLanguage || 'en');
+
   const getStepContent = () => {
     switch (step) {
       case 1:
         return {
-          title: 'Welcome',
-          subtitle: 'What language do you speak?',
+          title: t('welcome'),
+          subtitle: t('whatLanguage'),
         };
       case 2:
         return {
-          title: 'Great choice',
-          subtitle: 'What do you want to learn?',
+          title: t('greatChoice'),
+          subtitle: t('whatLearn'),
         };
       case 3:
         return {
-          title: 'Almost done',
-          subtitle: 'What\'s your current level?',
+          title: t('almostDone'),
+          subtitle: t('whatLevel'),
         };
     }
   };
@@ -305,9 +308,14 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
               {SIMPLIFIED_LEVELS.map((level) => (
                 <LevelCard
                   key={level.id}
-                  item={level}
+                  item={{
+                    ...level,
+                    title: t(level.id === 'beginner' ? 'beginner' : level.id === 'intermediate' ? 'intermediate' : 'advanced'),
+                    subtitle: t(level.id === 'beginner' ? 'beginnerDesc' : level.id === 'intermediate' ? 'intermediateDesc' : 'advancedDesc'),
+                    description: t(level.id === 'beginner' ? 'beginnerHint' : level.id === 'intermediate' ? 'intermediateHint' : 'advancedHint'),
+                  }}
                   isSelected={selectedLevel?.id === level.id}
-                  onSelect={handleLevelSelect}
+                  onSelect={() => handleLevelSelect(level)}
                 />
               ))}
             </View>
@@ -326,7 +334,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
             activeOpacity={0.8}
           >
             <Text style={[styles.continueButtonText, !canContinue && styles.continueButtonTextDisabled]}>
-              {step === 3 ? "Let's Start" : 'Continue'}
+              {step === 3 ? t('letsStart') : t('continue')}
             </Text>
           </TouchableOpacity>
         </View>

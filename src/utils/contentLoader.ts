@@ -4,6 +4,14 @@ import { ContentItem, ProficiencyLevel } from '../types';
 import esContent from '../data/content/es_content.json';
 import enContent from '../data/content/en_content.json';
 import itContent from '../data/content/it_content.json';
+import deContent from '../data/content/de_content.json';
+import frContent from '../data/content/fr_content.json';
+import ptContent from '../data/content/pt_content.json';
+import trContent from '../data/content/tr_content.json';
+import ruContent from '../data/content/ru_content.json';
+import jaContent from '../data/content/ja_content.json';
+import koContent from '../data/content/ko_content.json';
+import zhContent from '../data/content/zh_content.json';
 
 /**
  * Map of target language codes to their content
@@ -12,6 +20,14 @@ const contentMap: Record<string, ContentItem[]> = {
   es: esContent as ContentItem[],
   en: enContent as ContentItem[],
   it: itContent as ContentItem[],
+  de: deContent as ContentItem[],
+  fr: frContent as ContentItem[],
+  pt: ptContent as ContentItem[],
+  tr: trContent as ContentItem[],
+  ru: ruContent as ContentItem[],
+  ja: jaContent as ContentItem[],
+  ko: koContent as ContentItem[],
+  zh: zhContent as ContentItem[],
 };
 
 /**

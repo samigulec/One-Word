@@ -1,0 +1,191 @@
+[
+  {
+    "id": "ja_1",
+    "target_word": "こんにちは",
+    "level": "A1",
+    "translations": { "en": "Hello", "tr": "Merhaba", "de": "Hallo", "es": "Hola", "fr": "Bonjour" },
+    "example_sentence": "こんにちは！元気ですか？",
+    "example_translation": { "en": "Hello! How are you?", "tr": "Merhaba! Nasılsın?", "de": "Hallo! Wie geht es dir?" },
+    "pronunciation": "kon-nee-chee-WAH"
+  },
+  {
+    "id": "ja_2",
+    "target_word": "ありがとう",
+    "level": "A1",
+    "translations": { "en": "Thank you", "tr": "Teşekkür ederim", "de": "Danke", "es": "Gracias", "fr": "Merci" },
+    "example_sentence": "手伝ってくれてありがとう！",
+    "example_translation": { "en": "Thank you for helping me!", "tr": "Yardım ettiğin için teşekkürler!", "de": "Danke, dass du mir geholfen hast!" },
+    "pronunciation": "ah-ree-GAH-toh"
+  },
+  {
+    "id": "ja_3",
+    "target_word": "友達",
+    "level": "A1",
+    "translations": { "en": "Friend", "tr": "Arkadaş", "de": "Freund", "es": "Amigo", "fr": "Ami" },
+    "example_sentence": "彼は私の親友です。",
+    "example_translation": { "en": "He is my best friend.", "tr": "O benim en iyi arkadaşım.", "de": "Er ist mein bester Freund." },
+    "pronunciation": "toh-moh-DAH-chee"
+  },
+  {
+    "id": "ja_4",
+    "target_word": "家",
+    "level": "A1",
+    "translations": { "en": "House / Home", "tr": "Ev", "de": "Haus", "es": "Casa", "fr": "Maison" },
+    "example_sentence": "今から家に帰ります。",
+    "example_translation": { "en": "I'm going home now.", "tr": "Şimdi eve gidiyorum.", "de": "Ich gehe jetzt nach Hause." },
+    "pronunciation": "ee-EH / oo-CHEE"
+  },
+  {
+    "id": "ja_5",
+    "target_word": "水",
+    "level": "A1",
+    "translations": { "en": "Water", "tr": "Su", "de": "Wasser", "es": "Agua", "fr": "Eau" },
+    "example_sentence": "水をください。",
+    "example_translation": { "en": "Water, please.", "tr": "Su, lütfen.", "de": "Wasser, bitte." },
+    "pronunciation": "mee-ZOO"
+  },
+  {
+    "id": "ja_6",
+    "target_word": "おはようございます",
+    "level": "A1",
+    "translations": { "en": "Good morning", "tr": "Günaydın", "de": "Guten Morgen", "es": "Buenos días", "fr": "Bonjour" },
+    "example_sentence": "おはようございます！よく眠れましたか？",
+    "example_translation": { "en": "Good morning! Did you sleep well?", "tr": "Günaydın! İyi uyudun mu?", "de": "Guten Morgen! Hast du gut geschlafen?" },
+    "pronunciation": "oh-ha-yoh go-zai-MAHS"
+  },
+  {
+    "id": "ja_7",
+    "target_word": "お願いします",
+    "level": "A1",
+    "translations": { "en": "Please", "tr": "Lütfen", "de": "Bitte", "es": "Por favor", "fr": "S'il vous plaît" },
+    "example_sentence": "手伝ってください、お願いします。",
+    "example_translation": { "en": "Please help me.", "tr": "Bana yardım edin, lütfen.", "de": "Helfen Sie mir, bitte." },
+    "pronunciation": "oh-neh-gai shee-MAHS"
+  },
+  {
+    "id": "ja_8",
+    "target_word": "分かる",
+    "level": "A2",
+    "translations": { "en": "To understand", "tr": "Anlamak", "de": "Verstehen", "es": "Entender", "fr": "Comprendre" },
+    "example_sentence": "あなたの言いたいことが分かりません。",
+    "example_translation": { "en": "I don't understand what you mean.", "tr": "Ne demek istediğini anlamıyorum.", "de": "Ich verstehe nicht, was du meinst." },
+    "pronunciation": "wah-KAH-roo"
+  },
+  {
+    "id": "ja_9",
+    "target_word": "仕事",
+    "level": "A2",
+    "translations": { "en": "Work / Job", "tr": "İş", "de": "Arbeit", "es": "Trabajo", "fr": "Travail" },
+    "example_sentence": "今日は仕事がたくさんあります。",
+    "example_translation": { "en": "I have a lot of work today.", "tr": "Bugün çok işim var.", "de": "Ich habe heute viel Arbeit." },
+    "pronunciation": "shee-GOH-toh"
+  },
+  {
+    "id": "ja_10",
+    "target_word": "いつも",
+    "level": "A2",
+    "translations": { "en": "Always", "tr": "Her zaman", "de": "Immer", "es": "Siempre", "fr": "Toujours" },
+    "example_sentence": "私はいつも早く起きます。",
+    "example_translation": { "en": "I always wake up early.", "tr": "Her zaman erken kalkarım.", "de": "Ich stehe immer früh auf." },
+    "pronunciation": "ee-TSOO-moh"
+  },
+  {
+    "id": "ja_11",
+    "target_word": "かなり",
+    "level": "A2",
+    "translations": { "en": "Quite / Rather", "tr": "Oldukça", "de": "Ziemlich", "es": "Bastante", "fr": "Assez" },
+    "example_sentence": "その映画はかなり面白かった。",
+    "example_translation": { "en": "The movie was quite interesting.", "tr": "Film oldukça ilginçti.", "de": "Der Film war ziemlich interessant." },
+    "pronunciation": "kah-NAH-ree"
+  },
+  {
+    "id": "ja_12",
+    "target_word": "開発する",
+    "level": "B1",
+    "translations": { "en": "To develop", "tr": "Geliştirmek", "de": "Entwickeln", "es": "Desarrollar", "fr": "Développer" },
+    "example_sentence": "新しい戦略を開発する必要があります。",
+    "example_translation": { "en": "We need to develop new strategies.", "tr": "Yeni stratejiler geliştirmemiz gerekiyor.", "de": "Wir müssen neue Strategien entwickeln." },
+    "pronunciation": "kai-HAH-tsoo soo-roo"
+  },
+  {
+    "id": "ja_13",
+    "target_word": "しかし",
+    "level": "B1",
+    "translations": { "en": "However", "tr": "Ancak", "de": "Jedoch", "es": "Sin embargo", "fr": "Cependant" },
+    "example_sentence": "高いです。しかし、価値があります。",
+    "example_translation": { "en": "It's expensive. However, it's worth it.", "tr": "Pahalı. Ancak buna değer.", "de": "Es ist teuer. Jedoch lohnt es sich." },
+    "pronunciation": "shee-KAH-shee"
+  },
+  {
+    "id": "ja_14",
+    "target_word": "利用する",
+    "level": "B1",
+    "translations": { "en": "To take advantage of / To use", "tr": "Faydalanmak / Kullanmak", "de": "Nutzen", "es": "Aprovechar", "fr": "Profiter de" },
+    "example_sentence": "このチャンスを利用するべきです。",
+    "example_translation": { "en": "You should take advantage of this chance.", "tr": "Bu fırsattan faydalanmalısın.", "de": "Du solltest diese Chance nutzen." },
+    "pronunciation": "ree-YOH soo-roo"
+  },
+  {
+    "id": "ja_15",
+    "target_word": "にもかかわらず",
+    "level": "B2",
+    "translations": { "en": "Despite / In spite of", "tr": "Rağmen", "de": "Trotz", "es": "A pesar de", "fr": "Malgré" },
+    "example_sentence": "雨にもかかわらず、散歩に行きました。",
+    "example_translation": { "en": "Despite the rain, we went for a walk.", "tr": "Yağmura rağmen yürüyüşe çıktık.", "de": "Trotz des Regens gingen wir spazieren." },
+    "pronunciation": "nee-moh kah-kah-WAH-rah-zoo"
+  },
+  {
+    "id": "ja_16",
+    "target_word": "不可欠",
+    "level": "B2",
+    "translations": { "en": "Indispensable / Essential", "tr": "Vazgeçilmez", "de": "Unentbehrlich", "es": "Imprescindible", "fr": "Indispensable" },
+    "example_sentence": "この仕事にはコミュニケーション能力が不可欠です。",
+    "example_translation": { "en": "Communication skills are essential for this job.", "tr": "Bu iş için iletişim becerileri vazgeçilmez.", "de": "Kommunikationsfähigkeiten sind für diesen Job unentbehrlich." },
+    "pronunciation": "foo-kah-KET-soo"
+  },
+  {
+    "id": "ja_17",
+    "target_word": "伴う",
+    "level": "B2",
+    "translations": { "en": "To entail / To involve", "tr": "Gerektirmek", "de": "Mit sich bringen", "es": "Conllevar", "fr": "Impliquer" },
+    "example_sentence": "このプロジェクトは多くの研究を伴います。",
+    "example_translation": { "en": "This project entails a lot of research.", "tr": "Bu proje çok fazla araştırma gerektiriyor.", "de": "Dieses Projekt bringt viel Recherche mit sich." },
+    "pronunciation": "toh-moh-NAH-oo"
+  },
+  {
+    "id": "ja_18",
+    "target_word": "実施する",
+    "level": "C1",
+    "translations": { "en": "To carry out / To implement", "tr": "Yürütmek / Uygulamak", "de": "Durchführen", "es": "Llevar a cabo", "fr": "Effectuer" },
+    "example_sentence": "徹底的な調査を実施する必要があります。",
+    "example_translation": { "en": "We need to carry out a thorough investigation.", "tr": "Kapsamlı bir soruşturma yürütmemiz gerekiyor.", "de": "Wir müssen eine gründliche Untersuchung durchführen." },
+    "pronunciation": "jee-SHEE soo-roo"
+  },
+  {
+    "id": "ja_19",
+    "target_word": "それにもかかわらず",
+    "level": "C1",
+    "translations": { "en": "Nevertheless", "tr": "Buna rağmen", "de": "Nichtsdestoweniger", "es": "No obstante", "fr": "Néanmoins" },
+    "example_sentence": "課題は難しかった。それにもかかわらず、時間通りに完了しました。",
+    "example_translation": { "en": "The task was difficult. Nevertheless, we completed it on time.", "tr": "Görev zordu. Buna rağmen zamanında tamamladık.", "de": "Die Aufgabe war schwierig. Nichtsdestoweniger haben wir sie rechtzeitig erledigt." },
+    "pronunciation": "soh-reh nee-moh kah-kah-WAH-rah-zoo"
+  },
+  {
+    "id": "ja_20",
+    "target_word": "根底にある",
+    "level": "C2",
+    "translations": { "en": "To underlie / To be at the root of", "tr": "Altında yatmak", "de": "Zugrunde liegen", "es": "Subyacer", "fr": "Sous-tendre" },
+    "example_sentence": "文化の違いがこれらの紛争の根底にある。",
+    "example_translation": { "en": "Cultural differences underlie these conflicts.", "tr": "Kültürel farklılıklar bu çatışmaların altında yatıyor.", "de": "Kulturelle Unterschiede liegen diesen Konflikten zugrunde." },
+    "pronunciation": "kon-TEI nee AH-roo"
+  },
+  {
+    "id": "ja_21",
+    "target_word": "解明する",
+    "level": "C2",
+    "translations": { "en": "To elucidate / To clarify", "tr": "Açıklamak / Aydınlatmak", "de": "Erläutern", "es": "Elucidar", "fr": "Élucider" },
+    "example_sentence": "教授は複雑な理論を解明しました。",
+    "example_translation": { "en": "The professor elucidated the complex theory.", "tr": "Profesör karmaşık teoriyi açıkladı.", "de": "Der Professor erläuterte die komplexe Theorie." },
+    "pronunciation": "kai-MEI soo-roo"
+  }
+]
