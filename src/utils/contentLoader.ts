@@ -71,30 +71,38 @@ export const loadContentForLevel = (targetLanguage: string, level: ProficiencyLe
 
 /**
  * Get the word/phrase of the day based on current date and user level
- * All users at the same level see the same word on the same day
+ * Prioritizes words at the user's exact level, falls back to lower levels if needed
  */
 export const getWordOfTheDay = (targetLanguage: string, level: ProficiencyLevel = 'A1'): ContentItem => {
-  const content = loadContentForLevel(targetLanguage, level);
-  
-  if (content.length === 0) {
-    // Fallback to all content if no level-specific content
-    const allContent = loadContentForLanguage(targetLanguage);
-    if (allContent.length === 0) {
-      throw new Error('No content available');
-    }
-    const today = new Date();
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    return allContent[dayOfYear % allContent.length];
-  }
-  
   // Use date as seed for consistent daily selection
   const today = new Date();
   const startOfYear = new Date(today.getFullYear(), 0, 0);
   const diff = today.getTime() - startOfYear.getTime();
   const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
-  const index = dayOfYear % content.length;
-  return content[index];
+
+  const allContent = loadContentForLanguage(targetLanguage);
+
+  if (allContent.length === 0) {
+    throw new Error('No content available');
+  }
+
+  // First try: words at the user's exact level
+  const exactLevelContent = allContent.filter(item => item.level === level);
+  if (exactLevelContent.length > 0) {
+    return exactLevelContent[dayOfYear % exactLevelContent.length];
+  }
+
+  // Fallback: try each level below, from highest to lowest
+  const allowedLevels = levelHierarchy[level] || ['A1'];
+  for (let i = allowedLevels.length - 1; i >= 0; i--) {
+    const levelContent = allContent.filter(item => item.level === allowedLevels[i]);
+    if (levelContent.length > 0) {
+      return levelContent[dayOfYear % levelContent.length];
+    }
+  }
+
+  // Final fallback: any word
+  return allContent[dayOfYear % allContent.length];
 };
 
 /**
