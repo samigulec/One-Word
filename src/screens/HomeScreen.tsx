@@ -724,10 +724,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
   },
   flashcardOuter: {
-    width: width - 32,
+    width: width - 24,
     borderRadius: 28,
     // Glow shadow
     shadowColor: '#6366F1',
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
   },
   flashcard: {
     borderRadius: 28,
-    padding: 24,
+    padding: 28,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
@@ -800,22 +800,26 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    paddingHorizontal: 8,
+    paddingVertical: 12,
     marginBottom: 16,
   },
   wordGlow: {
     position: 'absolute',
-    width: 200,
-    height: 60,
-    borderRadius: 30,
+    width: '90%',
+    height: 80,
+    borderRadius: 40,
     backgroundColor: '#8B5CF6',
     opacity: 0.15,
   },
   idiomText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '800',
     color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 42,
+    lineHeight: 48,
+    width: '100%',
   },
 
   actionRow: {
