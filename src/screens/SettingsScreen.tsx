@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { LanguageCode, LANGUAGES, getTranslation } from '../utils/translations';
+import { LanguageCode, LANGUAGES, getTranslation, getLanguageName } from '../utils/translations';
 import { ProficiencyLevel } from '../types';
 import { clearAllData } from '../utils/storage';
 
@@ -117,7 +117,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </View>
                 <View style={styles.settingValue}>
                   <Text style={styles.settingFlag}>{nativeLang?.flag}</Text>
-                  <Text style={styles.settingText}>{nativeLang?.nativeName}</Text>
+                  <Text style={styles.settingText}>{getLanguageName(nativeLanguage, nativeLanguage)}</Text>
                 </View>
               </View>
 
@@ -130,7 +130,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 </View>
                 <View style={styles.settingValue}>
                   <Text style={styles.settingFlag}>{targetLang?.flag}</Text>
-                  <Text style={styles.settingText}>{targetLang?.nativeName}</Text>
+                  <Text style={styles.settingText}>{getLanguageName(targetLanguage, nativeLanguage)}</Text>
                 </View>
               </View>
 

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { LANGUAGES, Language, LanguageCode, getTranslation } from '../utils/translations';
+import { LANGUAGES, Language, LanguageCode, getTranslation, getLanguageName } from '../utils/translations';
 import { ProficiencyLevel } from '../types';
 
 const { width, height } = Dimensions.get('window');
@@ -165,7 +165,8 @@ const LanguageCard: React.FC<{
   onSelect: (lang: Language) => void;
   index: number;
   isDisabled?: boolean;
-}> = ({ item, isSelected, onSelect, index, isDisabled }) => {
+  displayName?: string;
+}> = ({ item, isSelected, onSelect, index, isDisabled, displayName }) => {
   const itemScale = useRef(new Animated.Value(1)).current;
   const enterAnim = useRef(new Animated.Value(0)).current;
 
@@ -222,7 +223,7 @@ const LanguageCard: React.FC<{
           isSelected && styles.languageNameSelected,
           isDisabled && styles.languageNameDisabled,
         ]}>
-          {item.nativeName}
+          {displayName || item.nativeName}
         </Text>
         {isSelected && (
           <View style={styles.selectedBadge}>
@@ -505,6 +506,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
       onSelect={handleLanguageSelect}
       index={index}
       isDisabled={step === 2 && item.code === nativeLanguage}
+      displayName={step === 2 && nativeLanguage ? getLanguageName(item.code, nativeLanguage) : undefined}
     />
   );
 

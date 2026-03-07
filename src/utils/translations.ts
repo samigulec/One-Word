@@ -22,7 +22,29 @@ export const LANGUAGES: Language[] = [
   { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
 ];
 
-type TranslationKey = 
+// Language names in each language so users can identify languages in their native tongue
+export const LANGUAGE_NAMES: Record<LanguageCode, Record<LanguageCode, string>> = {
+  en: { en: 'English', tr: 'Turkish', es: 'Spanish', de: 'German', fr: 'French', pt: 'Portuguese', it: 'Italian', ru: 'Russian', ja: 'Japanese', ko: 'Korean', zh: 'Chinese' },
+  tr: { en: 'İngilizce', tr: 'Türkçe', es: 'İspanyolca', de: 'Almanca', fr: 'Fransızca', pt: 'Portekizce', it: 'İtalyanca', ru: 'Rusça', ja: 'Japonca', ko: 'Korece', zh: 'Çince' },
+  es: { en: 'Inglés', tr: 'Turco', es: 'Español', de: 'Alemán', fr: 'Francés', pt: 'Portugués', it: 'Italiano', ru: 'Ruso', ja: 'Japonés', ko: 'Coreano', zh: 'Chino' },
+  de: { en: 'Englisch', tr: 'Türkisch', es: 'Spanisch', de: 'Deutsch', fr: 'Französisch', pt: 'Portugiesisch', it: 'Italienisch', ru: 'Russisch', ja: 'Japanisch', ko: 'Koreanisch', zh: 'Chinesisch' },
+  fr: { en: 'Anglais', tr: 'Turc', es: 'Espagnol', de: 'Allemand', fr: 'Français', pt: 'Portugais', it: 'Italien', ru: 'Russe', ja: 'Japonais', ko: 'Coréen', zh: 'Chinois' },
+  pt: { en: 'Inglês', tr: 'Turco', es: 'Espanhol', de: 'Alemão', fr: 'Francês', pt: 'Português', it: 'Italiano', ru: 'Russo', ja: 'Japonês', ko: 'Coreano', zh: 'Chinês' },
+  it: { en: 'Inglese', tr: 'Turco', es: 'Spagnolo', de: 'Tedesco', fr: 'Francese', pt: 'Portoghese', it: 'Italiano', ru: 'Russo', ja: 'Giapponese', ko: 'Coreano', zh: 'Cinese' },
+  ru: { en: 'Английский', tr: 'Турецкий', es: 'Испанский', de: 'Немецкий', fr: 'Французский', pt: 'Португальский', it: 'Итальянский', ru: 'Русский', ja: 'Японский', ko: 'Корейский', zh: 'Китайский' },
+  ja: { en: '英語', tr: 'トルコ語', es: 'スペイン語', de: 'ドイツ語', fr: 'フランス語', pt: 'ポルトガル語', it: 'イタリア語', ru: 'ロシア語', ja: '日本語', ko: '韓国語', zh: '中国語' },
+  ko: { en: '영어', tr: '터키어', es: '스페인어', de: '독일어', fr: '프랑스어', pt: '포르투갈어', it: '이탈리아어', ru: '러시아어', ja: '일본어', ko: '한국어', zh: '중국어' },
+  zh: { en: '英语', tr: '土耳其语', es: '西班牙语', de: '德语', fr: '法语', pt: '葡萄牙语', it: '意大利语', ru: '俄语', ja: '日语', ko: '韩语', zh: '中文' },
+};
+
+/**
+ * Get a language's name in a specific language
+ */
+export const getLanguageName = (langCode: LanguageCode, inLanguage: LanguageCode): string => {
+  return LANGUAGE_NAMES[inLanguage]?.[langCode] || LANGUAGE_NAMES['en'][langCode] || langCode;
+};
+
+type TranslationKey =
   // Home
   | 'appName' | 'idiomOfTheDay' | 'showMeaning' | 'hideMeaning' | 'meaning'
   | 'exampleSentence' | 'practiceWithAI' | 'practiceHint' | 'dayStreak' | 'loading'
