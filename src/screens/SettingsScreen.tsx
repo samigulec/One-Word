@@ -169,7 +169,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   <Text style={styles.settingEmoji}>{'\u{1F4E6}'}</Text>
                   <Text style={styles.settingLabel}>{t('version')}</Text>
                 </View>
-                <Text style={styles.settingTextMuted}>{Constants.expoConfig?.version ?? '1.1.0'}</Text>
+                <Text style={styles.settingTextMuted}>{Constants.expoConfig?.version ?? '1.2.0'}</Text>
               </View>
             </View>
 
