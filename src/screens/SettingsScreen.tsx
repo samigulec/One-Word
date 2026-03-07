@@ -9,6 +9,7 @@ import {
   Alert,
   Animated,
   Easing,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -65,21 +66,28 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       Animated.spring(resetScale, { toValue: 1, friction: 3, useNativeDriver: true }),
     ]).start();
 
-    Alert.alert(
-      t('resetConfirmTitle'),
-      t('resetConfirmMsg'),
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('reset'),
-          style: 'destructive',
-          onPress: async () => {
-            await clearAllData();
-            onReset();
-          }
-        },
-      ]
-    );
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(`${t('resetConfirmTitle')}\n${t('resetConfirmMsg')}`);
+      if (confirmed) {
+        clearAllData().then(() => onReset());
+      }
+    } else {
+      Alert.alert(
+        t('resetConfirmTitle'),
+        t('resetConfirmMsg'),
+        [
+          { text: t('cancel'), style: 'cancel' },
+          {
+            text: t('reset'),
+            style: 'destructive',
+            onPress: async () => {
+              await clearAllData();
+              onReset();
+            }
+          },
+        ]
+      );
+    }
   };
 
   return (

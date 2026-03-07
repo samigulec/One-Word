@@ -85,6 +85,11 @@ export default function App() {
   };
 
   const handleReset = () => {
+    setUserProgress(null);
+    setSelectedWord(null);
+    setNativeLanguage('en');
+    setTargetLanguage('es');
+    setProficiencyLevel('A1');
     setCurrentScreen('Onboarding');
   };
 
