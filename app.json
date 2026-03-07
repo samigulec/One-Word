@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F8FAFC"
       },
-      "package": "com.bikelime.app"
+      "package": "com.bikelime.app",
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
