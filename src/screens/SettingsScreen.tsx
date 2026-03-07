@@ -59,7 +59,9 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   const handleReset = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    }
 
     Animated.sequence([
       Animated.spring(resetScale, { toValue: 0.95, useNativeDriver: true }),
