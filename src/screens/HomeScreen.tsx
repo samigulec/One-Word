@@ -15,7 +15,7 @@ import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 import { ContentItem, UserProgress, ProficiencyLevel } from '../types';
 import { getWordOfTheDay, getTranslation, getExampleTranslation } from '../utils/contentLoader';
-import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord } from '../utils/storage';
+import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord, addXP, XP_REWARDS, checkAndUnlockAchievements, getUserProgress } from '../utils/storage';
 import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../utils/translations';
 
 const { width, height } = Dimensions.get('window');
@@ -78,6 +78,7 @@ type HomeScreenProps = {
   onNavigateToJourney: () => void;
   onNavigateToSettings: () => void;
   onNavigateToHistory: () => void;
+  onNavigateToQuiz: (word: ContentItem) => void;
   nativeLanguage: LanguageCode;
   targetLanguage: LanguageCode;
   proficiencyLevel: ProficiencyLevel;
@@ -165,12 +166,16 @@ const FloatingParticle: React.FC<{ delay: number; size: number; startX: number; 
   );
 };
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJourney, onNavigateToSettings, onNavigateToHistory, nativeLanguage, targetLanguage, proficiencyLevel }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJourney, onNavigateToSettings, onNavigateToHistory, onNavigateToQuiz, nativeLanguage, targetLanguage, proficiencyLevel }) => {
   const [word, setWord] = useState<ContentItem | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [totalXP, setTotalXP] = useState(0);
+  const [xpPopup, setXpPopup] = useState(0);
+  const xpPopupAnim = useRef(new Animated.Value(0)).current;
+  const quizButtonScale = useRef(new Animated.Value(1)).current;
 
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
 
@@ -316,6 +321,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
       await addLearnedWord(todaysWord);
       const favStatus = await isFavorite(todaysWord.id);
       setIsFav(favStatus);
+
+      // Award daily XP
+      const xpResult = await addXP(XP_REWARDS.DAILY_WORD);
+      setTotalXP(xpResult.totalXP);
+      setXpPopup(xpResult.newXP);
+
+      // Show XP popup
+      xpPopupAnim.setValue(1);
+      Animated.timing(xpPopupAnim, {
+        toValue: 0,
+        duration: 2000,
+        delay: 1000,
+        useNativeDriver: true,
+      }).start();
+
+      await checkAndUnlockAchievements();
     } catch (error) {
       console.error('Error loading content:', error);
     }
@@ -396,6 +417,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
     }
   };
 
+  const handleQuizPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    Animated.sequence([
+      Animated.spring(quizButtonScale, {
+        toValue: 0.92,
+        useNativeDriver: true,
+      }),
+      Animated.spring(quizButtonScale, {
+        toValue: 1,
+        friction: 3,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    if (word) {
+      setTimeout(() => onNavigateToQuiz(word), 150);
+    }
+  };
+
   if (!word) {
     return (
       <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.container}>
@@ -440,6 +481,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
             <Text style={styles.appTitle}>{t('appName')}</Text>
           </View>
           <View style={styles.headerRight}>
+            <View style={styles.xpBadgeHeader}>
+              <Text style={styles.xpIcon}>{'\u{26A1}'}</Text>
+              <Text style={styles.xpValue}>{totalXP}</Text>
+            </View>
             <View style={styles.targetLanguageBadge}>
               <Text style={styles.targetLanguageFlag}>{targetLanguageFlag}</Text>
             </View>
@@ -595,25 +640,52 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onNavigateToChat, onNavigateToJ
           </Animated.View>
         </View>
 
-        {/* Practice Button */}
-        <Animated.View style={[styles.practiceButtonWrapper, { transform: [{ scale: practiceButtonScale }] }]}>
-          <TouchableOpacity
-            onPress={handlePracticePress}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#6366F1', '#8B5CF6', '#A855F7']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.practiceButton}
-            >
-              <Animated.View style={[styles.practiceButtonGlow, { opacity: practiceGlow }]} />
-              <Text style={styles.practiceEmoji}>{'\u{1F4AC}'}</Text>
-              <Text style={styles.practiceButtonText}>{t('practiceWithAI')}</Text>
-              <Text style={styles.practiceArrow}>{'\u{1F525}'}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Animated.View>
+        {/* XP Popup */}
+        {xpPopup > 0 && (
+          <Animated.View style={[styles.xpPopup, {
+            opacity: xpPopupAnim,
+            transform: [{
+              translateY: xpPopupAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-20, 0],
+              }),
+            }],
+          }]}>
+            <Text style={styles.xpPopupText}>+{xpPopup} XP</Text>
+          </Animated.View>
+        )}
+
+        {/* Action Buttons */}
+        <View style={styles.actionButtonsRow}>
+          <Animated.View style={[styles.quizButtonWrapper, { transform: [{ scale: quizButtonScale }] }]}>
+            <TouchableOpacity onPress={handleQuizPress} activeOpacity={0.8}>
+              <LinearGradient
+                colors={['#F59E0B', '#EF4444']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.quizButton}
+              >
+                <Text style={styles.quizEmoji}>{'\u{1F9E0}'}</Text>
+                <Text style={styles.quizButtonText}>{t('testYourself')}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+
+          <Animated.View style={[styles.practiceButtonFlex, { transform: [{ scale: practiceButtonScale }] }]}>
+            <TouchableOpacity onPress={handlePracticePress} activeOpacity={0.8}>
+              <LinearGradient
+                colors={['#6366F1', '#8B5CF6', '#A855F7']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.practiceButton}
+              >
+                <Animated.View style={[styles.practiceButtonGlow, { opacity: practiceGlow }]} />
+                <Text style={styles.practiceEmoji}>{'\u{1F4AC}'}</Text>
+                <Text style={styles.practiceButtonText}>{t('practiceWithAI')}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
 
       </SafeAreaView>
 
@@ -717,6 +789,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     color: '#FFFFFF',
+  },
+
+  // XP Badge Header
+  xpBadgeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(245,158,11,0.15)',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 14,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.2)',
+  },
+  xpIcon: {
+    fontSize: 14,
+    marginRight: 4,
+  },
+  xpValue: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FBBF24',
   },
 
   // Card
@@ -971,11 +1065,54 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  // Practice Button
-  practiceButtonWrapper: {
+  // XP Popup
+  xpPopup: {
+    position: 'absolute',
+    top: 100,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(245,158,11,0.9)',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    zIndex: 100,
+  },
+  xpPopupText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  // Action Buttons
+  actionButtonsRow: {
+    flexDirection: 'row',
     paddingHorizontal: 20,
     paddingBottom: 8,
+    gap: 10,
   },
+  quizButtonWrapper: {
+    flex: 1,
+  },
+  quizButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 18,
+    paddingVertical: 18,
+  },
+  quizEmoji: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  quizButtonText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  practiceButtonFlex: {
+    flex: 1,
+  },
+
+  // Practice Button
   practiceButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1002,6 +1139,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginLeft: 10,
     fontWeight: '700',
+    display: 'none',
   },
 
   // Bottom Tab Bar

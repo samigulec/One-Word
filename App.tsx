@@ -8,13 +8,15 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import JourneyScreen from './src/screens/JourneyScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
+import QuizScreen from './src/screens/QuizScreen';
 import { ContentItem, ProficiencyLevel, UserProgress } from './src/types';
 import { LanguageCode } from './src/utils/translations';
 import { getLanguagePreferences, saveLanguagePreferences, getUserProgress, addLearnedWord } from './src/utils/storage';
+import { scheduleDailyReminder } from './src/utils/notifications';
 
 LogBox.ignoreLogs(['Non-serializable values']);
 
-type Screen = 'Loading' | 'Onboarding' | 'Home' | 'Chat' | 'Journey' | 'Settings' | 'History';
+type Screen = 'Loading' | 'Onboarding' | 'Home' | 'Chat' | 'Journey' | 'Settings' | 'History' | 'Quiz';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('Loading');
@@ -41,6 +43,7 @@ export default function App() {
       setTargetLanguage(savedPreferences.targetLanguage as LanguageCode);
       setProficiencyLevel(savedPreferences.proficiencyLevel as ProficiencyLevel);
       setCurrentScreen('Home');
+      scheduleDailyReminder(savedPreferences.nativeLanguage as LanguageCode);
     } else {
       setCurrentScreen('Onboarding');
     }
@@ -56,6 +59,7 @@ export default function App() {
     setTargetLanguage(target);
     setProficiencyLevel(level);
     setCurrentScreen('Home');
+    scheduleDailyReminder(native);
   };
 
   const navigateToChat = async (word: ContentItem) => {
@@ -84,6 +88,11 @@ export default function App() {
     setCurrentScreen('History');
   };
 
+  const navigateToQuiz = (word: ContentItem) => {
+    setSelectedWord(word);
+    setCurrentScreen('Quiz');
+  };
+
   const handleReset = () => {
     setUserProgress(null);
     setSelectedWord(null);
@@ -110,11 +119,12 @@ export default function App() {
         <OnboardingScreen onComplete={handleOnboardingComplete} />
       )}
       {currentScreen === 'Home' && (
-        <HomeScreen 
+        <HomeScreen
           onNavigateToChat={navigateToChat}
           onNavigateToJourney={navigateToJourney}
           onNavigateToSettings={navigateToSettings}
           onNavigateToHistory={navigateToHistory}
+          onNavigateToQuiz={navigateToQuiz}
           nativeLanguage={nativeLanguage}
           targetLanguage={targetLanguage}
           proficiencyLevel={proficiencyLevel}
@@ -143,9 +153,18 @@ export default function App() {
           onClose={navigateToHome}
         />
       )}
+      {currentScreen === 'Quiz' && selectedWord && (
+        <QuizScreen
+          word={selectedWord}
+          nativeLanguage={nativeLanguage}
+          targetLanguage={targetLanguage}
+          proficiencyLevel={proficiencyLevel}
+          onClose={navigateToHome}
+        />
+      )}
       {currentScreen === 'Chat' && selectedWord && (
-        <ChatScreen 
-          word={selectedWord} 
+        <ChatScreen
+          word={selectedWord}
           onNavigateBack={navigateToHome}
           nativeLanguage={nativeLanguage}
           targetLanguage={targetLanguage}

@@ -13,6 +13,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { LanguageCode, getTranslation } from '../utils/translations';
+import { getUserProgress, ACHIEVEMENT_DEFS } from '../utils/storage';
+import { Achievement } from '../types';
 
 const { width } = Dimensions.get('window');
 
@@ -21,6 +23,7 @@ type JourneyScreenProps = {
   totalWordsLearned: number;
   nativeLanguage: LanguageCode;
   onClose: () => void;
+  xp?: number;
 };
 
 interface DayNode {
@@ -32,9 +35,22 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
   currentStreak,
   totalWordsLearned,
   nativeLanguage,
-  onClose
+  onClose,
+  xp: propXp,
 }) => {
   const t = (key: Parameters<typeof getTranslation>[0]) => getTranslation(key, nativeLanguage);
+
+  const [userXP, setUserXP] = React.useState(propXp || 0);
+  const [unlockedAchievements, setUnlockedAchievements] = React.useState<Achievement[]>([]);
+
+  React.useEffect(() => {
+    const load = async () => {
+      const progress = await getUserProgress();
+      setUserXP(progress.xp || 0);
+      setUnlockedAchievements(progress.achievements || []);
+    };
+    load();
+  }, []);
 
   const generateNodes = (): DayNode[] => {
     const nodes: DayNode[] = [];
@@ -252,12 +268,12 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
           </Animated.View>
           <Animated.View style={{ transform: [{ translateY: statSlide3 }] }}>
             <LinearGradient
-              colors={['rgba(16,185,129,0.15)', 'rgba(5,150,105,0.15)']}
+              colors={['rgba(245,158,11,0.15)', 'rgba(245,158,11,0.05)']}
               style={styles.statCard}
             >
-              <Text style={styles.statEmoji}>{'\u{1F4C5}'}</Text>
-              <Text style={styles.statValue}>{Math.floor(currentStreak / 7)}</Text>
-              <Text style={styles.statLabel}>{t('weeks')}</Text>
+              <Text style={styles.statEmoji}>{'\u{26A1}'}</Text>
+              <Text style={styles.statValue}>{userXP}</Text>
+              <Text style={styles.statLabel}>XP</Text>
             </LinearGradient>
           </Animated.View>
         </Animated.View>
@@ -273,6 +289,28 @@ const JourneyScreen: React.FC<JourneyScreenProps> = ({
 
             <View style={styles.pathContainer}>
               {nodes.map((node, index) => renderNode(node, index))}
+            </View>
+
+            {/* Achievements */}
+            <Text style={styles.achievementsTitle}>{'\u{1F3C5}'} {t('achievements')}</Text>
+            <View style={styles.achievementsGrid}>
+              {ACHIEVEMENT_DEFS.map((def) => {
+                const unlocked = unlockedAchievements.some(a => a.id === def.id);
+                const achKey = `ach_${def.id}` as Parameters<typeof getTranslation>[0];
+                return (
+                  <View
+                    key={def.id}
+                    style={[styles.achievementCard, !unlocked && styles.achievementLocked]}
+                  >
+                    <Text style={[styles.achievementEmoji, !unlocked && { opacity: 0.3 }]}>
+                      {def.emoji}
+                    </Text>
+                    <Text style={[styles.achievementLabel, !unlocked && { color: 'rgba(255,255,255,0.2)' }]}>
+                      {t(achKey)}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
 
             {/* Bottom Motivation */}
@@ -514,6 +552,45 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: '#A78BFA',
+  },
+
+  // Achievements
+  achievementsTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 32,
+    marginBottom: 16,
+  },
+  achievementsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  achievementCard: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 14,
+    padding: 12,
+    alignItems: 'center',
+    width: (width - 80) / 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.2)',
+  },
+  achievementLocked: {
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  achievementEmoji: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  achievementLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.7)',
+    textAlign: 'center',
   },
 
   // Motivation

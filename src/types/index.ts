@@ -24,6 +24,11 @@ export interface LearnedWord {
   isFavorite: boolean;
 }
 
+export interface Achievement {
+  id: string;
+  unlockedAt: string; // ISO date
+}
+
 export interface UserProgress {
   lastViewedDate: string;
   viewedIdiomIds: number[];
@@ -31,6 +36,10 @@ export interface UserProgress {
   totalIdiomsLearned: number;
   learnedWords: LearnedWord[];
   favorites: string[]; // word IDs
+  xp: number;
+  quizCorrect: number;
+  quizTotal: number;
+  achievements: Achievement[];
 }
 
 export type ProficiencyLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';

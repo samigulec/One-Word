@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserProgress, LanguagePreferences, ContentItem, LearnedWord } from '../types';
+import { UserProgress, LanguagePreferences, ContentItem, LearnedWord, Achievement } from '../types';
 
 const STORAGE_KEYS = {
   USER_PROGRESS: '@daily_idiom_progress',
@@ -13,6 +13,10 @@ const defaultProgress: UserProgress = {
   totalIdiomsLearned: 0,
   learnedWords: [],
   favorites: [],
+  xp: 0,
+  quizCorrect: 0,
+  quizTotal: 0,
+  achievements: [],
 };
 
 // ─── Progress ────────────────────────────────────────────
@@ -147,6 +151,92 @@ export const saveLanguagePreferences = async (preferences: LanguagePreferences):
   } catch (error) {
     console.error('Error saving preferences:', error);
   }
+};
+
+// ─── XP System ──────────────────────────────────────────
+
+export const XP_REWARDS = {
+  DAILY_WORD: 10,
+  QUIZ_CORRECT: 20,
+  QUIZ_WRONG: 5,
+  STREAK_BONUS_MULTIPLIER: 0.1, // 10% bonus per streak day, max 100%
+};
+
+export const addXP = async (baseXP: number): Promise<{ newXP: number; totalXP: number }> => {
+  const progress = await getUserProgress();
+  const streakBonus = Math.min(progress.streak * XP_REWARDS.STREAK_BONUS_MULTIPLIER, 1);
+  const newXP = Math.round(baseXP * (1 + streakBonus));
+  const totalXP = (progress.xp || 0) + newXP;
+
+  await saveUserProgress({ ...progress, xp: totalXP });
+  return { newXP, totalXP };
+};
+
+export const recordQuizResult = async (correct: boolean): Promise<UserProgress> => {
+  const progress = await getUserProgress();
+  const xpEarned = correct ? XP_REWARDS.QUIZ_CORRECT : XP_REWARDS.QUIZ_WRONG;
+  const streakBonus = Math.min(progress.streak * XP_REWARDS.STREAK_BONUS_MULTIPLIER, 1);
+  const newXP = Math.round(xpEarned * (1 + streakBonus));
+
+  const updated: UserProgress = {
+    ...progress,
+    xp: (progress.xp || 0) + newXP,
+    quizCorrect: (progress.quizCorrect || 0) + (correct ? 1 : 0),
+    quizTotal: (progress.quizTotal || 0) + 1,
+  };
+
+  await saveUserProgress(updated);
+  return updated;
+};
+
+// ─── Achievements ───────────────────────────────────────
+
+export interface AchievementDef {
+  id: string;
+  emoji: string;
+  check: (progress: UserProgress) => boolean;
+}
+
+export const ACHIEVEMENT_DEFS: AchievementDef[] = [
+  { id: 'first_word', emoji: '\u{1F331}', check: (p) => p.totalIdiomsLearned >= 1 },
+  { id: 'streak_3', emoji: '\u{1F525}', check: (p) => p.streak >= 3 },
+  { id: 'streak_7', emoji: '\u2B50', check: (p) => p.streak >= 7 },
+  { id: 'streak_14', emoji: '\u{1F31F}', check: (p) => p.streak >= 14 },
+  { id: 'streak_30', emoji: '\u{1F3C6}', check: (p) => p.streak >= 30 },
+  { id: 'streak_100', emoji: '\u{1F451}', check: (p) => p.streak >= 100 },
+  { id: 'words_10', emoji: '\u{1F4DA}', check: (p) => p.totalIdiomsLearned >= 10 },
+  { id: 'words_25', emoji: '\u{1F4D6}', check: (p) => p.totalIdiomsLearned >= 25 },
+  { id: 'words_50', emoji: '\u{1F393}', check: (p) => p.totalIdiomsLearned >= 50 },
+  { id: 'words_100', emoji: '\u{1F48E}', check: (p) => p.totalIdiomsLearned >= 100 },
+  { id: 'quiz_5', emoji: '\u{1F9E0}', check: (p) => (p.quizCorrect || 0) >= 5 },
+  { id: 'quiz_25', emoji: '\u{1F3AF}', check: (p) => (p.quizCorrect || 0) >= 25 },
+  { id: 'quiz_perfect_10', emoji: '\u{1F947}', check: (p) => (p.quizCorrect || 0) >= 10 && (p.quizTotal || 0) > 0 && (p.quizCorrect || 0) / (p.quizTotal || 1) >= 0.9 },
+  { id: 'xp_100', emoji: '\u{1F4B0}', check: (p) => (p.xp || 0) >= 100 },
+  { id: 'xp_500', emoji: '\u{1F48E}', check: (p) => (p.xp || 0) >= 500 },
+  { id: 'xp_1000', emoji: '\u{1F680}', check: (p) => (p.xp || 0) >= 1000 },
+  { id: 'favorites_5', emoji: '\u2764\uFE0F', check: (p) => (p.favorites || []).length >= 5 },
+];
+
+export const checkAndUnlockAchievements = async (): Promise<Achievement[]> => {
+  const progress = await getUserProgress();
+  const existing = (progress.achievements || []).map(a => a.id);
+  const newAchievements: Achievement[] = [];
+  const today = new Date().toISOString().split('T')[0];
+
+  for (const def of ACHIEVEMENT_DEFS) {
+    if (!existing.includes(def.id) && def.check(progress)) {
+      newAchievements.push({ id: def.id, unlockedAt: today });
+    }
+  }
+
+  if (newAchievements.length > 0) {
+    await saveUserProgress({
+      ...progress,
+      achievements: [...(progress.achievements || []), ...newAchievements],
+    });
+  }
+
+  return newAchievements;
 };
 
 // ─── Reset ───────────────────────────────────────────────
