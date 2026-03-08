@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "One Word",
+    "slug": "oneword",
+    "version": "1.4.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8FAFC"
+    },
+    "description": "Learn a new language daily - free AI practice, no ads, no limits. 11 languages supported.",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bikelime.app",
+      "infoPlist": {
+        "CFBundleDisplayName": "One Word - Learn Languages"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F8FAFC"
+      },
+      "package": "com.bikelime.app",
+      "versionCode": 5
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "daf7e953-1082-44a7-88c5-3e72c4cea9d5"
+      }
+    }
+  }
+}
