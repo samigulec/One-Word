@@ -112,13 +112,14 @@ export const updateDailyStreak = async (idiomId: number): Promise<UserProgress> 
 
 // ─── Learned Words ───────────────────────────────────────
 
-export const addLearnedWord = async (word: ContentItem): Promise<void> => {
+// Kelimeyi ogrenilmis olarak kaydet. Yeni eklendiyse true, zaten varsa false doner.
+export const addLearnedWord = async (word: ContentItem): Promise<boolean> => {
   const progress = await getUserProgress();
   const today = new Date().toISOString().split('T')[0];
 
   // Kelime zaten varsa tekrar ekleme
   const exists = progress.learnedWords?.some(w => w.word.id === word.id);
-  if (exists) return;
+  if (exists) return false;
 
   const learnedWord: LearnedWord = {
     word,
@@ -135,6 +136,7 @@ export const addLearnedWord = async (word: ContentItem): Promise<void> => {
 
   // Kelime ogrenildiginde SRS kaydini da baslat
   await initSRSForWord(word.id);
+  return true;
 };
 
 export const getLearnedWords = async (): Promise<LearnedWord[]> => {
@@ -343,7 +345,7 @@ export const saveNotificationSettings = async (settings: NotificationSettings): 
 
 // ─── XP Sistemi (Genisletilmis) ─────────────────────────
 
-import { XP_VALUES, DAILY_LIMITS, getLevelForXP, calculateStreakBonus } from './xp';
+import { XP_VALUES, DAILY_LIMITS, getLevelForXP, getLevelProgress, calculateStreakBonus } from './xp';
 import { LevelInfo } from '../types';
 
 // XP kazan ve kaydet -- seviye, gunluk hedef, spam onleme dahil
@@ -486,7 +488,6 @@ export const getDailyXPStatus = async (): Promise<{
   const totalXP = progress.totalXP || 0;
 
   const levelInfo = getLevelForXP(totalXP);
-  const { getLevelProgress } = require('./xp');
   const levelProgress = getLevelProgress(totalXP);
 
   // Haftalik toplam XP

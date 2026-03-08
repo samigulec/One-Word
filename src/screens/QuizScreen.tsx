@@ -604,10 +604,10 @@ const matchStyles = StyleSheet.create({
 // Soru tipi gostergesi
 const QuestionTypeBadge: React.FC<{ type: string; t: (key: any) => string }> = ({ type, t }) => {
   const config: Record<string, { emoji: string; label: string; color: string }> = {
-    multiple_choice: { emoji: '\u{1F4DD}', label: 'Quiz', color: '#6366F1' },
+    multiple_choice: { emoji: '\u{1F4DD}', label: t('quiz'), color: '#6366F1' },
     flashcard: { emoji: '\u{1F0CF}', label: 'Flashcard', color: '#8B5CF6' },
-    type_answer: { emoji: '\u{2328}\u{FE0F}', label: 'Yaz', color: '#3B82F6' },
-    matching: { emoji: '\u{1F517}', label: 'Esle', color: '#10B981' },
+    type_answer: { emoji: '\u{2328}\u{FE0F}', label: t('quizWrite'), color: '#3B82F6' },
+    matching: { emoji: '\u{1F517}', label: t('quizMatch'), color: '#10B981' },
   };
   const c = config[type] || config.multiple_choice;
 
@@ -687,8 +687,8 @@ const QuizScreen: React.FC<QuizScreenProps> = ({ nativeLanguage, targetLanguage,
     const newResults = [...results, result];
     setResults(newResults);
 
-    // SRS guncelle
-    const confidence = isCorrect ? 4 : 2;
+    // SRS guncelle -- yanlis cevap quality=1, dogru cevap quality=4
+    const confidence = isCorrect ? 4 : 1;
     await updateWordSRS(question.word.id, confidence);
 
     // Dogru cevap icin XP

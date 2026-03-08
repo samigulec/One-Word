@@ -66,6 +66,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigateToReview, onNavigateToQuiz,
   onNavigateToPractice, onNavigateToLeaderboard,
   nativeLanguage, targetLanguage, proficiencyLevel,
+  calmMode,
 }) => {
   // Ana state'ler
   const [word, setWord] = useState<ContentItem | null>(null);
@@ -194,18 +195,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const idHash = parseInt(todaysWord.id.replace(/\D/g, '')) || 1;
       const updatedProgress = await updateDailyStreak(idHash);
       setProgress(updatedProgress);
-      await addLearnedWord(todaysWord);
+      // Kelimeyi ogrenilmis olarak kaydet -- sadece yeni eklendiyse XP ver
+      const isNewWord = await addLearnedWord(todaysWord);
       const favStatus = await isFavorite(todaysWord.id);
       setIsFav(favStatus);
-      await addXP('word_learned');
-      await completeDailyTask('learn_word');
+      if (isNewWord) {
+        // XP ekle ve level atlama kontrolu yap
+        const wordXPResult = await addXP('word_learned');
+        if (wordXPResult.leveledUp && wordXPResult.newLevel) {
+          triggerLevelUpAnimation(wordXPResult.newLevel);
+        }
+        if (wordXPResult.gained > 0) triggerFloatingXP(wordXPResult.gained);
+        await completeDailyTask('learn_word');
+      }
       await loadXPStatus();
       // Haftalik zorluk: kelime ogrenme hedefini guncelle
       const wcResult = await updateWeeklyChallengeGoal('learn_words');
       if (wcResult.justCompleted) {
         const bonus = await claimWeeklyChallengeBonus();
         if (bonus > 0) {
-          await addXP('daily_goal_reached', bonus);
+          // Bonus XP ekle ve level atlama kontrolu yap
+          const bonusXPResult = await addXP('daily_goal_reached', bonus);
+          if (bonusXPResult.leveledUp && bonusXPResult.newLevel) {
+            triggerLevelUpAnimation(bonusXPResult.newLevel);
+          }
           triggerFloatingXP(bonus);
           await loadXPStatus();
         }
@@ -240,6 +253,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     setIsFav(newFav);
     if (newFav) {
       const result = await addXP('favorite_added');
+      if (result.leveledUp && result.newLevel) triggerLevelUpAnimation(result.newLevel);
       if (result.gained > 0) triggerFloatingXP(result.gained);
       await loadXPStatus();
     }
@@ -260,6 +274,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           mimeType: 'image/png', dialogTitle: 'Share Word',
         });
         const result = await addXP('word_shared');
+        if (result.leveledUp && result.newLevel) triggerLevelUpAnimation(result.newLevel);
         if (result.gained > 0) triggerFloatingXP(result.gained);
         await loadXPStatus();
       } else {
@@ -278,6 +293,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     if (!showMeaning) {
       setShowMeaning(true);
       addXP('meaning_revealed').then(result => {
+        if (result.leveledUp && result.newLevel) triggerLevelUpAnimation(result.newLevel);
         if (result.gained > 0) triggerFloatingXP(result.gained);
         loadXPStatus();
       });
@@ -335,7 +351,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             ) : (
               <View style={styles.emptyTabContent}>
                 <Text style={styles.emptyTabEmoji}>{'\u{1F4D6}'}</Text>
-                <Text style={styles.emptyTabText}>Bu kelime icin henuz ornek yok</Text>
+                <Text style={styles.emptyTabText}>{t('noExamplesYet')}</Text>
               </View>
             )}
           </Animated.View>
@@ -348,7 +364,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             ) : (
               <View style={styles.emptyTabContent}>
                 <Text style={styles.emptyTabEmoji}>{'\u{1F4DD}'}</Text>
-                <Text style={styles.emptyTabText}>Bu kelime icin dilbilgisi notu yok</Text>
+                <Text style={styles.emptyTabText}>{t('noGrammarYet')}</Text>
               </View>
             )}
           </Animated.View>
@@ -367,52 +383,57 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         >
           {/* ── Kompakt Header: Greeting + Gamification Bar ── */}
           <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-            <Text style={styles.greeting}>{getGreeting()}</Text>
+            <Text style={styles.greeting} accessibilityRole="header">{getGreeting()}</Text>
           </Animated.View>
 
-          {/* Gamification Bar -- tek satirda streak, seviye, ilerleme, XP */}
-          <TouchableOpacity
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToLeaderboard(); }}
-            activeOpacity={0.7}
-            style={styles.gamificationBar}
-          >
-            <View style={styles.gamBarLeft}>
-              {/* Streak */}
-              <View style={styles.gamBarItem}>
-                <Text style={styles.gamBarEmoji}>{'\u{1F525}'}</Text>
-                <Text style={styles.gamBarValue}>{progress?.streak || 0}</Text>
-              </View>
+          {/* Gamification Bar -- calmMode aktifken gizlenir */}
+          {!calmMode && (
+            <TouchableOpacity
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToLeaderboard(); }}
+              activeOpacity={0.7}
+              style={styles.gamificationBar}
+              accessibilityRole="button"
+              accessibilityLabel={`Streak ${progress?.streak || 0} days, Level ${levelInfo?.level || 1}, ${totalXP} XP`}
+              accessibilityHint="Opens the leaderboard"
+            >
+              <View style={styles.gamBarLeft}>
+                {/* Streak */}
+                <View style={styles.gamBarItem}>
+                  <Text style={styles.gamBarEmoji}>{'\u{1F525}'}</Text>
+                  <Text style={styles.gamBarValue}>{progress?.streak || 0}</Text>
+                </View>
 
-              {/* Seviye + ilerleme cubugu */}
-              <View style={styles.gamBarLevel}>
-                <Text style={styles.gamBarLevelText}>
-                  {levelInfo?.emoji || '\u{1F331}'} Lv.{levelInfo?.level || 1}
-                </Text>
-                <View style={styles.gamBarProgressBg}>
-                  <Animated.View
-                    style={[
-                      styles.gamBarProgressFill,
-                      {
-                        width: levelProgressWidth.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0%', '100%'],
-                        }),
-                      },
-                    ]}
-                  />
+                {/* Seviye + ilerleme cubugu */}
+                <View style={styles.gamBarLevel}>
+                  <Text style={styles.gamBarLevelText}>
+                    {levelInfo?.emoji || '\u{1F331}'} {t('levelPrefix')}{levelInfo?.level || 1}
+                  </Text>
+                  <View style={styles.gamBarProgressBg}>
+                    <Animated.View
+                      style={[
+                        styles.gamBarProgressFill,
+                        {
+                          width: levelProgressWidth.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0%', '100%'],
+                          }),
+                        },
+                      ]}
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
 
-            {/* Toplam XP */}
-            <View style={styles.gamBarXP}>
-              <Text style={styles.gamBarXPValue}>{totalXP.toLocaleString()}</Text>
-              <Text style={styles.gamBarXPLabel}>XP</Text>
-            </View>
-          </TouchableOpacity>
+              {/* Toplam XP */}
+              <View style={styles.gamBarXP}>
+                <Text style={styles.gamBarXPValue}>{totalXP.toLocaleString()}</Text>
+                <Text style={styles.gamBarXPLabel}>XP</Text>
+              </View>
+            </TouchableOpacity>
+          )}
 
-          {/* Floating XP Animasyonlari */}
-          {floatingXPs.map(floatingXP => (
+          {/* Floating XP Animasyonlari -- calmMode aktifken gizlenir */}
+          {!calmMode && floatingXPs.map(floatingXP => (
             <Animated.View
               key={floatingXP.id}
               style={[
@@ -439,7 +460,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 <Text style={styles.wordEmoji}>{word.emoji || getCategoryIcon(word.category)}</Text>
 
                 {/* Kelime */}
-                <Text style={styles.wordText}>{word.target_word}</Text>
+                <Text style={styles.wordText} accessibilityRole="header" accessibilityLabel={`Word of the day: ${word.target_word}`}>{word.target_word}</Text>
 
                 {/* Telaffuz */}
                 {word.pronunciation && (
@@ -448,13 +469,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
                 {/* Aksiyon butonlari */}
                 <View style={styles.actionRow}>
-                  <TouchableOpacity onPress={handleSpeak} style={styles.actionBtn} activeOpacity={0.7}>
+                  <TouchableOpacity onPress={handleSpeak} style={styles.actionBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Listen to pronunciation" accessibilityHint="Plays the word audio">
                     <Text style={styles.actionBtnIcon}>{'\u{1F50A}'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleToggleFavorite} style={styles.actionBtn} activeOpacity={0.7}>
+                  <TouchableOpacity onPress={handleToggleFavorite} style={styles.actionBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={isFav ? "Remove from favorites" : "Add to favorites"} accessibilityHint="Toggles favorite status" accessibilityState={{ selected: isFav }}>
                     <Text style={styles.actionBtnIcon}>{isFav ? '\u2764\uFE0F' : '\u{1F90D}'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleShare} style={styles.actionBtn} activeOpacity={0.7} disabled={isSharing}>
+                  <TouchableOpacity onPress={handleShare} style={styles.actionBtn} activeOpacity={0.7} disabled={isSharing} accessibilityRole="button" accessibilityLabel="Share this word" accessibilityHint="Opens the share dialog" accessibilityState={{ disabled: isSharing }}>
                     <Text style={styles.actionBtnIcon}>{isSharing ? '\u23F3' : '\u{1F4E4}'}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -464,13 +485,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                     }}
                     style={styles.actionBtn}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="Cultural context"
+                    accessibilityHint="Shows cultural background information"
                   >
                     <Text style={styles.actionBtnIcon}>{'\u{1F4A1}'}</Text>
                   </TouchableOpacity>
                 </View>
 
                 {/* Anlamini Gor butonu */}
-                <TouchableOpacity onPress={handleMeaningPress} activeOpacity={0.7} style={styles.meaningToggleBtn}>
+                <TouchableOpacity onPress={handleMeaningPress} activeOpacity={0.7} style={styles.meaningToggleBtn} accessibilityRole="button" accessibilityLabel={showMeaning ? "Hide meaning" : "Show meaning"} accessibilityHint={showMeaning ? "Hides the word meaning and examples" : "Reveals the word meaning and examples"} accessibilityState={{ expanded: showMeaning }}>
                   <LinearGradient
                     colors={showMeaning ? ['rgba(110,231,183,0.15)', 'rgba(52,211,153,0.1)'] : ['rgba(167,139,250,0.15)', 'rgba(99,102,241,0.1)']}
                     style={styles.meaningToggleBtnInner}
@@ -489,25 +513,34 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                       <TouchableOpacity
                         style={[styles.wordCardTabItem, activeWordTab === 'meaning' && styles.wordCardTabItemActive]}
                         onPress={() => setActiveWordTab('meaning')}
+                        accessibilityRole="tab"
+                        accessibilityLabel="Meaning"
+                        accessibilityState={{ selected: activeWordTab === 'meaning' }}
                       >
                         <Text style={[styles.wordCardTabText, activeWordTab === 'meaning' && styles.wordCardTabTextActive]}>
-                          Anlam
+                          {t('tabMeaning')}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.wordCardTabItem, activeWordTab === 'example' && styles.wordCardTabItemActive]}
                         onPress={() => setActiveWordTab('example')}
+                        accessibilityRole="tab"
+                        accessibilityLabel="Examples"
+                        accessibilityState={{ selected: activeWordTab === 'example' }}
                       >
                         <Text style={[styles.wordCardTabText, activeWordTab === 'example' && styles.wordCardTabTextActive]}>
-                          Ornek
+                          {t('tabExample')}
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.wordCardTabItem, activeWordTab === 'grammar' && styles.wordCardTabItemActive]}
                         onPress={() => setActiveWordTab('grammar')}
+                        accessibilityRole="tab"
+                        accessibilityLabel="Grammar"
+                        accessibilityState={{ selected: activeWordTab === 'grammar' }}
                       >
                         <Text style={[styles.wordCardTabText, activeWordTab === 'grammar' && styles.wordCardTabTextActive]}>
-                          Gramer
+                          {t('tabGrammar')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -531,6 +564,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               }}
               activeOpacity={0.8}
               style={styles.primaryActionBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Practice"
+              accessibilityHint="Opens AI practice session with this word"
             >
               <LinearGradient
                 colors={['#6366F1', '#8B5CF6']}
@@ -538,7 +574,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 end={{ x: 1, y: 0 }}
                 style={styles.primaryActionBtnInner}
               >
-                <Text style={styles.primaryActionBtnText}>{'\u{1F4AC}'} Pratik Yap</Text>
+                <Text style={styles.primaryActionBtnText}>{'\u{1F4AC}'} {t('practiceNow')}</Text>
               </LinearGradient>
             </TouchableOpacity>
 
@@ -550,6 +586,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               }}
               activeOpacity={0.8}
               style={styles.primaryActionBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Start Quiz"
+              accessibilityHint="Opens a vocabulary quiz"
             >
               <LinearGradient
                 colors={['#F59E0B', '#EF4444']}
@@ -570,6 +609,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 }}
                 style={styles.reviewBtn}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={`${dueCount} words to review`}
+                accessibilityHint="Opens the review session"
               >
                 <Text style={styles.reviewBtnText}>
                   {'\u{1F504}'} {dueCount} {t('wordsToReview')} {'\u203A'}
@@ -596,21 +638,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Alt Navigasyon Cubugu -- 4 tab: Home | Quests | History | Profile */}
       <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tab} onPress={() => {}}>
+        <TouchableOpacity style={styles.tab} onPress={() => {}} accessibilityRole="tab" accessibilityLabel="Home" accessibilityState={{ selected: true }}>
           <Text style={styles.tabIcon}>{'\u{1F3E0}'}</Text>
           <Text style={styles.tabLabelActive}>{t('tabHome')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToQuests(); }}>
+        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToQuests(); }} accessibilityRole="tab" accessibilityLabel="Quests" accessibilityState={{ selected: false }} accessibilityHint="Opens quests and daily tasks">
           <Text style={styles.tabIcon}>{'\u{1F3AF}'}</Text>
-          <Text style={styles.tabLabel}>Quests</Text>
+          <Text style={styles.tabLabel}>{t('tabQuests')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }}>
+        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }} accessibilityRole="tab" accessibilityLabel="History" accessibilityState={{ selected: false }} accessibilityHint="Opens word history">
           <Text style={styles.tabIcon}>{'\u{1F4DA}'}</Text>
           <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToProfile(); }}>
+        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToProfile(); }} accessibilityRole="tab" accessibilityLabel="Profile" accessibilityState={{ selected: false }} accessibilityHint="Opens profile and settings">
           <Text style={styles.tabIcon}>{'\u{1F464}'}</Text>
-          <Text style={styles.tabLabel}>Profil</Text>
+          <Text style={styles.tabLabel}>{t('tabProfile')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -621,8 +663,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         onClose={() => setShowCulturalContext(false)}
       />
 
-      {/* Level Up Overlay */}
-      {showLevelUp && levelInfo && (
+      {/* Level Up Overlay -- calmMode aktifken gizlenir */}
+      {!calmMode && showLevelUp && levelInfo && (
         <Animated.View style={[styles.levelUpOverlay, { opacity: levelUpOpacity }]}>
           <Animated.View style={[styles.levelUpCard, { transform: [{ scale: levelUpScale }] }]}>
             <LinearGradient
@@ -630,8 +672,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               style={styles.levelUpContent}
             >
               <Text style={styles.levelUpEmoji}>{levelInfo.emoji}</Text>
-              <Text style={styles.levelUpTitle}>Seviye Atladin!</Text>
-              <Text style={styles.levelUpLevel}>Seviye {levelInfo.level}</Text>
+              <Text style={styles.levelUpTitle} accessibilityRole="header">{t('levelUp')}</Text>
+              <Text style={styles.levelUpLevel}>{t('levelPrefix')}{levelInfo.level}</Text>
               <Text style={styles.levelUpName}>{levelInfo.title}</Text>
             </LinearGradient>
           </Animated.View>

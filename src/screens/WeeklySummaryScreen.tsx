@@ -14,10 +14,12 @@ import Svg, { Polygon, Line, Circle, Text as SvgText } from 'react-native-svg';
 import { LearnedWord, UserProgress } from '../types';
 import { getUserProgress, getEarnedBadges, getQuizCount } from '../utils/storage';
 import { loadContentForLanguage } from '../utils/contentLoader';
+import { LanguageCode, getTranslation as getUITranslation } from '../utils/translations';
 
 type WeeklySummaryScreenProps = {
   onClose: () => void;
   targetLanguage?: string;
+  nativeLanguage?: LanguageCode;
 };
 
 // Kategori bilgi haritasi verisi
@@ -73,7 +75,8 @@ const RADAR_CENTER = RADAR_SIZE / 2;
 const RADAR_RADIUS = 80;
 const RADAR_LEVELS = 4;
 
-const WeeklySummaryScreen: React.FC<WeeklySummaryScreenProps> = ({ onClose, targetLanguage }) => {
+const WeeklySummaryScreen: React.FC<WeeklySummaryScreenProps> = ({ onClose, targetLanguage, nativeLanguage = 'en' }) => {
+  const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [badgeCount, setBadgeCount] = useState(0);
   const [quizCount, setQuizCount] = useState(0);
@@ -245,7 +248,7 @@ const WeeklySummaryScreen: React.FC<WeeklySummaryScreenProps> = ({ onClose, targ
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{'\u{1F4CA}'} Haftalik Ozet</Text>
+          <Text style={styles.headerTitle}>{'\u{1F4CA}'} {t('weeklySummary')}</Text>
           <View style={styles.placeholder} />
         </View>
 
@@ -257,30 +260,30 @@ const WeeklySummaryScreen: React.FC<WeeklySummaryScreenProps> = ({ onClose, targ
               <View style={styles.statCard}>
                 <Text style={styles.statEmoji}>{'\u{1F4D6}'}</Text>
                 <Text style={styles.statValue}>{thisWeekTotal}</Text>
-                <Text style={styles.statLabel}>Kelime</Text>
+                <Text style={styles.statLabel}>{t('wordLabel')}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statEmoji}>{'\u{1F525}'}</Text>
                 <Text style={styles.statValue}>{progress?.streak || 0}</Text>
-                <Text style={styles.statLabel}>Gun Serisi</Text>
+                <Text style={styles.statLabel}>{t('dayStreakLabel')}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statEmoji}>{'\u{1F3C6}'}</Text>
                 <Text style={styles.statValue}>{badgeCount}</Text>
-                <Text style={styles.statLabel}>Rozet</Text>
+                <Text style={styles.statLabel}>{t('badgeLabel')}</Text>
               </View>
             </View>
 
             {/* Onceki hafta karsilastirma */}
             <View style={styles.compareCard}>
-              <Text style={styles.compareLabel}>Onceki haftaya gore</Text>
+              <Text style={styles.compareLabel}>{t('comparedToPrevWeek')}</Text>
               <Text style={[styles.compareValue, { color: isUp ? '#34D399' : '#F87171' }]}>
                 {isUp ? '\u2191' : '\u2193'} {Math.abs(changePercent)}%
               </Text>
             </View>
 
             {/* Gunluk grafik */}
-            <Text style={styles.sectionTitle}>Gunluk Ogrenme</Text>
+            <Text style={styles.sectionTitle}>{t('dailyLearning')}</Text>
             <View style={styles.chartContainer}>
               <View style={styles.chartBars}>
                 {weeklyWords.map((count, i) => (
@@ -311,7 +314,7 @@ const WeeklySummaryScreen: React.FC<WeeklySummaryScreenProps> = ({ onClose, targ
             {/* En Cok Ogrenilen Kategoriler */}
             {topCategories.length > 0 && (
               <>
-                <Text style={styles.sectionTitle}>En Cok Ogrenilen Kategoriler</Text>
+                <Text style={styles.sectionTitle}>{t('topCategories')}</Text>
                 <View style={styles.categoriesCard}>
                   {topCategories.map((cat, i) => (
                     <View key={cat.name} style={styles.categoryRow}>
@@ -346,7 +349,7 @@ const WeeklySummaryScreen: React.FC<WeeklySummaryScreenProps> = ({ onClose, targ
             {/* Bilgi Haritasi -- Radar Chart */}
             {knowledgeMap.length >= 3 && (
               <>
-                <Text style={styles.sectionTitle}>{'\u{1F5FA}\u{FE0F}'} Bilgi Haritasi</Text>
+                <Text style={styles.sectionTitle}>{'\u{1F5FA}\u{FE0F}'} {t('knowledgeMap')}</Text>
                 <View style={styles.radarCard}>
                   <View style={styles.radarContainer}>
                     <Svg width={RADAR_SIZE} height={RADAR_SIZE}>
@@ -440,20 +443,20 @@ const WeeklySummaryScreen: React.FC<WeeklySummaryScreenProps> = ({ onClose, targ
             )}
 
             {/* Genel Istatistikler */}
-            <Text style={styles.sectionTitle}>Genel</Text>
+            <Text style={styles.sectionTitle}>{t('general')}</Text>
             <View style={styles.generalCard}>
               <View style={styles.generalRow}>
-                <Text style={styles.generalLabel}>Toplam Kelime</Text>
+                <Text style={styles.generalLabel}>{t('totalWords')}</Text>
                 <Text style={styles.generalValue}>{(progress?.learnedWords || []).length}</Text>
               </View>
               <View style={styles.generalDivider} />
               <View style={styles.generalRow}>
-                <Text style={styles.generalLabel}>Tamamlanan Quiz</Text>
+                <Text style={styles.generalLabel}>{t('completedQuizzes')}</Text>
                 <Text style={styles.generalValue}>{quizCount}</Text>
               </View>
               <View style={styles.generalDivider} />
               <View style={styles.generalRow}>
-                <Text style={styles.generalLabel}>Favori Kelimeler</Text>
+                <Text style={styles.generalLabel}>{t('favoriteWords')}</Text>
                 <Text style={styles.generalValue}>{(progress?.favorites || []).length}</Text>
               </View>
             </View>

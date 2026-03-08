@@ -30,6 +30,8 @@ export const DAILY_LIMITS: Partial<Record<XPActionType, number>> = {
 };
 
 // 50 seviyeli level sistemi
+// TODO: Seviye isimleri su an Turkce hardcoded. Ileride ceviri sistemine tasinmali.
+// Level titles are currently hardcoded in Turkish. Should be moved to translation system in the future.
 export const LEVELS: LevelInfo[] = [
   { level: 1,  title: 'Merakli',        emoji: '\u{1F331}', minXP: 0,     maxXP: 50 },
   { level: 2,  title: 'Baslangic',      emoji: '\u{1F33F}', minXP: 50,    maxXP: 120 },

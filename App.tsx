@@ -65,6 +65,8 @@ type Screen =
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('Loading');
   const [selectedWord, setSelectedWord] = useState<ContentItem | null>(null);
+  // Secilen senaryo ID'si (cafe, travel, shopping, vb.)
+  const [selectedScenario, setSelectedScenario] = useState<string | undefined>(undefined);
   const [nativeLanguage, setNativeLanguage] = useState<LanguageCode>('en');
   const [targetLanguage, setTargetLanguage] = useState<LanguageCode>('es');
   const [proficiencyLevel, setProficiencyLevel] = useState<ProficiencyLevel>('A1');
@@ -155,9 +157,11 @@ function App() {
   }, []);
 
   // Navigasyon fonksiyonlari
-  const navigateToChat = async (word: ContentItem) => {
+  // Senaryo secimi ile chat ekranina gecis
+  const navigateToChat = async (word: ContentItem, scenarioId?: string) => {
     await addLearnedWord(word);
     setSelectedWord(word);
+    setSelectedScenario(scenarioId);
     setCurrentScreen('Chat');
     await checkAndAwardBadges();
   };
@@ -165,6 +169,7 @@ function App() {
   const navigateToHome = () => {
     setCurrentScreen('Home');
     setSelectedWord(null);
+    setSelectedScenario(undefined);
     loadUserProgress();
     checkAndAwardBadges();
   };
@@ -290,10 +295,10 @@ function App() {
         />
       )}
       {currentScreen === 'WeeklySummary' && (
-        <WeeklySummaryScreen onClose={navigateToHome} targetLanguage={targetLanguage} />
+        <WeeklySummaryScreen onClose={navigateToHome} targetLanguage={targetLanguage} nativeLanguage={nativeLanguage} />
       )}
       {currentScreen === 'Leaderboard' && (
-        <LeaderboardScreen onClose={navigateToHome} />
+        <LeaderboardScreen onClose={navigateToHome} nativeLanguage={nativeLanguage} />
       )}
       {currentScreen === 'Chat' && selectedWord && (
         <ChatScreen
@@ -301,6 +306,7 @@ function App() {
           onNavigateBack={navigateToHome}
           nativeLanguage={nativeLanguage}
           targetLanguage={targetLanguage}
+          scenario={selectedScenario}
         />
       )}
 

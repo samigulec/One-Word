@@ -690,7 +690,9 @@ const getSimulatedResponse = (
   word: ContentItem,
   conversationHistory: ChatMessage[],
   nativeLanguage: LanguageCode,
-  meaning: string
+  meaning: string,
+  // Aktif senaryo ID'si -- senaryo baglaminda yanit uretmek icin
+  scenario?: string
 ): string => {
   const lowerMessage = userMessage.toLowerCase();
   const templates = responseTemplates[nativeLanguage] || responseTemplates['en'];
@@ -754,13 +756,23 @@ const getSimulatedResponse = (
 
   // 7. Konusma baglami kontrolu: challenge/scenario/dialog modunda miyiz?
   const context = detectConversationContext(conversationHistory);
+  // Secilen senaryo varsa, her zaman senaryo baglaminda deger lendir
+  const isInScenarioMode = !!scenario || context === 'challenge' || context === 'scenario' || context === 'dialog';
 
-  if (context === 'challenge' || context === 'scenario' || context === 'dialog') {
+  if (isInScenarioMode) {
     // Kelimeyi kullanmis mi kontrol et
     const usedWord = checkWordUsage(userMessage, word);
     if (usedWord) {
       return pickRandom(scenarioTemplates.sentenceSuccess(word));
     } else if (userMessage.length > 10) {
+      // Senaryo aktifken kelimeyi kullanmadan uzun mesaj yazilmissa
+      // senaryo baglaminda geri bildirim ver
+      if (scenario) {
+        const validScenario = scenario as ScenarioKey;
+        const scenarioName = names[validScenario] || scenario;
+        return scenarioTemplates.sentenceMiss(word) +
+          `\n\n${scenarioEmojis[validScenario] || ''} ${scenarioName}`;
+      }
       return scenarioTemplates.sentenceMiss(word);
     }
   }
@@ -768,6 +780,10 @@ const getSimulatedResponse = (
   // 8. Genel mesaj: kelime kullanimi kontrolu
   const usedWord = checkWordUsage(userMessage, word);
   if (usedWord) {
+    // Senaryo aktifse senaryo baglaminda basari mesaji ver
+    if (scenario) {
+      return pickRandom(scenarioTemplates.sentenceSuccess(word));
+    }
     return pickRandom(templates.correctUsage);
   }
 
@@ -777,6 +793,13 @@ const getSimulatedResponse = (
   }
 
   // 10. Konusma devami veya tesvik
+  // Senaryo secildiyse senaryo baglaminda tesvik et
+  if (scenario) {
+    const validScenario = scenario as ScenarioKey;
+    const scenarioName = names[validScenario] || scenario;
+    return scenarioTemplates.prompt(word, scenarioName);
+  }
+
   // Konusmada 4+ mesaj varsa konusma devam sablonlarini kullan
   if (conversationHistory.length >= 4 && templates.conversationContinue) {
     const allResponses = [...templates.conversationContinue(word), ...templates.encouragement(word)];
@@ -839,7 +862,9 @@ export const getAIResponse = async (
   nativeLanguage: LanguageCode,
   targetLanguage: LanguageCode,
   wordMeaning: string,
-  feedbackIntensity: FeedbackIntensity = 'balanced'
+  feedbackIntensity: FeedbackIntensity = 'balanced',
+  // Secilen senaryo ID'si -- senaryo baglaminda yanit uretmek icin
+  scenario?: string
 ): Promise<ChatMessage> => {
   // Ag gecikmesi simulasyonu
   await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 800));
@@ -849,7 +874,8 @@ export const getAIResponse = async (
     word,
     conversationHistory,
     nativeLanguage,
-    wordMeaning
+    wordMeaning,
+    scenario
   );
 
   // Geri bildirim siddetini uygula
@@ -882,14 +908,31 @@ export const getInitialGreeting = (
   word: ContentItem,
   nativeLanguage: LanguageCode,
   targetLanguage: LanguageCode,
-  wordMeaning: string
+  wordMeaning: string,
+  // Secilen senaryo ID'si -- PracticeScreen'den gelir
+  scenario?: string
 ): ChatMessage => {
   const greetingFn = greetingTemplates[nativeLanguage] || greetingTemplates['en'];
+  let content = greetingFn(word, wordMeaning, targetLanguage);
+
+  // Senaryo secildiyse, senaryo-bazli baslangic mesajini ekle
+  if (scenario) {
+    const validScenario = scenario as ScenarioKey;
+    const names = scenarioNames[nativeLanguage] || scenarioNames['en'];
+    const scenarioTemplates = scenarioResponses[nativeLanguage] || scenarioResponses['en'];
+    const emoji = scenarioEmojis[validScenario] || '';
+
+    if (names[validScenario]) {
+      const scenarioName = names[validScenario];
+      // Senaryo bazli karsilama: genel bilgi + senaryo prompt'u
+      content = content + `\n\n${emoji} ${scenarioTemplates.prompt(word, scenarioName)}`;
+    }
+  }
 
   return {
     id: generateMessageId(),
     role: 'assistant',
-    content: greetingFn(word, wordMeaning, targetLanguage),
+    content,
     timestamp: new Date(),
   };
 };

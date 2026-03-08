@@ -28,22 +28,24 @@ type HistoryScreenProps = {
 };
 
 // SRS guven seviyesi renk ve etiket haritasi
-const getConfidenceInfo = (confidence: number): { color: string; label: string; bgColor: string } => {
-  if (confidence <= 1) return { color: '#EF4444', label: 'Yeni', bgColor: 'rgba(239,68,68,0.15)' };
-  if (confidence <= 2) return { color: '#F59E0B', label: 'Zayif', bgColor: 'rgba(245,158,11,0.15)' };
-  if (confidence <= 3) return { color: '#FBBF24', label: 'Orta', bgColor: 'rgba(251,191,36,0.15)' };
-  if (confidence <= 4) return { color: '#34D399', label: 'Iyi', bgColor: 'rgba(52,211,153,0.15)' };
-  return { color: '#10B981', label: 'Ustun', bgColor: 'rgba(16,185,129,0.15)' };
+// labels parametresi ceviri sisteminden beslenir
+const getConfidenceInfo = (confidence: number, labels: { new_: string; weak: string; medium: string; good: string; superb: string }): { color: string; label: string; bgColor: string } => {
+  if (confidence <= 1) return { color: '#EF4444', label: labels.new_, bgColor: 'rgba(239,68,68,0.15)' };
+  if (confidence <= 2) return { color: '#F59E0B', label: labels.weak, bgColor: 'rgba(245,158,11,0.15)' };
+  if (confidence <= 3) return { color: '#FBBF24', label: labels.medium, bgColor: 'rgba(251,191,36,0.15)' };
+  if (confidence <= 4) return { color: '#34D399', label: labels.good, bgColor: 'rgba(52,211,153,0.15)' };
+  return { color: '#10B981', label: labels.superb, bgColor: 'rgba(16,185,129,0.15)' };
 };
 
 // Tarih formatlama yardimci fonksiyonu
-const formatDate = (dateStr: string): string => {
+// todayLabel ve yesterdayLabel ceviri sisteminden beslenir
+const formatDate = (dateStr: string, todayLabel: string = 'Today', yesterdayLabel: string = 'Yesterday'): string => {
   const date = new Date(dateStr);
   const today = new Date();
   const yesterday = new Date(Date.now() - 86400000);
 
-  if (dateStr === today.toISOString().split('T')[0]) return 'Bugun';
-  if (dateStr === yesterday.toISOString().split('T')[0]) return 'Dun';
+  if (dateStr === today.toISOString().split('T')[0]) return todayLabel;
+  if (dateStr === yesterday.toISOString().split('T')[0]) return yesterdayLabel;
 
   const day = date.getDate();
   const months = ['Oca', 'Sub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Agu', 'Eyl', 'Eki', 'Kas', 'Ara'];
@@ -59,10 +61,13 @@ const getWeekKey = (dateStr: string): string => {
   return `${date.getFullYear()}-W${weekNum}`;
 };
 
-const getWeekLabel = (weekKey: string): string => {
+const getWeekLabel = (weekKey: string, weekWord: string = 'Week'): string => {
   const [year, week] = weekKey.split('-W');
-  return `Hafta ${week}, ${year}`;
+  return `${weekWord} ${week}, ${year}`;
 };
+
+// Guven seviyesi etiketleri tipi
+interface ConfidenceLabels { new_: string; weak: string; medium: string; good: string; superb: string; }
 
 // Animasyonlu kelime karti
 const AnimatedWordCard: React.FC<{
@@ -71,7 +76,10 @@ const AnimatedWordCard: React.FC<{
   nativeLanguage: LanguageCode;
   onToggleFavorite: (id: string) => void;
   srsData?: SRSData;
-}> = ({ item, index, nativeLanguage, onToggleFavorite, srsData }) => {
+  confidenceLabels: ConfidenceLabels;
+  todayLabel: string;
+  yesterdayLabel: string;
+}> = ({ item, index, nativeLanguage, onToggleFavorite, srsData, confidenceLabels, todayLabel, yesterdayLabel }) => {
   const slideAnim = useRef(new Animated.Value(40)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -105,7 +113,7 @@ const AnimatedWordCard: React.FC<{
 
   const translation = item.word.translations[nativeLanguage] || item.word.translations['en'] || '';
   const confidence = srsData?.confidence || 1;
-  const confidenceInfo = getConfidenceInfo(confidence);
+  const confidenceInfo = getConfidenceInfo(confidence, confidenceLabels);
 
   const getLevelColor = (level: string): string => {
     const colors: Record<string, string> = {
@@ -145,7 +153,7 @@ const AnimatedWordCard: React.FC<{
 
           {/* Alt satir: tarih + kategori + SRS guven */}
           <View style={styles.wordBottomRow}>
-            <Text style={styles.dateText}>{formatDate(item.learnedDate)}</Text>
+            <Text style={styles.dateText}>{formatDate(item.learnedDate, todayLabel, yesterdayLabel)}</Text>
             {item.word.category && (
               <View style={styles.categoryTag}>
                 <Text style={styles.categoryTagText}>{item.word.category.replace('_', ' ')}</Text>
@@ -237,8 +245,8 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
     });
 
     return sortedKeys.map(key => ({
-      title: groupMode === 'day' ? formatDate(key)
-           : groupMode === 'week' ? getWeekLabel(key)
+      title: groupMode === 'day' ? formatDate(key, t('today'), t('yesterday'))
+           : groupMode === 'week' ? getWeekLabel(key, t('historyWeek'))
            : key.replace('_', ' '),
       data: grouped[key],
       count: grouped[key].length,
@@ -260,6 +268,14 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
     }
   }, [filter, words.length]);
 
+  // Ceviri etiketleri -- guven seviyeleri ve tarih formati
+  const confidenceLabels: ConfidenceLabels = {
+    new_: t('confidenceNew'), weak: t('confidenceWeak'), medium: t('confidenceMedium'),
+    good: t('confidenceGood'), superb: t('confidenceSuperb'),
+  };
+  const todayLabel = t('today');
+  const yesterdayLabel = t('yesterday');
+
   const renderWord = ({ item, index }: { item: LearnedWord; index: number }) => (
     <AnimatedWordCard
       item={item}
@@ -267,6 +283,9 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
       nativeLanguage={nativeLanguage}
       onToggleFavorite={handleToggleFavorite}
       srsData={srsMap[item.word.id]}
+      confidenceLabels={confidenceLabels}
+      todayLabel={todayLabel}
+      yesterdayLabel={yesterdayLabel}
     />
   );
 
@@ -280,10 +299,10 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
   );
 
   const groupButtons: { mode: GroupMode; label: string }[] = [
-    { mode: 'all', label: 'Tumu' },
-    { mode: 'day', label: 'Gun' },
-    { mode: 'week', label: 'Hafta' },
-    { mode: 'category', label: 'Kategori' },
+    { mode: 'all', label: t('historyAll') },
+    { mode: 'day', label: t('historyDay') },
+    { mode: 'week', label: t('historyWeek') },
+    { mode: 'category', label: t('historyCategory') },
   ];
 
   return (

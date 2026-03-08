@@ -124,9 +124,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
       const granted = await requestNotificationPermission();
       if (!granted) {
         Alert.alert(
-          'Bildirim Izni',
-          'Bildirimleri kullanabilmek icin ayarlardan izin vermeniz gerekiyor.',
-          [{ text: 'Tamam' }]
+          t('notificationPermission'),
+          t('notificationPermissionDesc'),
+          [{ text: t('ok') }]
         );
         return;
       }
@@ -209,9 +209,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
         style={styles.profileCard}
       >
         <Text style={styles.profileEmoji}>{levelInfo?.emoji || '\u{1F331}'}</Text>
-        <Text style={styles.profileName}>{userName || 'Kullanici'}</Text>
+        <Text style={styles.profileName} accessibilityRole="header">{userName || t('user')}</Text>
         <Text style={styles.profileLevel}>
-          Lv. {levelInfo?.level || 1} - {levelInfo?.title || 'Merakli'}
+          {t('levelPrefix')} {levelInfo?.level || 1} - {levelInfo?.title || t('curious')}
         </Text>
         <View style={styles.profileXPBadge}>
           <Text style={styles.profileXPValue}>{totalXP.toLocaleString()}</Text>
@@ -234,7 +234,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <View style={styles.statCard}>
           <Text style={styles.statEmoji}>{'\u{2764}\u{FE0F}'}</Text>
           <Text style={styles.statValue}>{(userProgress?.favorites || []).length}</Text>
-          <Text style={styles.statLabel}>Favoriler</Text>
+          <Text style={styles.statLabel}>{t('profileFavorites')}</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statEmoji}>{'\u{1F4C5}'}</Text>
@@ -336,17 +336,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
             }}
             trackColor={{ false: 'rgba(255,255,255,0.1)', true: 'rgba(110,231,183,0.5)' }}
             thumbColor={calmMode ? '#6EE7B7' : '#666'}
+            accessibilityLabel="Calm Mode"
+            accessibilityHint="Hides gamification elements like XP and streaks"
           />
         </View>
       </View>
 
       {/* Geri Bildirim Siddeti */}
-      <Text style={styles.sectionTitle}>{'\u{1F4AC}'} Feedback Style</Text>
+      <Text style={styles.sectionTitle}>{'\u{1F4AC}'} {t('feedbackStyle')}</Text>
       <View style={styles.card}>
         {([
-          { key: 'soft' as FeedbackIntensity, emoji: '\u{1F33B}', label: 'Soft', desc: 'Encouraging and gentle corrections' },
-          { key: 'balanced' as FeedbackIntensity, emoji: '\u{2696}\u{FE0F}', label: 'Balanced', desc: 'Constructive feedback with explanations' },
-          { key: 'strict' as FeedbackIntensity, emoji: '\u{1F3AF}', label: 'Strict', desc: 'Direct corrections, detailed feedback' },
+          { key: 'soft' as FeedbackIntensity, emoji: '\u{1F33B}', label: t('feedbackSoft'), desc: t('feedbackSoftDesc') },
+          { key: 'balanced' as FeedbackIntensity, emoji: '\u{2696}\u{FE0F}', label: t('feedbackBalanced'), desc: t('feedbackBalancedDesc') },
+          { key: 'strict' as FeedbackIntensity, emoji: '\u{1F3AF}', label: t('feedbackStrict'), desc: t('feedbackStrictDesc') },
         ]).map((option, index) => (
           <React.Fragment key={option.key}>
             {index > 0 && <View style={styles.divider} />}
@@ -359,6 +361,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 await setFeedbackIntensity(option.key);
               }}
               activeOpacity={0.7}
+              accessibilityRole="radio"
+              accessibilityLabel={`${option.label} feedback style`}
+              accessibilityHint={option.desc}
+              accessibilityState={{ selected: feedbackMode === option.key }}
             >
               <View style={styles.settingRow}>
                 <View style={[styles.settingLabelRow, { flex: 1 }]}>
@@ -383,18 +389,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
       </View>
 
       {/* Bildirimler */}
-      <Text style={styles.sectionTitle}>{'\u{1F514}'} Bildirimler</Text>
+      <Text style={styles.sectionTitle}>{'\u{1F514}'} {t('notifications')}</Text>
       <View style={styles.card}>
         <View style={styles.settingRow}>
           <View style={styles.settingLabelRow}>
             <Text style={styles.settingEmoji}>{'\u{1F4F3}'}</Text>
-            <Text style={styles.settingLabel}>Bildirimler</Text>
+            <Text style={styles.settingLabel}>{t('notifications')}</Text>
           </View>
           <Switch
             value={notifSettings.enabled}
             onValueChange={handleToggleNotifications}
             trackColor={{ false: 'rgba(255,255,255,0.1)', true: 'rgba(99,102,241,0.5)' }}
             thumbColor={notifSettings.enabled ? '#6366F1' : '#666'}
+            accessibilityLabel="Notifications"
+            accessibilityHint="Enables or disables all notifications"
           />
         </View>
 
@@ -404,22 +412,24 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <View style={styles.settingRow}>
               <View style={styles.settingLabelRow}>
                 <Text style={styles.settingEmoji}>{'\u{1F4D6}'}</Text>
-                <Text style={styles.settingLabel}>Gunluk Kelime</Text>
+                <Text style={styles.settingLabel}>{t('dailyWord')}</Text>
               </View>
               <Switch
                 value={notifSettings.dailyWordReminder}
                 onValueChange={(v) => updateNotifSetting({ dailyWordReminder: v })}
                 trackColor={{ false: 'rgba(255,255,255,0.1)', true: 'rgba(99,102,241,0.5)' }}
                 thumbColor={notifSettings.dailyWordReminder ? '#6366F1' : '#666'}
+                accessibilityLabel="Daily word reminder"
+                accessibilityHint="Reminds you to learn the daily word"
               />
             </View>
             {notifSettings.dailyWordReminder && (
               <View style={styles.timePickerRow}>
-                <TouchableOpacity onPress={() => adjustTime('dailyWordTime', 'hour', -1)} style={styles.timeBtn}>
+                <TouchableOpacity onPress={() => adjustTime('dailyWordTime', 'hour', -1)} style={styles.timeBtn} accessibilityRole="button" accessibilityLabel="Decrease daily word reminder hour">
                   <Text style={styles.timeBtnText}>-</Text>
                 </TouchableOpacity>
                 <Text style={styles.timeDisplay}>{formatTime(notifSettings.dailyWordTime)}</Text>
-                <TouchableOpacity onPress={() => adjustTime('dailyWordTime', 'hour', 1)} style={styles.timeBtn}>
+                <TouchableOpacity onPress={() => adjustTime('dailyWordTime', 'hour', 1)} style={styles.timeBtn} accessibilityRole="button" accessibilityLabel="Increase daily word reminder hour">
                   <Text style={styles.timeBtnText}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -429,22 +439,24 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <View style={styles.settingRow}>
               <View style={styles.settingLabelRow}>
                 <Text style={styles.settingEmoji}>{'\u{1F525}'}</Text>
-                <Text style={styles.settingLabel}>Seri Hatirlatma</Text>
+                <Text style={styles.settingLabel}>{t('streakReminder')}</Text>
               </View>
               <Switch
                 value={notifSettings.streakReminder}
                 onValueChange={(v) => updateNotifSetting({ streakReminder: v })}
                 trackColor={{ false: 'rgba(255,255,255,0.1)', true: 'rgba(99,102,241,0.5)' }}
                 thumbColor={notifSettings.streakReminder ? '#6366F1' : '#666'}
+                accessibilityLabel="Streak reminder"
+                accessibilityHint="Reminds you to keep your streak going"
               />
             </View>
             {notifSettings.streakReminder && (
               <View style={styles.timePickerRow}>
-                <TouchableOpacity onPress={() => adjustTime('streakReminderTime', 'hour', -1)} style={styles.timeBtn}>
+                <TouchableOpacity onPress={() => adjustTime('streakReminderTime', 'hour', -1)} style={styles.timeBtn} accessibilityRole="button" accessibilityLabel="Decrease streak reminder hour">
                   <Text style={styles.timeBtnText}>-</Text>
                 </TouchableOpacity>
                 <Text style={styles.timeDisplay}>{formatTime(notifSettings.streakReminderTime)}</Text>
-                <TouchableOpacity onPress={() => adjustTime('streakReminderTime', 'hour', 1)} style={styles.timeBtn}>
+                <TouchableOpacity onPress={() => adjustTime('streakReminderTime', 'hour', 1)} style={styles.timeBtn} accessibilityRole="button" accessibilityLabel="Increase streak reminder hour">
                   <Text style={styles.timeBtnText}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -454,22 +466,24 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <View style={styles.settingRow}>
               <View style={styles.settingLabelRow}>
                 <Text style={styles.settingEmoji}>{'\u{1F9E0}'}</Text>
-                <Text style={styles.settingLabel}>Quiz Hatirlatma</Text>
+                <Text style={styles.settingLabel}>{t('quizReminder')}</Text>
               </View>
               <Switch
                 value={notifSettings.quizReminder}
                 onValueChange={(v) => updateNotifSetting({ quizReminder: v })}
                 trackColor={{ false: 'rgba(255,255,255,0.1)', true: 'rgba(99,102,241,0.5)' }}
                 thumbColor={notifSettings.quizReminder ? '#6366F1' : '#666'}
+                accessibilityLabel="Quiz reminder"
+                accessibilityHint="Reminds you to take quizzes"
               />
             </View>
             {notifSettings.quizReminder && (
               <View style={styles.timePickerRow}>
-                <TouchableOpacity onPress={() => adjustTime('quizReminderTime', 'hour', -1)} style={styles.timeBtn}>
+                <TouchableOpacity onPress={() => adjustTime('quizReminderTime', 'hour', -1)} style={styles.timeBtn} accessibilityRole="button" accessibilityLabel="Decrease quiz reminder hour">
                   <Text style={styles.timeBtnText}>-</Text>
                 </TouchableOpacity>
                 <Text style={styles.timeDisplay}>{formatTime(notifSettings.quizReminderTime)}</Text>
-                <TouchableOpacity onPress={() => adjustTime('quizReminderTime', 'hour', 1)} style={styles.timeBtn}>
+                <TouchableOpacity onPress={() => adjustTime('quizReminderTime', 'hour', 1)} style={styles.timeBtn} accessibilityRole="button" accessibilityLabel="Increase quiz reminder hour">
                   <Text style={styles.timeBtnText}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -506,7 +520,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
       {/* Tehlike Bolgesi */}
       <Text style={styles.sectionTitle}>{'\u{26A0}\u{FE0F}'} {t('dangerZone')}</Text>
       <Animated.View style={{ transform: [{ scale: resetScale }] }}>
-        <TouchableOpacity onPress={handleReset} activeOpacity={0.8}>
+        <TouchableOpacity onPress={handleReset} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Reset all data" accessibilityHint="Deletes all progress and settings permanently">
           <LinearGradient
             colors={['rgba(239,68,68,0.12)', 'rgba(239,68,68,0.08)']}
             style={styles.resetButton}
@@ -525,10 +539,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Go back" accessibilityHint="Returns to the previous screen">
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{'\u{1F464}'} Profil</Text>
+          <Text style={styles.headerTitle} accessibilityRole="header">{'\u{1F464}'} {t('profile')}</Text>
           <View style={styles.placeholder} />
         </View>
 
@@ -538,20 +552,26 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
             style={[styles.tabItem, activeTab === 'stats' && styles.tabItemActive]}
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setActiveTab('stats'); }}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel="Statistics"
+            accessibilityState={{ selected: activeTab === 'stats' }}
           >
             <Text style={styles.tabItemIcon}>{'\u{1F4CA}'}</Text>
             <Text style={[styles.tabItemLabel, activeTab === 'stats' && styles.tabItemLabelActive]}>
-              Istatistikler
+              {t('statistics')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tabItem, activeTab === 'settings' && styles.tabItemActive]}
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setActiveTab('settings'); }}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel="Settings"
+            accessibilityState={{ selected: activeTab === 'settings' }}
           >
             <Text style={styles.tabItemIcon}>{'\u{2699}\u{FE0F}'}</Text>
             <Text style={[styles.tabItemLabel, activeTab === 'settings' && styles.tabItemLabelActive]}>
-              Ayarlar
+              {t('profileSettings')}
             </Text>
           </TouchableOpacity>
         </View>

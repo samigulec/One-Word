@@ -13,11 +13,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { LeaderboardEntry, LeaderboardData, LeagueType } from '../types';
 import { getLeaderboard, getWeeklyLeaderboard, LEAGUES } from '../utils/leaderboard';
+import { LanguageCode, getTranslation as getUITranslation } from '../utils/translations';
 
 const { width } = Dimensions.get('window');
 
 type LeaderboardScreenProps = {
   onClose: () => void;
+  nativeLanguage?: LanguageCode;
 };
 
 type TabMode = 'allTime' | 'weekly';
@@ -68,7 +70,9 @@ const RankCard: React.FC<{
   entry: LeaderboardEntry;
   rank: number;
   index: number;
-}> = ({ entry, rank, index }) => {
+  youLabel: string;
+  levelPrefix: string;
+}> = ({ entry, rank, index, youLabel, levelPrefix }) => {
   const slideAnim = useRef(new Animated.Value(40)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -102,7 +106,7 @@ const RankCard: React.FC<{
         <Text style={styles.rankAvatar}>{entry.avatar}</Text>
         <View style={styles.rankInfo}>
           <Text style={[styles.rankName, entry.isCurrentUser && styles.rankNameHighlight]}>
-            {entry.name} {entry.isCurrentUser ? '(Sen)' : ''}
+            {entry.name} {entry.isCurrentUser ? youLabel : ''}
           </Text>
           <View style={styles.rankMeta}>
             <Text style={styles.rankMetaText}>{'\u{1F525}'} {entry.streak}</Text>
@@ -115,14 +119,17 @@ const RankCard: React.FC<{
             {entry.xp}
           </Text>
           <Text style={styles.rankXPLabel}>XP</Text>
-          <Text style={styles.rankLevel}>Lv.{entry.level}</Text>
+          <Text style={styles.rankLevel}>{levelPrefix}{entry.level}</Text>
         </View>
       </View>
     </Animated.View>
   );
 };
 
-const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose }) => {
+const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose, nativeLanguage = 'en' }) => {
+  // Ceviri fonksiyonu
+  const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
+
   const [tab, setTab] = useState<TabMode>('allTime');
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [league, setLeague] = useState<LeagueType>('bronze');
@@ -158,7 +165,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose }) => {
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Liderlik Tablosu</Text>
+          <Text style={styles.headerTitle}>{t('leaderboard')}</Text>
           <View style={[styles.leagueBadge, { backgroundColor: `${LEAGUES[league].color}25`, borderColor: `${LEAGUES[league].color}50` }]}>
             <Text style={styles.leagueBadgeText}>{LEAGUES[league].emoji}</Text>
           </View>
@@ -175,7 +182,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose }) => {
               style={styles.tabButton}
             >
               <Text style={[styles.tabText, tab === 'allTime' && styles.tabTextActive]}>
-                Tum Zamanlar
+                {t('allTime')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -188,7 +195,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose }) => {
               style={styles.tabButton}
             >
               <Text style={[styles.tabText, tab === 'weekly' && styles.tabTextActive]}>
-                Bu Hafta
+                {t('thisWeek')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -207,7 +214,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose }) => {
         <FlatList
           data={rest}
           renderItem={({ item, index }) => (
-            <RankCard entry={item} rank={index + 4} index={index} />
+            <RankCard entry={item} rank={index + 4} index={index} youLabel={t('you')} levelPrefix={t('levelPrefix')} />
           )}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContainer}

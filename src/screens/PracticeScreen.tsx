@@ -31,7 +31,8 @@ const SCENARIOS = [
 type PracticeScreenProps = {
   word: ContentItem | null;
   nativeLanguage: LanguageCode;
-  onSelectScenario: (word: ContentItem) => void;
+  // Senaryo ID'si opsiyonel: serbest konusma modunda gonderilmez
+  onSelectScenario: (word: ContentItem, scenarioId?: string) => void;
   onClose: () => void;
 };
 
@@ -54,10 +55,11 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
     ]).start();
   }, []);
 
+  // Secilen senaryonun ID'sini onSelectScenario'ya aktariyoruz
   const handleScenarioPress = (scenario: typeof SCENARIOS[0]) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (word) {
-      onSelectScenario(word);
+      onSelectScenario(word, scenario.id);
     }
   };
 
@@ -66,10 +68,10 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Go back" accessibilityHint="Returns to the previous screen">
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{'\u{1F4AC}'} Pratik Yap</Text>
+          <Text style={styles.headerTitle} accessibilityRole="header">{'\u{1F4AC}'} Pratik Yap</Text>
           <View style={styles.placeholder} />
         </View>
 
@@ -82,7 +84,7 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
             >
               <Text style={styles.wordBannerEmoji}>{word.emoji || '\u{1F4AC}'}</Text>
               <View style={styles.wordBannerText}>
-                <Text style={styles.wordBannerWord}>"{word.target_word}"</Text>
+                <Text style={styles.wordBannerWord} accessibilityRole="text" accessibilityLabel={`Practice word: ${word.target_word}`}>"{word.target_word}"</Text>
                 <Text style={styles.wordBannerHint}>
                   {t('practiceWithAI') || 'ile pratik yap'}
                 </Text>
@@ -103,6 +105,9 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
                 style={styles.scenarioCard}
                 activeOpacity={0.7}
                 onPress={() => handleScenarioPress(scenario)}
+                accessibilityRole="button"
+                accessibilityLabel={`${t(scenario.labelKey as any) || scenario.fallback} scenario`}
+                accessibilityHint="Starts a practice conversation in this scenario"
               >
                 <LinearGradient
                   colors={['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.02)']}
@@ -123,8 +128,12 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
             activeOpacity={0.8}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              // Serbest konusma: senaryo ID'si gonderilmez (undefined)
               if (word) onSelectScenario(word);
             }}
+            accessibilityRole="button"
+            accessibilityLabel="Free conversation"
+            accessibilityHint="Starts a free-form practice conversation"
           >
             <LinearGradient
               colors={['#6366F1', '#8B5CF6']}

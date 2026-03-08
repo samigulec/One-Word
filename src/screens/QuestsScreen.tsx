@@ -39,12 +39,13 @@ const TASK_CONFIG: Record<DailyTaskId, { icon: string; labelKey: 'taskLearnWord'
 };
 
 // Rozet kategori bilgileri
-const CATEGORY_INFO: Record<BadgeCategory, { title: string; emoji: string }> = {
-  streak: { title: 'Seri Rozetleri', emoji: '\u{1F525}' },
-  words: { title: 'Kelime Rozetleri', emoji: '\u{1F4DA}' },
-  quiz: { title: 'Quiz Rozetleri', emoji: '\u{1F9E0}' },
-  level: { title: 'Seviye Rozetleri', emoji: '\u{1F4CA}' },
-  special: { title: 'Ozel Rozetler', emoji: '\u{2B50}' },
+// Rozet kategori bilgileri -- ceviri anahtarlari ve emojiler
+const CATEGORY_KEYS: Record<BadgeCategory, { titleKey: 'categoryStreak' | 'categoryWords' | 'categoryQuiz' | 'categoryLevel' | 'categorySpecial'; emoji: string }> = {
+  streak: { titleKey: 'categoryStreak', emoji: '\u{1F525}' },
+  words: { titleKey: 'categoryWords', emoji: '\u{1F4DA}' },
+  quiz: { titleKey: 'categoryQuiz', emoji: '\u{1F9E0}' },
+  level: { titleKey: 'categoryLevel', emoji: '\u{1F4CA}' },
+  special: { titleKey: 'categorySpecial', emoji: '\u{2B50}' },
 };
 
 const CATEGORIES: BadgeCategory[] = ['streak', 'words', 'quiz', 'level', 'special'];
@@ -219,10 +220,10 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
   const renderTabBar = () => (
     <View style={styles.tabSelector}>
       {([
-        { id: 'daily' as QuestTab, label: 'Gorevler', icon: '\u{2705}' },
-        { id: 'weekly' as QuestTab, label: 'Haftalik', icon: '\u{1F3AF}' },
-        { id: 'badges' as QuestTab, label: 'Rozetler', icon: '\u{1F3C6}' },
-        { id: 'journey' as QuestTab, label: 'Yolculuk', icon: '\u{1F680}' },
+        { id: 'daily' as QuestTab, label: t('questsDaily'), icon: '\u{2705}' },
+        { id: 'weekly' as QuestTab, label: t('questsWeekly'), icon: '\u{1F3AF}' },
+        { id: 'badges' as QuestTab, label: t('questsBadges'), icon: '\u{1F3C6}' },
+        { id: 'journey' as QuestTab, label: t('questsJourney'), icon: '\u{1F680}' },
       ]).map((tab) => (
         <TouchableOpacity
           key={tab.id}
@@ -232,6 +233,9 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
             setActiveTab(tab.id);
           }}
           activeOpacity={0.7}
+          accessibilityRole="tab"
+          accessibilityLabel={tab.label}
+          accessibilityState={{ selected: activeTab === tab.id }}
         >
           <Text style={styles.tabItemIcon}>{tab.icon}</Text>
           <Text style={[styles.tabItemLabel, activeTab === tab.id && styles.tabItemLabelActive]}>
@@ -249,7 +253,7 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
         <>
           {/* Gorev baslik */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{'\u{2705}'} {t('dailyTasks')}</Text>
+            <Text style={styles.sectionTitle} accessibilityRole="header">{'\u{2705}'} {t('dailyTasks')}</Text>
             {dailyTasks.allCompleted && (
               <View style={styles.completeBadge}>
                 <Text style={styles.completeBadgeText}>{t('dailyTasksComplete')}</Text>
@@ -259,7 +263,7 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
           {/* Gorevler listesi */}
           {dailyTasks.tasks.map((task) => (
-            <View key={task.id} style={[styles.taskCard, task.completed && styles.taskCardCompleted]}>
+            <View key={task.id} style={[styles.taskCard, task.completed && styles.taskCardCompleted]} accessibilityLabel={`${getTaskLabel(task.id)}, ${task.completed ? 'completed' : 'not completed'}, ${task.xp} XP`}>
               <View style={styles.taskLeft}>
                 <View style={[styles.taskIconContainer, task.completed && styles.taskIconCompleted]}>
                   {task.completed ? (
@@ -305,8 +309,8 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
         <View style={styles.challengeHeader}>
           <Text style={styles.challengeEmoji}>{weeklyChallenge.categoryEmoji}</Text>
           <View style={styles.challengeInfo}>
-            <Text style={styles.challengeTitle}>{weeklyChallenge.themeTitle}</Text>
-            <Text style={styles.challengeSubtitle}>Weekly Challenge</Text>
+            <Text style={styles.challengeTitle} accessibilityRole="header">{weeklyChallenge.themeTitle}</Text>
+            <Text style={styles.challengeSubtitle}>{t('weeklyChallenge')}</Text>
           </View>
           <View style={styles.challengeProgressBadge}>
             <Text style={[styles.challengeProgressText, allComplete && styles.challengeProgressComplete]}>
@@ -369,6 +373,9 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
             }}
             activeOpacity={0.8}
             style={styles.weeklySummaryButton}
+            accessibilityRole="button"
+            accessibilityLabel="Weekly Summary"
+            accessibilityHint="Shows your weekly progress statistics"
           >
             <LinearGradient
               colors={['rgba(52,211,153,0.15)', 'rgba(16,185,129,0.1)']}
@@ -378,8 +385,8 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
             >
               <Text style={styles.weeklySummaryEmoji}>{'\u{1F4CA}'}</Text>
               <View style={styles.weeklySummaryTextContainer}>
-                <Text style={styles.weeklySummaryTitle}>Haftalik Ozet</Text>
-                <Text style={styles.weeklySummarySubtitle}>Ilerleme istatistiklerin</Text>
+                <Text style={styles.weeklySummaryTitle}>{t('weeklySummary')}</Text>
+                <Text style={styles.weeklySummarySubtitle}>{t('progressStats')}</Text>
               </View>
               <Text style={styles.weeklySummaryArrow}>{'\u203A'}</Text>
             </LinearGradient>
@@ -396,7 +403,7 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
       <View style={styles.badgeProgressBar}>
         <View style={styles.badgeProgressInfo}>
           <Text style={styles.badgeProgressText}>{totalEarned}/{totalBadges}</Text>
-          <Text style={styles.badgeProgressLabel}>Rozet Kazanildi</Text>
+          <Text style={styles.badgeProgressLabel}>{t('badgeEarned')}</Text>
         </View>
         <View style={styles.badgeProgressTrack}>
           <View style={[styles.badgeProgressFill, { width: `${(totalEarned / totalBadges) * 100}%` }]} />
@@ -405,12 +412,12 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
       {/* Kategoriler */}
       {CATEGORIES.map((category) => {
-        const info = CATEGORY_INFO[category];
+        const catInfo = CATEGORY_KEYS[category];
         const badges = getBadgesByCategory(category);
 
         return (
           <View key={category}>
-            <Text style={styles.badgeCategoryTitle}>{info.emoji} {info.title}</Text>
+            <Text style={styles.badgeCategoryTitle} accessibilityRole="header">{catInfo.emoji} {t(catInfo.titleKey)}</Text>
             <View style={styles.badgeGrid}>
               {badges.map((badge) => {
                 const isEarned = earnedIds.has(badge.id);
@@ -420,6 +427,7 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
                   <View
                     key={badge.id}
                     style={[styles.badgeCard, !isEarned && styles.badgeCardLocked]}
+                    accessibilityLabel={`Badge: ${badge.name}, ${isEarned ? 'earned' : 'locked'}. ${badge.description}`}
                   >
                     <Text style={[styles.badgeEmoji, !isEarned && styles.badgeEmojiLocked]}>
                       {isEarned ? badge.emoji : '\u{1F512}'}
@@ -487,8 +495,11 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
               activeOpacity={0.7}
               disabled={isSharing}
               onPress={() => handleShareAchievement(createStreakTemplate(streak))}
+              accessibilityRole="button"
+              accessibilityLabel={`Share your ${streak} day streak`}
+              accessibilityHint="Opens the share dialog"
             >
-              <Text style={styles.shareBtnText}>{'\u{1F525}'} Share Streak</Text>
+              <Text style={styles.shareBtnText}>{'\u{1F525}'} {t('shareStreak')}</Text>
             </TouchableOpacity>
           )}
           {totalWords >= 5 && (
@@ -497,14 +508,17 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
               activeOpacity={0.7}
               disabled={isSharing}
               onPress={() => handleShareAchievement(createWordsTemplate(totalWords))}
+              accessibilityRole="button"
+              accessibilityLabel={`Share your ${totalWords} learned words`}
+              accessibilityHint="Opens the share dialog"
             >
-              <Text style={styles.shareBtnText}>{'\u{1F4DA}'} Share Words</Text>
+              <Text style={styles.shareBtnText}>{'\u{1F4DA}'} {t('shareWords')}</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {/* Journey Path - sadece ilk 14 gun */}
-        <Text style={styles.journeyPathTitle}>{t('learningPath')}</Text>
+        <Text style={styles.journeyPathTitle} accessibilityRole="header">{t('learningPath')}</Text>
         <Text style={styles.journeyPathSubtitle}>{t('unlockDays')}</Text>
 
         <View style={styles.journeyPath}>
@@ -581,10 +595,10 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Go back" accessibilityHint="Returns to the previous screen">
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{'\u{1F3AF}'} Quests</Text>
+          <Text style={styles.headerTitle} accessibilityRole="header">{'\u{1F3AF}'} {t('quests')}</Text>
           <View style={styles.placeholder} />
         </View>
 

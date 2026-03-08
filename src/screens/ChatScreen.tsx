@@ -35,6 +35,8 @@ type ChatScreenProps = {
   onNavigateBack: () => void;
   nativeLanguage: LanguageCode;
   targetLanguage: LanguageCode;
+  // Secilen senaryo ID'si (cafe, travel, vb.) -- PracticeScreen'den gelir
+  scenario?: string;
 };
 
 // Bouncing dots typing indicator
@@ -97,11 +99,11 @@ const formatTime = (date: Date): string => {
 };
 
 // Mesaj sayaci - kac mesaj gonderildi
-const MessageCounter: React.FC<{ count: number }> = ({ count }) => {
+const MessageCounter: React.FC<{ count: number; label: string }> = ({ count, label }) => {
   if (count < 2) return null;
   return (
     <View style={counterStyles.container}>
-      <Text style={counterStyles.text}>{count - 1} mesaj</Text>
+      <Text style={counterStyles.text}>{count - 1} {label}</Text>
     </View>
   );
 };
@@ -190,7 +192,7 @@ const AnimatedMessage: React.FC<{ item: ChatMessage; index: number; isLast: bool
   );
 };
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLanguage, targetLanguage }) => {
+const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLanguage, targetLanguage, scenario }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -208,10 +210,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
 
   useEffect(() => {
     const wordTranslation = getContentTranslation(word, nativeLanguage);
-    const greeting = getInitialGreeting(word, nativeLanguage, targetLanguage, wordTranslation);
+    // Senaryo bilgisini baslangic selamlamasina aktariyoruz
+    const greeting = getInitialGreeting(word, nativeLanguage, targetLanguage, wordTranslation, scenario);
     setMessages([greeting]);
     setMessageCount(0);
-  }, [word, nativeLanguage, targetLanguage]);
+  }, [word, nativeLanguage, targetLanguage, scenario]);
 
   const handleSend = useCallback(async (text?: string) => {
     const messageText = text || inputText.trim();
@@ -247,7 +250,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
     try {
       const wordTranslation = getContentTranslation(word, nativeLanguage);
       const intensity = await getFeedbackIntensity();
-      const aiResponse = await getAIResponse(messageText, word, updatedMessages, nativeLanguage, targetLanguage, wordTranslation, intensity);
+      // Senaryo bilgisini AI yanit servisine aktariyoruz
+      const aiResponse = await getAIResponse(messageText, word, updatedMessages, nativeLanguage, targetLanguage, wordTranslation, intensity, scenario);
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
       const errorMessage: ChatMessage = {
