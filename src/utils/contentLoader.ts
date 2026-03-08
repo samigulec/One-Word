@@ -17,17 +17,17 @@ import zhContent from '../data/content/zh_content.json';
  * Map of target language codes to their content
  */
 const contentMap: Record<string, ContentItem[]> = {
-  es: esContent as ContentItem[],
-  en: enContent as ContentItem[],
-  it: itContent as ContentItem[],
-  de: deContent as ContentItem[],
-  fr: frContent as ContentItem[],
-  pt: ptContent as ContentItem[],
-  tr: trContent as ContentItem[],
-  ru: ruContent as ContentItem[],
-  ja: jaContent as ContentItem[],
-  ko: koContent as ContentItem[],
-  zh: zhContent as ContentItem[],
+  es: esContent as unknown as ContentItem[],
+  en: enContent as unknown as ContentItem[],
+  it: itContent as unknown as ContentItem[],
+  de: deContent as unknown as ContentItem[],
+  fr: frContent as unknown as ContentItem[],
+  pt: ptContent as unknown as ContentItem[],
+  tr: trContent as unknown as ContentItem[],
+  ru: ruContent as unknown as ContentItem[],
+  ja: jaContent as unknown as ContentItem[],
+  ko: koContent as unknown as ContentItem[],
+  zh: zhContent as unknown as ContentItem[],
 };
 
 /**

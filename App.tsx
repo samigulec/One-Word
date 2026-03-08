@@ -1,30 +1,68 @@
+// App.tsx -- v2.0.0 Ana navigasyon (UX yeniden tasarimi)
+// Yeni tab yapisi: Home | Quests | History | Profile
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { LogBox, ActivityIndicator, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Sentry from '@sentry/react-native';
+
+// Sentry baslatma -- hata izleme ve performans takibi
+Sentry.init({
+  dsn: 'https://placeholder@sentry.io/0', // KULLANICI: Kendi DSN degerinizi buraya yazin
+  tracesSampleRate: 1.0,
+  debug: __DEV__, // Sadece gelistirme modunda debug acik
+  enabled: !__DEV__, // Sadece production'da aktif
+});
+
+// Ekranlar
 import HomeScreen from './src/screens/HomeScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
-import JourneyScreen from './src/screens/JourneyScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
+import QuestsScreen from './src/screens/QuestsScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import PracticeScreen from './src/screens/PracticeScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import ReviewScreen from './src/screens/ReviewScreen';
 import QuizScreen from './src/screens/QuizScreen';
-import BadgesScreen from './src/screens/BadgesScreen';
 import WeeklySummaryScreen from './src/screens/WeeklySummaryScreen';
 import LeaderboardScreen from './src/screens/LeaderboardScreen';
 import BadgeUnlockedModal from './src/components/BadgeUnlockedModal';
+
+// Tipler ve utility'ler
 import { ContentItem, ProficiencyLevel, UserProgress, Badge } from './src/types';
 import { LanguageCode } from './src/utils/translations';
-import { getLanguagePreferences, saveLanguagePreferences, getUserProgress, addLearnedWord, getNotificationSettings, getEarnedBadges, addEarnedBadge, getCalmMode } from './src/utils/storage';
+import {
+  getLanguagePreferences,
+  saveLanguagePreferences,
+  getUserProgress,
+  addLearnedWord,
+  getNotificationSettings,
+  getEarnedBadges,
+  addEarnedBadge,
+  getCalmMode,
+} from './src/utils/storage';
 import { requestNotificationPermission, scheduleAllNotifications } from './src/utils/notifications';
 import { checkStreakBadges, checkWordBadges, checkSpecialBadges, createEarnedBadge } from './src/utils/badges';
 
 LogBox.ignoreLogs(['Non-serializable values']);
 
-type Screen = 'Loading' | 'Onboarding' | 'Home' | 'Chat' | 'Journey' | 'Settings' | 'History' | 'Review' | 'Quiz' | 'Badges' | 'WeeklySummary' | 'Leaderboard';
+// Tum ekran tipleri -- v2.0.0 guncellendi
+type Screen =
+  | 'Loading'
+  | 'Onboarding'
+  | 'Home'
+  | 'Chat'
+  | 'Quests'
+  | 'Profile'
+  | 'Practice'
+  | 'History'
+  | 'Review'
+  | 'Quiz'
+  | 'WeeklySummary'
+  | 'Leaderboard';
 
-export default function App() {
+function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('Loading');
   const [selectedWord, setSelectedWord] = useState<ContentItem | null>(null);
   const [nativeLanguage, setNativeLanguage] = useState<LanguageCode>('en');
@@ -95,39 +133,32 @@ export default function App() {
     const earned = await getEarnedBadges();
     const pendingBadges: Badge[] = [];
 
-    // Streak rozetleri
     const newStreakBadges = checkStreakBadges(progress.streak, earned);
     pendingBadges.push(...newStreakBadges);
 
-    // Kelime rozetleri
     const totalWords = (progress.learnedWords || []).length;
     const newWordBadges = checkWordBadges(totalWords, earned);
     pendingBadges.push(...newWordBadges);
 
-    // Ozel rozetler (saat bazli)
     const currentHour = new Date().getHours();
     const hasFavorite = (progress.favorites || []).length > 0;
     const newSpecialBadges = checkSpecialBadges({ hasFavorite, currentHour }, earned);
     pendingBadges.push(...newSpecialBadges);
 
-    // Yeni rozetleri kaydet ve goster
     if (pendingBadges.length > 0) {
       for (const badge of pendingBadges) {
         await addEarnedBadge(createEarnedBadge(badge.id));
       }
-      // Ilk yeni rozeti modal olarak goster
       setUnlockedBadge(pendingBadges[0]);
       setShowBadgeModal(true);
     }
   }, []);
 
+  // Navigasyon fonksiyonlari
   const navigateToChat = async (word: ContentItem) => {
-    // Save word as learned when user starts practicing
     await addLearnedWord(word);
     setSelectedWord(word);
     setCurrentScreen('Chat');
-
-    // Kelime ogrenildikten sonra rozet kontrolu
     await checkAndAwardBadges();
   };
 
@@ -135,25 +166,24 @@ export default function App() {
     setCurrentScreen('Home');
     setSelectedWord(null);
     loadUserProgress();
-    // Her ana sayfaya donuste rozet kontrolu
     checkAndAwardBadges();
   };
 
-  const navigateToBadges = () => {
-    setCurrentScreen('Badges');
+  const navigateToQuests = () => {
+    setCurrentScreen('Quests');
+  };
+
+  const navigateToProfile = () => {
+    setCurrentScreen('Profile');
+  };
+
+  const navigateToPractice = (word?: ContentItem) => {
+    if (word) setSelectedWord(word);
+    setCurrentScreen('Practice');
   };
 
   const navigateToWeeklySummary = () => {
     setCurrentScreen('WeeklySummary');
-  };
-
-  const navigateToJourney = () => {
-    loadUserProgress();
-    setCurrentScreen('Journey');
-  };
-
-  const navigateToSettings = () => {
-    setCurrentScreen('Settings');
   };
 
   const navigateToHistory = () => {
@@ -200,13 +230,12 @@ export default function App() {
       {currentScreen === 'Home' && (
         <HomeScreen
           onNavigateToChat={navigateToChat}
-          onNavigateToJourney={navigateToJourney}
-          onNavigateToSettings={navigateToSettings}
+          onNavigateToQuests={navigateToQuests}
           onNavigateToHistory={navigateToHistory}
+          onNavigateToProfile={navigateToProfile}
           onNavigateToReview={navigateToReview}
           onNavigateToQuiz={navigateToQuiz}
-          onNavigateToBadges={navigateToBadges}
-          onNavigateToWeeklySummary={navigateToWeeklySummary}
+          onNavigateToPractice={(w?: ContentItem) => navigateToPractice(w)}
           onNavigateToLeaderboard={navigateToLeaderboard}
           nativeLanguage={nativeLanguage}
           targetLanguage={targetLanguage}
@@ -214,17 +243,15 @@ export default function App() {
           calmMode={calmMode}
         />
       )}
-      {currentScreen === 'Journey' && (
-        <JourneyScreen
-          currentStreak={userProgress?.streak || 0}
-          totalWordsLearned={userProgress?.totalIdiomsLearned || 0}
+      {currentScreen === 'Quests' && (
+        <QuestsScreen
           nativeLanguage={nativeLanguage}
           onClose={navigateToHome}
           onNavigateToWeeklySummary={navigateToWeeklySummary}
         />
       )}
-      {currentScreen === 'Settings' && (
-        <SettingsScreen
+      {currentScreen === 'Profile' && (
+        <ProfileScreen
           nativeLanguage={nativeLanguage}
           targetLanguage={targetLanguage}
           proficiencyLevel={proficiencyLevel}
@@ -232,6 +259,14 @@ export default function App() {
           onReset={handleReset}
           calmMode={calmMode}
           onCalmModeChange={setCalmModeState}
+        />
+      )}
+      {currentScreen === 'Practice' && (
+        <PracticeScreen
+          word={selectedWord}
+          nativeLanguage={nativeLanguage}
+          onSelectScenario={navigateToChat}
+          onClose={navigateToHome}
         />
       )}
       {currentScreen === 'History' && (
@@ -253,9 +288,6 @@ export default function App() {
           targetLanguage={targetLanguage}
           onClose={navigateToHome}
         />
-      )}
-      {currentScreen === 'Badges' && (
-        <BadgesScreen onClose={navigateToHome} />
       )}
       {currentScreen === 'WeeklySummary' && (
         <WeeklySummaryScreen onClose={navigateToHome} targetLanguage={targetLanguage} />
@@ -292,3 +324,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+// Sentry ile App bileseni sarmalanarak export ediliyor
+export default Sentry.wrap(App);

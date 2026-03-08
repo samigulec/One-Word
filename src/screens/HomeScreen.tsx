@@ -1,3 +1,7 @@
+// HomeScreen.tsx -- v2.0.0 Sadelestirilmis Ana Sayfa
+// Kompakt header + gamification bar + kelime karti + aksiyon butonlari
+// Gunluk gorevler, haftalik zorluk, rozetler, senaryo kartlari TASINDI
+
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
@@ -18,36 +22,26 @@ import * as Speech from 'expo-speech';
 import { captureRef } from 'react-native-view-shot';
 // @ts-ignore
 import * as Sharing from 'expo-sharing';
-import { ContentItem, UserProgress, ProficiencyLevel, LevelInfo, DailyTasksData, DailyTaskId } from '../types';
+import { ContentItem, UserProgress, ProficiencyLevel, LevelInfo, DailyTaskId } from '../types';
 import { getWordOfTheDay, getTranslation, getExampleTranslation } from '../utils/contentLoader';
-import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord, getDueWordsForToday, getUserName, getDailyXPStatus, addXP, getDailyTasks, completeDailyTask, claimDailyTasksBonus, getWeeklyChallenge, updateWeeklyChallengeGoal, claimWeeklyChallengeBonus } from '../utils/storage';
-import { WeeklyChallengeData } from '../types';
+import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord, getDueWordsForToday, getUserName, getDailyXPStatus, addXP, completeDailyTask, updateWeeklyChallengeGoal, claimWeeklyChallengeBonus } from '../utils/storage';
 import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../utils/translations';
 import ShareWordCard from '../components/ShareWordCard';
 import CulturalContextModal from '../components/CulturalContextModal';
 import GrammarNuggets from '../components/GrammarNuggets';
 import RealWorldExamples from '../components/RealWorldExamples';
-import WeeklyChallengePanel from '../components/WeeklyChallengePanel';
 import { getCategoryIcon } from '../utils/categoryIcons';
 
 const { width } = Dimensions.get('window');
 
-// Gunluk gorev ikon ve label eslestirmesi
-const TASK_CONFIG: Record<DailyTaskId, { icon: string; labelKey: 'taskLearnWord' | 'taskDiscoverMeaning' | 'taskPracticeAI' }> = {
-  learn_word: { icon: '\u{1F4D6}', labelKey: 'taskLearnWord' },
-  discover_meaning: { icon: '\u{1F50D}', labelKey: 'taskDiscoverMeaning' },
-  practice_ai: { icon: '\u{1F4AC}', labelKey: 'taskPracticeAI' },
-};
-
 type HomeScreenProps = {
   onNavigateToChat: (word: ContentItem) => void;
-  onNavigateToJourney: () => void;
-  onNavigateToSettings: () => void;
+  onNavigateToQuests: () => void;
   onNavigateToHistory: () => void;
+  onNavigateToProfile: () => void;
   onNavigateToReview: () => void;
   onNavigateToQuiz: () => void;
-  onNavigateToBadges: () => void;
-  onNavigateToWeeklySummary: () => void;
+  onNavigateToPractice: (word?: ContentItem) => void;
   onNavigateToLeaderboard: () => void;
   nativeLanguage: LanguageCode;
   targetLanguage: LanguageCode;
@@ -63,12 +57,17 @@ interface FloatingXP {
   translateY: Animated.Value;
 }
 
+// Kelime karti icindeki tab secenekleri
+type WordCardTab = 'meaning' | 'example' | 'grammar';
+
 const HomeScreen: React.FC<HomeScreenProps> = ({
-  onNavigateToChat, onNavigateToJourney, onNavigateToSettings,
-  onNavigateToHistory, onNavigateToReview, onNavigateToQuiz,
-  onNavigateToBadges, onNavigateToWeeklySummary, onNavigateToLeaderboard,
+  onNavigateToChat, onNavigateToQuests,
+  onNavigateToHistory, onNavigateToProfile,
+  onNavigateToReview, onNavigateToQuiz,
+  onNavigateToPractice, onNavigateToLeaderboard,
   nativeLanguage, targetLanguage, proficiencyLevel,
 }) => {
+  // Ana state'ler
   const [word, setWord] = useState<ContentItem | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
@@ -76,20 +75,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [dueCount, setDueCount] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
   const [userName, setUserName] = useState<string>('');
+
+  // XP & seviye state'leri
   const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
-  const [dailyTasks, setDailyTasks] = useState<DailyTasksData | null>(null);
-  // Kulturel baglam modal state
-  const [showCulturalContext, setShowCulturalContext] = useState(false);
-  // Haftalik zorluk state
-  const [weeklyChallenge, setWeeklyChallenge] = useState<WeeklyChallengeData | null>(null);
-
-  // XP widget state'leri
   const [dailyXP, setDailyXP] = useState<number>(0);
   const [dailyGoal, setDailyGoal] = useState<number>(50);
   const [totalXP, setTotalXP] = useState<number>(0);
   const [levelProgress, setLevelProgress] = useState<number>(0);
-  const [dailyGoalStreak, setDailyGoalStreak] = useState<number>(0);
+
+  // Kelime karti tab state
+  const [activeWordTab, setActiveWordTab] = useState<WordCardTab>('meaning');
+
+  // Kulturel baglam modal state
+  const [showCulturalContext, setShowCulturalContext] = useState(false);
 
   // Floating XP animasyonlari
   const [floatingXPs, setFloatingXPs] = useState<FloatingXP[]>([]);
@@ -102,16 +101,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const meaningReveal = useRef(new Animated.Value(0)).current;
   const levelUpScale = useRef(new Animated.Value(0)).current;
   const levelUpOpacity = useRef(new Animated.Value(0)).current;
-  const xpWidgetOpacity = useRef(new Animated.Value(0)).current;
-  const dailyProgressWidth = useRef(new Animated.Value(0)).current;
   const levelProgressWidth = useRef(new Animated.Value(0)).current;
-
-  // Gorev tamamlanma animasyonlari (her gorev icin ayri)
-  const taskCheckScales = useRef<Record<string, Animated.Value>>({
-    learn_word: new Animated.Value(0),
-    discover_meaning: new Animated.Value(0),
-    practice_ai: new Animated.Value(0),
-  }).current;
 
   const shareCardRef = useRef<View>(null);
 
@@ -134,8 +124,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     startAnimations();
     getUserName().then(name => setUserName(name));
     loadXPStatus();
-    loadDailyTasks();
-    loadWeeklyChallenge();
   }, [targetLanguage, proficiencyLevel]);
 
   // Giris animasyonlari
@@ -144,65 +132,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       Animated.spring(cardScale, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
       Animated.timing(cardOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.timing(headerOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.timing(xpWidgetOpacity, { toValue: 1, duration: 500, delay: 200, useNativeDriver: true }),
     ]).start();
-  };
-
-  // Haftalik zorlugu yukle
-  const loadWeeklyChallenge = async () => {
-    const data = await getWeeklyChallenge();
-    setWeeklyChallenge(data);
-  };
-
-  // Gunluk gorevleri yukle
-  const loadDailyTasks = async () => {
-    const tasks = await getDailyTasks();
-    setDailyTasks(tasks);
-    // Tamamlanmis gorevlerin checkmark'larini goster
-    tasks.tasks.forEach(task => {
-      if (task.completed) {
-        taskCheckScales[task.id].setValue(1);
-      }
-    });
-  };
-
-  // Gorev tamamla ve animasyonu tetikle
-  const handleCompleteTask = async (taskId: DailyTaskId) => {
-    const result = await completeDailyTask(taskId);
-    setDailyTasks(result.tasksData);
-
-    // Gorev tamamlandiginda checkmark animasyonu
-    if (result.xpGained > 0) {
-      // Checkmark animasyonu
-      Animated.spring(taskCheckScales[taskId], {
-        toValue: 1,
-        tension: 80,
-        friction: 5,
-        useNativeDriver: true,
-      }).start();
-
-      // Floating XP animasyonu
-      triggerFloatingXP(result.xpGained);
-
-      // XP ekle
-      const xpResult = await addXP('word_learned', result.xpGained);
-      if (xpResult.leveledUp && xpResult.newLevel) {
-        triggerLevelUpAnimation(xpResult.newLevel);
-      }
-      // XP durumunu guncelle
-      await loadXPStatus();
-    }
-
-    // Tum gorevler tamamlandiginda bonus
-    if (result.allJustCompleted) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      const bonus = await claimDailyTasksBonus();
-      if (bonus > 0) {
-        await addXP('daily_goal_reached', bonus);
-        triggerFloatingXP(bonus);
-        await loadXPStatus();
-      }
-    }
   };
 
   // XP durumunu yukle ve progress bar animasyonlarini tetikle
@@ -213,21 +143,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     setDailyGoal(status.dailyGoal);
     setTotalXP(status.totalXP);
     setLevelProgress(status.levelProgress);
-    setDailyGoalStreak(status.dailyGoalStreak);
 
-    // Progress bar animasyonlari (useNativeDriver: false cunku width degisecek)
-    Animated.parallel([
-      Animated.timing(dailyProgressWidth, {
-        toValue: Math.min(status.dailyXP / status.dailyGoal, 1),
-        duration: 800,
-        useNativeDriver: false,
-      }),
-      Animated.timing(levelProgressWidth, {
-        toValue: status.levelProgress,
-        duration: 800,
-        useNativeDriver: false,
-      }),
-    ]).start();
+    Animated.timing(levelProgressWidth, {
+      toValue: status.levelProgress,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
   };
 
   // Floating "+X XP" animasyonu olustur
@@ -235,25 +156,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     const id = floatingIdRef.current++;
     const opacity = new Animated.Value(1);
     const translateY = new Animated.Value(0);
-
     const newFloat: FloatingXP = { id, amount, opacity, translateY };
     setFloatingXPs(prev => [...prev, newFloat]);
-
-    // Yukari kayip solma animasyonu
     Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: -60,
-        duration: 1200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 1200,
-        delay: 300,
-        useNativeDriver: true,
-      }),
+      Animated.timing(translateY, { toValue: -60, duration: 1200, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 0, duration: 1200, delay: 300, useNativeDriver: true }),
     ]).start(() => {
-      // Animasyon bitince listeden cikar
       setFloatingXPs(prev => prev.filter(f => f.id !== id));
     });
   };
@@ -282,6 +190,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const todaysWord = getWordOfTheDay(targetLanguage, proficiencyLevel);
       setWord(todaysWord);
       setShowMeaning(false);
+      setActiveWordTab('meaning');
       const idHash = parseInt(todaysWord.id.replace(/\D/g, '')) || 1;
       const updatedProgress = await updateDailyStreak(idHash);
       setProgress(updatedProgress);
@@ -289,11 +198,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const favStatus = await isFavorite(todaysWord.id);
       setIsFav(favStatus);
       await addXP('word_learned');
+      await completeDailyTask('learn_word');
       await loadXPStatus();
-      handleCompleteTask('learn_word');
       // Haftalik zorluk: kelime ogrenme hedefini guncelle
       const wcResult = await updateWeeklyChallengeGoal('learn_words');
-      setWeeklyChallenge(wcResult.data);
       if (wcResult.justCompleted) {
         const bonus = await claimWeeklyChallengeBonus();
         if (bonus > 0) {
@@ -373,7 +281,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         if (result.gained > 0) triggerFloatingXP(result.gained);
         loadXPStatus();
       });
-      handleCompleteTask('discover_meaning');
+      completeDailyTask('discover_meaning');
       Animated.spring(meaningReveal, {
         toValue: 1, tension: 50, friction: 6, useNativeDriver: true,
       }).start();
@@ -381,15 +289,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       Animated.timing(meaningReveal, {
         toValue: 0, duration: 200, useNativeDriver: true,
       }).start(() => setShowMeaning(false));
-    }
-  };
-
-  // AI ile pratik yap
-  const handlePracticePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (word) {
-      handleCompleteTask('practice_ai');
-      setTimeout(() => onNavigateToChat(word), 150);
     }
   };
 
@@ -407,16 +306,54 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const localizedMeaning = getTranslation(word, nativeLanguage);
   const localizedExample = getExampleTranslation(word, nativeLanguage);
 
-  // Gorev etiketini getir
-  const getTaskLabel = (taskId: DailyTaskId): string => {
-    const config = TASK_CONFIG[taskId];
-    return config ? t(config.labelKey) : taskId;
-  };
-
-  // Gorev ikonunu getir
-  const getTaskIcon = (taskId: DailyTaskId): string => {
-    const config = TASK_CONFIG[taskId];
-    return config ? config.icon : '\u{2753}';
+  // Kelime karti tab icerik renderla
+  const renderWordTabContent = () => {
+    switch (activeWordTab) {
+      case 'meaning':
+        return (
+          <Animated.View style={[styles.tabContentArea, {
+            opacity: meaningReveal,
+            transform: [{
+              translateY: meaningReveal.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }),
+            }],
+          }]}>
+            <Text style={styles.meaningText}>{localizedMeaning}</Text>
+            <View style={styles.separator} />
+            <View style={styles.exampleArea}>
+              <Text style={styles.exampleText}>{targetLanguageFlag} "{word.example_sentence}"</Text>
+              {localizedExample && (
+                <Text style={styles.exampleTrans}>{nativeLanguageFlag} {localizedExample}</Text>
+              )}
+            </View>
+          </Animated.View>
+        );
+      case 'example':
+        return (
+          <Animated.View style={[styles.tabContentArea, { opacity: meaningReveal }]}>
+            {word.realWorldExamples && word.realWorldExamples.length > 0 ? (
+              <RealWorldExamples word={word} />
+            ) : (
+              <View style={styles.emptyTabContent}>
+                <Text style={styles.emptyTabEmoji}>{'\u{1F4D6}'}</Text>
+                <Text style={styles.emptyTabText}>Bu kelime icin henuz ornek yok</Text>
+              </View>
+            )}
+          </Animated.View>
+        );
+      case 'grammar':
+        return (
+          <Animated.View style={[styles.tabContentArea, { opacity: meaningReveal }]}>
+            {(word.grammarNote || (word.sentencePatterns && word.sentencePatterns.length > 0)) ? (
+              <GrammarNuggets word={word} />
+            ) : (
+              <View style={styles.emptyTabContent}>
+                <Text style={styles.emptyTabEmoji}>{'\u{1F4DD}'}</Text>
+                <Text style={styles.emptyTabText}>Bu kelime icin dilbilgisi notu yok</Text>
+              </View>
+            )}
+          </Animated.View>
+        );
+    }
   };
 
   return (
@@ -428,57 +365,33 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* Header */}
+          {/* ── Kompakt Header: Greeting + Gamification Bar ── */}
           <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
             <Text style={styles.greeting}>{getGreeting()}</Text>
-            <View style={styles.headerBadges}>
-              <TouchableOpacity
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToLeaderboard(); }}
-                style={styles.headerBadge}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.headerBadgeText}>{levelInfo?.emoji || '\u{1F331}'} Lv.{levelInfo?.level || 1}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToJourney(); }}
-                style={[styles.headerBadge, progress && progress.streak > 0 && styles.headerBadgeStreak]}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.headerBadgeText}>
-                  {progress && progress.streak > 0 ? '\u{1F525}' : '\u2728'} {progress?.streak || 0}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </Animated.View>
 
-          {/* XP Widget -- Seviye ilerleme + Gunluk XP */}
-          <Animated.View style={[styles.xpWidget, { opacity: xpWidgetOpacity }]}>
-            <LinearGradient
-              colors={['rgba(99,102,241,0.12)', 'rgba(139,92,246,0.08)']}
-              style={styles.xpWidgetInner}
-            >
-              {/* Toplam XP ve Seviye */}
-              <View style={styles.xpTopRow}>
-                <View style={styles.xpLevelBadge}>
-                  <Text style={styles.xpLevelEmoji}>{levelInfo?.emoji || '\u{1F331}'}</Text>
-                  <View>
-                    <Text style={styles.xpLevelTitle}>{levelInfo?.title || 'Merakli'}</Text>
-                    <Text style={styles.xpLevelNumber}>Lv. {levelInfo?.level || 1}</Text>
-                  </View>
-                </View>
-                <View style={styles.xpTotalBadge}>
-                  <Text style={styles.xpTotalValue}>{totalXP.toLocaleString()}</Text>
-                  <Text style={styles.xpTotalLabel}>XP</Text>
-                </View>
+          {/* Gamification Bar -- tek satirda streak, seviye, ilerleme, XP */}
+          <TouchableOpacity
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToLeaderboard(); }}
+            activeOpacity={0.7}
+            style={styles.gamificationBar}
+          >
+            <View style={styles.gamBarLeft}>
+              {/* Streak */}
+              <View style={styles.gamBarItem}>
+                <Text style={styles.gamBarEmoji}>{'\u{1F525}'}</Text>
+                <Text style={styles.gamBarValue}>{progress?.streak || 0}</Text>
               </View>
 
-              {/* Seviye ilerleme cubugu */}
-              <View style={styles.progressSection}>
-                <View style={styles.progressBarBg}>
+              {/* Seviye + ilerleme cubugu */}
+              <View style={styles.gamBarLevel}>
+                <Text style={styles.gamBarLevelText}>
+                  {levelInfo?.emoji || '\u{1F331}'} Lv.{levelInfo?.level || 1}
+                </Text>
+                <View style={styles.gamBarProgressBg}>
                   <Animated.View
                     style={[
-                      styles.progressBarFill,
-                      styles.levelProgressFill,
+                      styles.gamBarProgressFill,
                       {
                         width: levelProgressWidth.interpolate({
                           inputRange: [0, 1],
@@ -488,58 +401,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                     ]}
                   />
                 </View>
-                <Text style={styles.progressLabel}>
-                  {levelInfo ? `${totalXP - levelInfo.minXP} / ${levelInfo.maxXP - levelInfo.minXP} XP` : ''}
-                </Text>
               </View>
+            </View>
 
-              {/* Ayirici cizgi */}
-              <View style={styles.xpDivider} />
+            {/* Toplam XP */}
+            <View style={styles.gamBarXP}>
+              <Text style={styles.gamBarXPValue}>{totalXP.toLocaleString()}</Text>
+              <Text style={styles.gamBarXPLabel}>XP</Text>
+            </View>
+          </TouchableOpacity>
 
-              {/* Gunluk XP hedef ve ilerleme */}
-              <View style={styles.dailyXPSection}>
-                <View style={styles.dailyXPHeader}>
-                  <Text style={styles.dailyXPTitle}>{'\u{1F3AF}'} {t('dailyTasks')}</Text>
-                  <Text style={styles.dailyXPCount}>
-                    {dailyXP}/{dailyGoal} XP
-                  </Text>
-                </View>
-                <View style={styles.progressBarBg}>
-                  <Animated.View
-                    style={[
-                      styles.progressBarFill,
-                      styles.dailyProgressFill,
-                      dailyXP >= dailyGoal && styles.dailyProgressComplete,
-                      {
-                        width: dailyProgressWidth.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0%', '100%'],
-                        }),
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-
-              {/* Streak bilgisi */}
-              {(progress?.streak || 0) > 0 && (
-                <View style={styles.streakRow}>
-                  <View style={styles.streakItem}>
-                    <Text style={styles.streakIcon}>{'\u{1F525}'}</Text>
-                    <Text style={styles.streakValue}>{progress?.streak || 0} {t('dayStreak')}</Text>
-                  </View>
-                  {dailyGoalStreak > 0 && (
-                    <View style={styles.streakItem}>
-                      <Text style={styles.streakIcon}>{'\u{1F3AF}'}</Text>
-                      <Text style={styles.streakValue}>{dailyGoalStreak} {t('dailyTasksStreak')}</Text>
-                    </View>
-                  )}
-                </View>
-              )}
-            </LinearGradient>
-          </Animated.View>
-
-          {/* Floating XP Animasyonlari -- XP widget uzerinde gosterilir */}
+          {/* Floating XP Animasyonlari */}
           {floatingXPs.map(floatingXP => (
             <Animated.View
               key={floatingXP.id}
@@ -556,19 +428,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             </Animated.View>
           ))}
 
-          {/* Kelime Karti */}
+          {/* ── Kelime Karti (Sadelestirmis) ── */}
           <View style={styles.cardArea}>
             <Animated.View style={[styles.card, { opacity: cardOpacity, transform: [{ scale: cardScale }] }]}>
               <LinearGradient
                 colors={['rgba(255,255,255,0.08)', 'rgba(255,255,255,0.02)']}
                 style={styles.cardInner}
               >
+                {/* Kelime emojisi */}
                 <Text style={styles.wordEmoji}>{word.emoji || getCategoryIcon(word.category)}</Text>
+
+                {/* Kelime */}
                 <Text style={styles.wordText}>{word.target_word}</Text>
+
+                {/* Telaffuz */}
                 {word.pronunciation && (
                   <Text style={styles.pronunciation}>{word.pronunciation}</Text>
                 )}
 
+                {/* Aksiyon butonlari */}
                 <View style={styles.actionRow}>
                   <TouchableOpacity onPress={handleSpeak} style={styles.actionBtn} activeOpacity={0.7}>
                     <Text style={styles.actionBtnIcon}>{'\u{1F50A}'}</Text>
@@ -591,184 +469,113 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                   </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity onPress={handleMeaningPress} activeOpacity={0.7}>
-                  <Text style={styles.meaningToggle}>
-                    {showMeaning ? `\u25BE ${t('hideMeaning')}` : `\u25B8 ${t('showMeaning')}`}
-                  </Text>
+                {/* Anlamini Gor butonu */}
+                <TouchableOpacity onPress={handleMeaningPress} activeOpacity={0.7} style={styles.meaningToggleBtn}>
+                  <LinearGradient
+                    colors={showMeaning ? ['rgba(110,231,183,0.15)', 'rgba(52,211,153,0.1)'] : ['rgba(167,139,250,0.15)', 'rgba(99,102,241,0.1)']}
+                    style={styles.meaningToggleBtnInner}
+                  >
+                    <Text style={styles.meaningToggle}>
+                      {showMeaning ? `\u25BE ${t('hideMeaning')}` : `\u25B8 ${t('showMeaning')}`}
+                    </Text>
+                  </LinearGradient>
                 </TouchableOpacity>
 
+                {/* Anlam acildiginda: Tab'lar ile icerik goster */}
                 {showMeaning && (
-                  <Animated.View style={[styles.meaningArea, {
-                    opacity: meaningReveal,
-                    transform: [{
-                      translateY: meaningReveal.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }),
-                    }],
-                  }]}>
-                    <Text style={styles.meaningText}>{localizedMeaning}</Text>
-                  </Animated.View>
-                )}
+                  <View style={styles.wordCardTabs}>
+                    {/* Tab seciciler */}
+                    <View style={styles.wordCardTabBar}>
+                      <TouchableOpacity
+                        style={[styles.wordCardTabItem, activeWordTab === 'meaning' && styles.wordCardTabItemActive]}
+                        onPress={() => setActiveWordTab('meaning')}
+                      >
+                        <Text style={[styles.wordCardTabText, activeWordTab === 'meaning' && styles.wordCardTabTextActive]}>
+                          Anlam
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.wordCardTabItem, activeWordTab === 'example' && styles.wordCardTabItemActive]}
+                        onPress={() => setActiveWordTab('example')}
+                      >
+                        <Text style={[styles.wordCardTabText, activeWordTab === 'example' && styles.wordCardTabTextActive]}>
+                          Ornek
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.wordCardTabItem, activeWordTab === 'grammar' && styles.wordCardTabItemActive]}
+                        onPress={() => setActiveWordTab('grammar')}
+                      >
+                        <Text style={[styles.wordCardTabText, activeWordTab === 'grammar' && styles.wordCardTabTextActive]}>
+                          Gramer
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
 
-                <View style={styles.separator} />
-
-                <View style={styles.exampleArea}>
-                  <Text style={styles.exampleText}>{targetLanguageFlag} "{word.example_sentence}"</Text>
-                  {localizedExample && (
-                    <Text style={styles.exampleTrans}>{nativeLanguageFlag} {localizedExample}</Text>
-                  )}
-                </View>
-
-                {/* Ozellik 2: Dilbilgisi Kapsulleri */}
-                {showMeaning && (word.grammarNote || (word.sentencePatterns && word.sentencePatterns.length > 0)) && (
-                  <>
-                    <View style={styles.separator} />
-                    <GrammarNuggets word={word} />
-                  </>
-                )}
-
-                {/* Ozellik 5: Canli Kullanim Ornekleri */}
-                {showMeaning && word.realWorldExamples && word.realWorldExamples.length > 0 && (
-                  <>
-                    <View style={styles.separator} />
-                    <RealWorldExamples word={word} />
-                  </>
+                    {/* Tab icerigi */}
+                    {renderWordTabContent()}
+                  </View>
                 )}
               </LinearGradient>
             </Animated.View>
           </View>
 
-          {/* Gunluk Gorev Paneli */}
-          {dailyTasks && (
-            <View style={styles.dailyTasksPanel}>
-              <View style={styles.dailyTasksHeader}>
-                <Text style={styles.dailyTasksTitle}>{'\u{2705}'} {t('dailyTasks')}</Text>
-                {dailyTasks.allCompleted && (
-                  <View style={styles.dailyTasksCompleteBadge}>
-                    <Text style={styles.dailyTasksCompleteText}>{t('dailyTasksComplete')}</Text>
-                  </View>
-                )}
-              </View>
-              {dailyTasks.tasks.map((task) => (
-                <View key={task.id} style={[styles.taskCard, task.completed && styles.taskCardCompleted]}>
-                  <View style={styles.taskLeft}>
-                    {/* Checkmark veya gorev ikonu */}
-                    <View style={[styles.taskIconContainer, task.completed && styles.taskIconCompleted]}>
-                      {task.completed ? (
-                        <Animated.View style={{ transform: [{ scale: taskCheckScales[task.id] }] }}>
-                          <Text style={styles.taskCheckmark}>{'\u2713'}</Text>
-                        </Animated.View>
-                      ) : (
-                        <Text style={styles.taskIcon}>{getTaskIcon(task.id)}</Text>
-                      )}
-                    </View>
-                    <Text style={[styles.taskLabel, task.completed && styles.taskLabelCompleted]}>
-                      {getTaskLabel(task.id)}
-                    </Text>
-                  </View>
-                  <View style={[styles.taskXPBadge, task.completed && styles.taskXPBadgeCompleted]}>
-                    <Text style={[styles.taskXPText, task.completed && styles.taskXPTextCompleted]}>
-                      +{task.xp} XP
-                    </Text>
-                  </View>
-                </View>
-              ))}
-              {/* Bonus bilgisi */}
-              {dailyTasks.allCompleted && dailyTasks.bonusClaimed && (
-                <View style={styles.bonusRow}>
-                  <Text style={styles.bonusText}>{'\u{1F381}'} {t('dailyTasksBonus')}: +30 XP</Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Haftalik Zorluk Paneli */}
-          <WeeklyChallengePanel data={weeklyChallenge} />
-
-          {/* Alt Aksiyonlar */}
-          <View style={styles.bottomActions}>
-            {dueCount > 0 && (
-              <TouchableOpacity
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNavigateToReview(); }}
-                style={styles.reviewBtn}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.reviewBtnText}>{'\u{1F504}'} {dueCount} {t('wordsToReview')}</Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Quiz Butonu */}
+          {/* ── Aksiyon Butonlari ── */}
+          <View style={styles.actionButtons}>
+            {/* Pratik Yap butonu */}
             <TouchableOpacity
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNavigateToQuiz(); }}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                completeDailyTask('practice_ai');
+                onNavigateToPractice(word);
+              }}
               activeOpacity={0.8}
+              style={styles.primaryActionBtn}
+            >
+              <LinearGradient
+                colors={['#6366F1', '#8B5CF6']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.primaryActionBtnInner}
+              >
+                <Text style={styles.primaryActionBtnText}>{'\u{1F4AC}'} Pratik Yap</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Quiz Coz butonu */}
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                onNavigateToQuiz();
+              }}
+              activeOpacity={0.8}
+              style={styles.primaryActionBtn}
             >
               <LinearGradient
                 colors={['#F59E0B', '#EF4444']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={styles.quizBtn}
+                style={styles.primaryActionBtnInner}
               >
-                <Text style={styles.quizBtnText}>{'\u{1F9E0}'} {t('startQuiz') || 'Quiz\'e Başla'}</Text>
+                <Text style={styles.primaryActionBtnText}>{'\u{1F9E0}'} {t('startQuiz') || 'Quiz Coz'}</Text>
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Pratik Yap - Zenginlestirilmis */}
-            <View style={styles.practiceSection}>
-              <Text style={styles.practiceSectionTitle}>
-                {'\u{1F4AC}'} {userName ? `${userName}, ` : ''}{word ? `"${word.target_word}" ${t('practiceWithAI') || 'ile pratik yap'}` : t('practiceWithAI')}
-              </Text>
-              <Text style={styles.practiceSectionSubtitle}>
-                {t('practiceSubtitle') || 'Bir senaryo seç ve konuşmaya başla!'}
-              </Text>
-              <View style={styles.scenarioGrid}>
-                <TouchableOpacity
-                  style={styles.scenarioCard}
-                  activeOpacity={0.7}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleCompleteTask('practice_ai'); if (word) onNavigateToChat(word); }}
-                >
-                  <Text style={styles.scenarioEmoji}>{'\u2615'}</Text>
-                  <Text style={styles.scenarioLabel}>{t('scenarioCafe') || 'Kafede'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.scenarioCard}
-                  activeOpacity={0.7}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleCompleteTask('practice_ai'); if (word) onNavigateToChat(word); }}
-                >
-                  <Text style={styles.scenarioEmoji}>{'\u2708\uFE0F'}</Text>
-                  <Text style={styles.scenarioLabel}>{t('scenarioTravel') || 'Seyahatte'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.scenarioCard}
-                  activeOpacity={0.7}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleCompleteTask('practice_ai'); if (word) onNavigateToChat(word); }}
-                >
-                  <Text style={styles.scenarioEmoji}>{'\u{1F6D2}'}</Text>
-                  <Text style={styles.scenarioLabel}>{t('scenarioShopping') || 'Alışverişte'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.scenarioCard}
-                  activeOpacity={0.7}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleCompleteTask('practice_ai'); if (word) onNavigateToChat(word); }}
-                >
-                  <Text style={styles.scenarioEmoji}>{'\u{1F4BC}'}</Text>
-                  <Text style={styles.scenarioLabel}>{t('scenarioWork') || 'İş Yerinde'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.scenarioCard}
-                  activeOpacity={0.7}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleCompleteTask('practice_ai'); if (word) onNavigateToChat(word); }}
-                >
-                  <Text style={styles.scenarioEmoji}>{'\u{1F393}'}</Text>
-                  <Text style={styles.scenarioLabel}>{t('scenarioSchool') || 'Okulda'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.scenarioCard}
-                  activeOpacity={0.7}
-                  onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleCompleteTask('practice_ai'); if (word) onNavigateToChat(word); }}
-                >
-                  <Text style={styles.scenarioEmoji}>{'\u{1F46B}'}</Text>
-                  <Text style={styles.scenarioLabel}>{t('scenarioFriends') || 'Arkadaşlarla'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            {/* Tekrar hatirlatma */}
+            {dueCount > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  onNavigateToReview();
+                }}
+                style={styles.reviewBtn}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.reviewBtnText}>
+                  {'\u{1F504}'} {dueCount} {t('wordsToReview')} {'\u203A'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -787,27 +594,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
       )}
 
-      {/* Alt Navigasyon Cubugu */}
+      {/* Alt Navigasyon Cubugu -- 4 tab: Home | Quests | History | Profile */}
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tab} onPress={() => {}}>
           <Text style={styles.tabIcon}>{'\u{1F3E0}'}</Text>
           <Text style={styles.tabLabelActive}>{t('tabHome')}</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToQuests(); }}>
+          <Text style={styles.tabIcon}>{'\u{1F3AF}'}</Text>
+          <Text style={styles.tabLabel}>Quests</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }}>
           <Text style={styles.tabIcon}>{'\u{1F4DA}'}</Text>
           <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToBadges(); }}>
-          <Text style={styles.tabIcon}>{'\u{1F3C6}'}</Text>
-          <Text style={styles.tabLabel}>{t('tabBadges')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToJourney(); }}>
-          <Text style={styles.tabIcon}>{'\u{1F680}'}</Text>
-          <Text style={styles.tabLabel}>{t('tabJourney')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToSettings(); }}>
-          <Text style={styles.tabIcon}>{'\u2699\uFE0F'}</Text>
-          <Text style={styles.tabLabel}>{t('tabSettings')}</Text>
+        <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToProfile(); }}>
+          <Text style={styles.tabIcon}>{'\u{1F464}'}</Text>
+          <Text style={styles.tabLabel}>Profil</Text>
         </TouchableOpacity>
       </View>
 
@@ -818,7 +621,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         onClose={() => setShowCulturalContext(false)}
       />
 
-      {/* Level Up Overlay -- seviye atladiginda gosterilir */}
+      {/* Level Up Overlay */}
       {showLevelUp && levelInfo && (
         <Animated.View style={[styles.levelUpOverlay, { opacity: levelUpOpacity }]}>
           <Animated.View style={[styles.levelUpCard, { transform: [{ scale: levelUpScale }] }]}>
@@ -846,170 +649,92 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { fontSize: 16, color: 'rgba(255,255,255,0.6)', fontWeight: '600' },
 
-  // ─── Header ──────────────────────────────────────────────
+  // ── Kompakt Header ──
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   greeting: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: -0.3,
+  },
+
+  // ── Gamification Bar ──
+  gamificationBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 16,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.15)',
+  },
+  gamBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
     flex: 1,
   },
-  headerBadges: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  headerBadge: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  headerBadgeStreak: {
-    backgroundColor: 'rgba(245,158,11,0.15)',
-  },
-  headerBadgeText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.8)',
-  },
-
-  // ─── XP Widget ───────────────────────────────────────────
-  xpWidget: {
-    marginHorizontal: 20,
-    marginBottom: 12,
-  },
-  xpWidgetInner: {
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.2)',
-  },
-  xpTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  xpLevelBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  xpLevelEmoji: {
-    fontSize: 32,
-  },
-  xpLevelTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#A78BFA',
-  },
-  xpLevelNumber: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.5)',
-  },
-  xpTotalBadge: {
-    alignItems: 'flex-end',
-  },
-  xpTotalValue: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#FBBF24',
-  },
-  xpTotalLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: 'rgba(251,191,36,0.6)',
-    letterSpacing: 1,
-  },
-
-  // ─── Progress Bar ────────────────────────────────────────
-  progressSection: {
-    marginBottom: 8,
-  },
-  progressBarBg: {
-    height: 8,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  levelProgressFill: {
-    backgroundColor: '#8B5CF6',
-  },
-  progressLabel: {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.4)',
-    marginTop: 4,
-    textAlign: 'right',
-  },
-  xpDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    marginVertical: 10,
-  },
-
-  // ─── Gunluk XP Hedef ────────────────────────────────────
-  dailyXPSection: {
-    marginBottom: 4,
-  },
-  dailyXPHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  dailyXPTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.7)',
-  },
-  dailyXPCount: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#6EE7B7',
-  },
-  dailyProgressFill: {
-    backgroundColor: '#6EE7B7',
-  },
-  dailyProgressComplete: {
-    backgroundColor: '#34D399',
-  },
-
-  // ─── Streak Gosterimi ────────────────────────────────────
-  streakRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 10,
-  },
-  streakItem: {
+  gamBarItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  streakIcon: {
-    fontSize: 14,
+  gamBarEmoji: { fontSize: 16 },
+  gamBarValue: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FBBF24',
   },
-  streakValue: {
+  gamBarLevel: {
+    flex: 1,
+  },
+  gamBarLevelText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.6)',
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 4,
+  },
+  gamBarProgressBg: {
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  gamBarProgressFill: {
+    height: '100%',
+    backgroundColor: '#8B5CF6',
+    borderRadius: 3,
+  },
+  gamBarXP: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 3,
+    marginLeft: 12,
+  },
+  gamBarXPValue: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#FBBF24',
+  },
+  gamBarXPLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'rgba(251,191,36,0.6)',
   },
 
-  // ─── Floating XP Animasyonu ──────────────────────────────
+  // ── Floating XP ──
   floatingXP: {
     position: 'absolute',
-    top: 140,
+    top: 100,
     alignSelf: 'center',
     zIndex: 100,
   },
@@ -1022,11 +747,11 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
 
-  // ─── Kelime Karti ────────────────────────────────────────
+  // ── Kelime Karti ──
   cardArea: {
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   card: {
     width: width - 40,
@@ -1045,7 +770,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.1)',
   },
   wordEmoji: {
-    fontSize: 28,
+    fontSize: 32,
     marginBottom: 12,
   },
   wordText: {
@@ -1076,19 +801,57 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  actionBtnIcon: {
-    fontSize: 20,
+  actionBtnIcon: { fontSize: 20 },
+
+  // Anlamini Gor butonu
+  meaningToggleBtn: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  meaningToggleBtnInner: {
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: 'center',
   },
   meaningToggle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#A78BFA',
-    marginBottom: 4,
-    paddingVertical: 4,
   },
-  meaningArea: {
-    marginTop: 8,
+
+  // Kelime karti icindeki tab'lar
+  wordCardTabs: {
+    width: '100%',
+    marginTop: 16,
+  },
+  wordCardTabBar: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 10,
+    padding: 3,
+    marginBottom: 12,
+  },
+  wordCardTabItem: {
+    flex: 1,
+    paddingVertical: 8,
     alignItems: 'center',
+    borderRadius: 8,
+  },
+  wordCardTabItemActive: {
+    backgroundColor: 'rgba(99,102,241,0.2)',
+  },
+  wordCardTabText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.4)',
+  },
+  wordCardTabTextActive: {
+    color: '#A78BFA',
+    fontWeight: '700',
+  },
+  tabContentArea: {
+    width: '100%',
   },
   meaningText: {
     fontSize: 18,
@@ -1096,12 +859,14 @@ const styles = StyleSheet.create({
     color: '#6EE7B7',
     textAlign: 'center',
     lineHeight: 26,
+    marginBottom: 12,
   },
   separator: {
     width: '60%' as any,
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.06)',
-    marginVertical: 16,
+    marginVertical: 12,
+    alignSelf: 'center',
   },
   exampleArea: {
     width: '100%' as any,
@@ -1118,120 +883,40 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.4)',
     lineHeight: 20,
   },
-
-  // ─── Gunluk Gorev Paneli ─────────────────────────────────
-  dailyTasksPanel: {
-    marginHorizontal: 20,
-    marginBottom: 16,
-  },
-  dailyTasksHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  emptyTabContent: {
     alignItems: 'center',
-    marginBottom: 10,
+    paddingVertical: 20,
   },
-  dailyTasksTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: 'rgba(255,255,255,0.8)',
-  },
-  dailyTasksCompleteBadge: {
-    backgroundColor: 'rgba(52,211,153,0.15)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  dailyTasksCompleteText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#34D399',
-  },
-  taskCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  taskCardCompleted: {
-    backgroundColor: 'rgba(52,211,153,0.06)',
-    borderColor: 'rgba(52,211,153,0.15)',
-  },
-  taskLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  taskIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  taskIconCompleted: {
-    backgroundColor: 'rgba(52,211,153,0.2)',
-  },
-  taskIcon: {
-    fontSize: 18,
-  },
-  taskCheckmark: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#34D399',
-  },
-  taskLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.7)',
-    flex: 1,
-  },
-  taskLabelCompleted: {
-    color: 'rgba(255,255,255,0.4)',
-    textDecorationLine: 'line-through',
-  },
-  taskXPBadge: {
-    backgroundColor: 'rgba(251,191,36,0.1)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  taskXPBadgeCompleted: {
-    backgroundColor: 'rgba(52,211,153,0.1)',
-  },
-  taskXPText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FBBF24',
-  },
-  taskXPTextCompleted: {
-    color: '#34D399',
-  },
-  bonusRow: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  bonusText: {
+  emptyTabEmoji: { fontSize: 28, marginBottom: 8, opacity: 0.5 },
+  emptyTabText: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#FBBF24',
+    color: 'rgba(255,255,255,0.35)',
+    textAlign: 'center',
   },
 
-  // ─── Alt Aksiyonlar ──────────────────────────────────────
-  bottomActions: {
+  // ── Aksiyon Butonlari ──
+  actionButtons: {
     paddingHorizontal: 20,
+    gap: 10,
     paddingBottom: 8,
-    gap: 8,
+  },
+  primaryActionBtn: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  primaryActionBtnInner: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  primaryActionBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   reviewBtn: {
     backgroundColor: 'rgba(245,158,11,0.12)',
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 14,
     alignItems: 'center',
@@ -1243,80 +928,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FBBF24',
   },
-  practiceBtn: {
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  practiceBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  quizBtn: {
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  quizBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  practiceSection: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
-    marginTop: 4,
-  },
-  practiceSectionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  practiceSectionSubtitle: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: 'rgba(255,255,255,0.45)',
-    marginBottom: 14,
-  },
-  scenarioGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  scenarioCard: {
-    width: (width - 72) / 3,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  scenarioEmoji: {
-    fontSize: 26,
-    marginBottom: 6,
-  },
-  scenarioLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.7)',
-    textAlign: 'center',
-  },
 
-  // ─── Gizli Paylasim Karti ───────────────────────────────
+  // ── Gizli Paylasim Karti ──
   shareCardHidden: {
     position: 'absolute',
     top: -9999,
     left: -9999,
   },
 
-  // ─── Alt Navigasyon Cubugu ───────────────────────────────
+  // ── Alt Navigasyon Cubugu (4 tab) ──
   tabBar: {
     flexDirection: 'row',
     backgroundColor: 'rgba(15,10,46,0.95)',
@@ -1345,7 +965,7 @@ const styles = StyleSheet.create({
     color: '#A78BFA',
   },
 
-  // ─── Level Up Overlay ────────────────────────────────────
+  // ── Level Up Overlay ──
   levelUpOverlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
@@ -1364,27 +984,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 24,
   },
-  levelUpEmoji: {
-    fontSize: 64,
-    marginBottom: 12,
-  },
-  levelUpTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  levelUpLevel: {
-    fontSize: 36,
-    fontWeight: '900',
-    color: '#FBBF24',
-    marginBottom: 4,
-  },
-  levelUpName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.8)',
-  },
+  levelUpEmoji: { fontSize: 64, marginBottom: 12 },
+  levelUpTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginBottom: 4 },
+  levelUpLevel: { fontSize: 36, fontWeight: '900', color: '#FBBF24', marginBottom: 4 },
+  levelUpName: { fontSize: 16, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
 });
 
 export default HomeScreen;
