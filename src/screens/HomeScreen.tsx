@@ -23,7 +23,7 @@ import { captureRef } from 'react-native-view-shot';
 // @ts-ignore
 import * as Sharing from 'expo-sharing';
 import { ContentItem, UserProgress, ProficiencyLevel, LevelInfo, DailyTaskId } from '../types';
-import { getWordOfTheDay, getTranslation, getExampleTranslation } from '../utils/contentLoader';
+import { getWordOfTheDay, getTranslation, getExampleTranslation, loadContentForLevel } from '../utils/contentLoader';
 import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord, getDueWordsForToday, getUserName, getDailyXPStatus, addXP, completeDailyTask, updateWeeklyChallengeGoal, claimWeeklyChallengeBonus } from '../utils/storage';
 import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../utils/translations';
 import ShareWordCard from '../components/ShareWordCard';
@@ -71,6 +71,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
   // Ana state'ler
   const [word, setWord] = useState<ContentItem | null>(null);
+  const [wordList, setWordList] = useState<ContentItem[]>([]);
+  const [wordIndex, setWordIndex] = useState(0);
+  const [swipesLeft, setSwipesLeft] = useState(2);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
   const [isFav, setIsFav] = useState(false);
@@ -110,77 +113,83 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   // Tinder-style swipe animasyonlari
   const swipeX = useRef(new Animated.Value(0)).current;
   const swipeY = useRef(new Animated.Value(0)).current;
+  const swipesLeftRef = useRef(2);
 
   const SWIPE_THRESHOLD = 120;
+
+  // Sonraki kelimeye gec
+  const showNextWord = useCallback((direction: number) => {
+    if (swipesLeftRef.current <= 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+      Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+      return;
+    }
+
+    Animated.timing(swipeX, {
+      toValue: direction * (width + 100),
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      swipesLeftRef.current -= 1;
+      setSwipesLeft(swipesLeftRef.current);
+      setWordIndex(prev => {
+        const next = prev + 1;
+        const nextWord = wordList[next];
+        if (nextWord) {
+          setWord(nextWord);
+          setShowMeaning(false);
+          setActiveWordTab('meaning');
+          meaningReveal.setValue(0);
+          addLearnedWord(nextWord).then(isNew => {
+            if (isNew) {
+              addXP('word_learned').then(r => {
+                if (r.leveledUp && r.newLevel) triggerLevelUpAnimation(r.newLevel);
+                if (r.gained > 0) triggerFloatingXP(r.gained);
+                loadXPStatus();
+              });
+            }
+          });
+          isFavorite(nextWord.id).then(setIsFav);
+        }
+        return next;
+      });
+      swipeX.setValue(0);
+      swipeY.setValue(0);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      // Giris animasyonu
+      cardScale.setValue(0.95);
+      cardOpacity.setValue(0);
+      Animated.parallel([
+        Animated.spring(cardScale, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
+        Animated.timing(cardOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+      ]).start();
+    });
+  }, [wordList]);
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gestureState) =>
-        Math.abs(gestureState.dx) > 10,
+      onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dx) > 10,
       onPanResponderMove: Animated.event(
         [null, { dx: swipeX, dy: swipeY }],
         { useNativeDriver: false }
       ),
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > SWIPE_THRESHOLD) {
-          // Saga cek → Kesfe
-          Animated.timing(swipeX, {
-            toValue: width + 100,
-            duration: 300,
-            useNativeDriver: true,
-          }).start(() => {
-            swipeX.setValue(0);
-            swipeY.setValue(0);
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            completeDailyTask('practice_ai');
-            onNavigateToPractice(word || undefined);
-          });
-        } else if (gestureState.dx < -SWIPE_THRESHOLD) {
-          // Sola cek → Quiz
-          Animated.timing(swipeX, {
-            toValue: -width - 100,
-            duration: 300,
-            useNativeDriver: true,
-          }).start(() => {
-            swipeX.setValue(0);
-            swipeY.setValue(0);
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            onNavigateToQuiz();
-          });
+      onPanResponderRelease: (_, gs) => {
+        if (Math.abs(gs.dx) > SWIPE_THRESHOLD) {
+          showNextWord(gs.dx > 0 ? 1 : -1);
         } else {
-          // Geri don
-          Animated.spring(swipeX, {
-            toValue: 0,
-            tension: 40,
-            friction: 5,
-            useNativeDriver: true,
-          }).start();
-          Animated.spring(swipeY, {
-            toValue: 0,
-            tension: 40,
-            friction: 5,
-            useNativeDriver: true,
-          }).start();
+          Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+          Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
         }
       },
     })
   ).current;
 
-  // Kart rotation ve opacity -- swipe esnasinda tilt ve renk gostergeleri
+  // Kart rotation -- swipe esnasinda tilt
   const cardRotate = swipeX.interpolate({
     inputRange: [-width, 0, width],
     outputRange: ['-12deg', '0deg', '12deg'],
-  });
-  const swipeRightOpacity = swipeX.interpolate({
-    inputRange: [0, 80],
-    outputRange: [0, 1],
-    extrapolate: 'clamp',
-  });
-  const swipeLeftOpacity = swipeX.interpolate({
-    inputRange: [-80, 0],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
   });
 
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
@@ -262,10 +271,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }, 3000);
   };
 
-  // Gunluk icerik yukle
+  // Gunluk icerik yukle -- 3 kelime hazirla (1 ana + 2 bonus)
   const loadDailyContent = async () => {
     try {
       const todaysWord = getWordOfTheDay(targetLanguage, proficiencyLevel);
+      // Bonus kelimeler icin ayni seviyedeki diger kelimeleri al
+      const allWords = loadContentForLevel(targetLanguage, proficiencyLevel);
+      const today = new Date();
+      const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+      const otherWords = allWords.filter(w => w.id !== todaysWord.id);
+      const bonus1 = otherWords[(dayOfYear + 7) % otherWords.length];
+      const bonus2 = otherWords[(dayOfYear + 13) % otherWords.length];
+      const words = [todaysWord, bonus1, bonus2].filter(Boolean);
+      setWordList(words);
+      setWordIndex(0);
+      setSwipesLeft(2);
+      swipesLeftRef.current = 2;
+
       setWord(todaysWord);
       setShowMeaning(false);
       setActiveWordTab('meaning');
@@ -524,14 +546,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)']}
                 style={styles.cardInner}
               >
-                {/* Swipe gostergeleri */}
-                <Animated.View style={[styles.swipeLabel, styles.swipeLabelRight, { opacity: swipeRightOpacity }]}>
-                  <Text style={styles.swipeLabelTextRight}>{t('practiceNow')}</Text>
-                </Animated.View>
-                <Animated.View style={[styles.swipeLabel, styles.swipeLabelLeft, { opacity: swipeLeftOpacity }]}>
-                  <Text style={styles.swipeLabelTextLeft}>{t('startQuiz') || 'Quiz'}</Text>
-                </Animated.View>
-
                 {/* Kelime emojisi */}
                 <Text style={styles.wordEmoji}>{word.emoji || getCategoryIcon(word.category)}</Text>
 
@@ -613,9 +627,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             </Animated.View>
           </View>
 
-          {/* Swipe ipucu */}
+          {/* Swipe ipucu + kalan hak */}
           <View style={styles.swipeHint}>
-            <Text style={styles.swipeHintText}>{'\u2190'} Quiz  |  {t('practiceNow')} {'\u2192'}</Text>
+            {swipesLeft > 0 ? (
+              <Text style={styles.swipeHintText}>{'\u2190'} {'\u2192'}  +{swipesLeft}</Text>
+            ) : (
+              <View style={styles.swipeHintDots}>
+                {wordList.map((_, i) => (
+                  <View key={i} style={[styles.swipeDot, i === wordIndex && styles.swipeDotActive]} />
+                ))}
+              </View>
+            )}
           </View>
         </View>
       </SafeAreaView>
@@ -759,33 +781,6 @@ const styles = StyleSheet.create({
     minHeight: 420,
     justifyContent: 'center',
   },
-  swipeLabel: {
-    position: 'absolute',
-    top: 24,
-    zIndex: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 2,
-  },
-  swipeLabelRight: {
-    left: 20,
-    borderColor: '#6EE7B7',
-  },
-  swipeLabelLeft: {
-    right: 20,
-    borderColor: '#F87171',
-  },
-  swipeLabelTextRight: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#6EE7B7',
-  },
-  swipeLabelTextLeft: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#F87171',
-  },
   wordEmoji: {
     fontSize: 40,
     marginBottom: 16,
@@ -922,6 +917,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'rgba(255,255,255,0.25)',
     letterSpacing: 0.5,
+  },
+  swipeHintDots: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  swipeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  swipeDotActive: {
+    backgroundColor: '#A78BFA',
   },
 
   // ── Gizli Paylasim Karti ──
