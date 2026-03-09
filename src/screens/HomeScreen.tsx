@@ -34,6 +34,40 @@ import RealWorldExamples from '../components/RealWorldExamples';
 import { SkeletonCard } from '../components/SkeletonLoader';
 import { getCategoryIcon } from '../utils/categoryIcons';
 
+// Kategoriye gore emoji baloncuk gradient renkleri
+const CATEGORY_BUBBLE_COLORS: Record<string, [string, string]> = {
+  greetings: ['#FBBF24', '#F59E0B'],
+  daily_life: ['#60A5FA', '#3B82F6'],
+  home: ['#60A5FA', '#3B82F6'],
+  people: ['#F472B6', '#EC4899'],
+  food_drink: ['#FB923C', '#F97316'],
+  travel: ['#34D399', '#10B981'],
+  work_business: ['#A78BFA', '#8B5CF6'],
+  emotions: ['#FCD34D', '#FBBF24'],
+  nature: ['#4ADE80', '#22C55E'],
+  health: ['#F87171', '#EF4444'],
+  technology: ['#818CF8', '#6366F1'],
+  education: ['#67E8F9', '#22D3EE'],
+  culture: ['#E879F9', '#D946EF'],
+  sports: ['#34D399', '#10B981'],
+  music: ['#C084FC', '#A855F7'],
+  shopping: ['#FB923C', '#F97316'],
+  weather: ['#FDE68A', '#FCD34D'],
+  family: ['#F9A8D4', '#F472B6'],
+  animals: ['#86EFAC', '#4ADE80'],
+  colors: ['#C084FC', '#A855F7'],
+  numbers: ['#93C5FD', '#60A5FA'],
+  time: ['#FDA4AF', '#FB7185'],
+  body: ['#FDBA74', '#FB923C'],
+  clothing: ['#A5B4FC', '#818CF8'],
+  city: ['#67E8F9', '#22D3EE'],
+};
+
+const getCategoryBubbleColors = (category?: string): [string, string] => {
+  if (!category) return ['#A78BFA', '#8B5CF6'];
+  return CATEGORY_BUBBLE_COLORS[category] || ['#A78BFA', '#8B5CF6'];
+};
+
 const { width } = Dimensions.get('window');
 
 type HomeScreenProps = {
@@ -591,8 +625,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 colors={['rgba(124,58,237,0.14)', 'rgba(236,72,153,0.06)', 'rgba(255,255,255,0.02)']}
                 style={styles.cardInner}
               >
-                {/* Kelime emojisi */}
-                <Text style={styles.wordEmoji}>{word.emoji || getCategoryIcon(word.category)}</Text>
+                {/* Kelime emojisi -- karikatür baloncuk */}
+                <View style={styles.emojiBubbleWrapper}>
+                  <LinearGradient
+                    colors={getCategoryBubbleColors(word.category)}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.emojiBubble}
+                  >
+                    <Text style={styles.wordEmoji}>{word.emoji || getCategoryIcon(word.category)}</Text>
+                  </LinearGradient>
+                </View>
 
                 {/* Kelime */}
                 <Text style={styles.wordText} accessibilityRole="header" accessibilityLabel={`Word of the day: ${word.target_word}`}>{word.target_word}</Text>
@@ -834,9 +877,23 @@ const styles = StyleSheet.create({
     minHeight: 420,
     justifyContent: 'center',
   },
+  emojiBubbleWrapper: {
+    marginBottom: 20,
+  },
+  emojiBubble: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
   wordEmoji: {
-    fontSize: 40,
-    marginBottom: 16,
+    fontSize: 38,
   },
   wordText: {
     fontSize: 38,
