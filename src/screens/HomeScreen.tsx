@@ -170,7 +170,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [unlockedCount, setUnlockedCount] = useState(1);
 
   const SWIPE_THRESHOLD = 100;
-  const SWIPE_UP_THRESHOLD = -80;
+  const SWIPE_UP_THRESHOLD = -60;
   const MAX_WORDS = 3;
 
   // Super like animasyonu
@@ -228,20 +228,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         });
       }
     });
-    // Animasyon
+    // Animasyon -- buyuk ve belirgin
     setShowSuperLike(true);
-    superLikeScale.setValue(0);
+    superLikeScale.setValue(0.3);
     superLikeOpacity.setValue(1);
-    Animated.parallel([
-      Animated.spring(superLikeScale, { toValue: 1, tension: 60, friction: 4, useNativeDriver: true }),
-      Animated.timing(superLikeOpacity, { toValue: 0, duration: 1200, delay: 600, useNativeDriver: true }),
-    ]).start(() => setShowSuperLike(false));
-    // Kart yukari uc ve geri gel
     Animated.sequence([
-      Animated.timing(swipeY, { toValue: -150, duration: 200, useNativeDriver: true }),
-      Animated.spring(swipeY, { toValue: 0, tension: 60, friction: 5, useNativeDriver: true }),
+      Animated.spring(superLikeScale, { toValue: 1.3, tension: 80, friction: 4, useNativeDriver: true }),
+      Animated.spring(superLikeScale, { toValue: 1, tension: 100, friction: 6, useNativeDriver: true }),
     ]).start();
-    Animated.spring(swipeX, { toValue: 0, tension: 60, friction: 5, useNativeDriver: true }).start();
+    Animated.timing(superLikeOpacity, { toValue: 0, duration: 1500, delay: 800, useNativeDriver: true })
+      .start(() => setShowSuperLike(false));
+    // Kart yukari zipla ve geri gel
+    Animated.sequence([
+      Animated.timing(swipeY, { toValue: -120, duration: 180, useNativeDriver: true }),
+      Animated.spring(swipeY, { toValue: 0, tension: 70, friction: 5, useNativeDriver: true }),
+    ]).start();
+    Animated.spring(swipeX, { toValue: 0, tension: 70, friction: 5, useNativeDriver: true }).start();
   };
 
   // Swipe islemi -- yeni kelime ac veya acilmis kelimeler arasinda don
@@ -300,7 +302,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         { useNativeDriver: false }
       ),
       onPanResponderRelease: (_, gs) => {
-        if (gs.dy < SWIPE_UP_THRESHOLD && Math.abs(gs.dx) < 50) {
+        if (gs.dy < SWIPE_UP_THRESHOLD && Math.abs(gs.dx) < 80) {
           // Yukari swipe → Super Like (favorilere ekle)
           triggerSuperLike();
         } else if (Math.abs(gs.dx) > SWIPE_THRESHOLD) {
@@ -826,7 +828,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* Super Like animasyonu */}
           {showSuperLike && (
             <Animated.View style={[styles.superLikeOverlay, { opacity: superLikeOpacity, transform: [{ scale: superLikeScale }] }]} pointerEvents="none">
-              <Ionicons name="star" size={64} color="#FBBF24" />
+              <Ionicons name="star" size={80} color="#FBBF24" />
+              <Text style={styles.superLikeText}>FAVORITE</Text>
             </Animated.View>
           )}
 
@@ -1048,8 +1051,19 @@ const styles = StyleSheet.create({
   superLikeOverlay: {
     position: 'absolute',
     alignSelf: 'center',
-    top: '40%' as any,
+    top: '35%' as any,
     zIndex: 100,
+    alignItems: 'center',
+  },
+  superLikeText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FBBF24',
+    letterSpacing: 2,
+    marginTop: 8,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   cardInner: {
     borderRadius: 28,
