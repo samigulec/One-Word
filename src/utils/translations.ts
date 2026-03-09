@@ -135,7 +135,9 @@ type TranslationKey =
   | 'stageComplete' | 'allStagesComplete' | 'iPracticed' | 'gotIt' | 'chatWithLingo'
   | 'whatDoesMean' | 'trueOrFalse' | 'fillInBlank' | 'completeTheSentence'
   | 'quizResult' | 'encouragePerfect' | 'encourageGood' | 'encourageOk' | 'encourageTryMore'
-  | 'stagesCompleted' | 'unlockPrevious' | 'listenToWord' | 'true' | 'false';
+  | 'stagesCompleted' | 'unlockPrevious' | 'listenToWord' | 'true' | 'false'
+  | 'lingoIntro' | 'startChatting'
+  | 'usageNotesLabel' | 'funFactLabel';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   en: {
@@ -245,6 +247,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Keep going! Practice makes perfect!',
     stagesCompleted: 'completed', unlockPrevious: 'Complete the previous stage first',
     listenToWord: 'Tap to listen', true: 'True', false: 'False',
+    lingoIntro: "Hey! I'm Lingo, your language buddy! Let's practice \"{word}\" together!",
+    startChatting: 'Start Chatting',
+    usageNotesLabel: 'Usage Notes', funFactLabel: 'Fun Fact',
   },
   tr: {
     appName: "One Word", idiomOfTheDay: 'Günün Kelimesi', showMeaning: 'Anlamını Göster',
@@ -353,6 +358,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Devam et! Pratik mukemmellestir!',
     stagesCompleted: 'tamamlandi', unlockPrevious: 'Once onceki asamayi tamamla',
     listenToWord: 'Dinlemek icin dokun', true: 'Dogru', false: 'Yanlis',
+    lingoIntro: 'Merhaba! Ben Lingo, dil arkadaşın! Hadi birlikte "{word}" kelimesini pratik yapalim!',
+    startChatting: 'Sohbete Basla',
+    usageNotesLabel: 'Kullanim Notlari', funFactLabel: 'Ilginc Bilgi',
   },
   es: {
     appName: "One Word", idiomOfTheDay: 'Palabra del Día', showMeaning: 'Mostrar Significado',
@@ -452,6 +460,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Sigue asi! La practica hace al maestro!',
     stagesCompleted: 'completadas', unlockPrevious: 'Completa la etapa anterior primero',
     listenToWord: 'Toca para escuchar', true: 'Verdadero', false: 'Falso',
+    lingoIntro: 'Hola! Soy Lingo, tu companero de idiomas! Practiquemos "{word}" juntos!',
+    startChatting: 'Iniciar Chat',
+    usageNotesLabel: 'Notas de Uso', funFactLabel: 'Dato Curioso',
   },
   de: {
     appName: "One Word", idiomOfTheDay: 'Wort des Tages', showMeaning: 'Bedeutung zeigen',
@@ -551,6 +562,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Weiter so! Ubung macht den Meister!',
     stagesCompleted: 'abgeschlossen', unlockPrevious: 'Schliesse zuerst die vorherige Stufe ab',
     listenToWord: 'Tippe zum Anhoren', true: 'Richtig', false: 'Falsch',
+    lingoIntro: 'Hey! Ich bin Lingo, dein Sprachfreund! Lass uns "{word}" zusammen uben!',
+    startChatting: 'Chat starten',
+    usageNotesLabel: 'Verwendungshinweise', funFactLabel: 'Wusstest du?',
   },
   fr: {
     appName: "One Word", idiomOfTheDay: 'Mot du Jour', showMeaning: 'Voir le Sens',
@@ -650,6 +664,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Continue! La pratique rend parfait!',
     stagesCompleted: 'terminees', unlockPrevious: "Complete d'abord l'etape precedente",
     listenToWord: 'Appuie pour ecouter', true: 'Vrai', false: 'Faux',
+    lingoIntro: 'Salut! Je suis Lingo, ton compagnon de langue! Pratiquons "{word}" ensemble!',
+    startChatting: 'Commencer a discuter',
+    usageNotesLabel: "Notes d'utilisation", funFactLabel: 'Le saviez-vous?',
   },
   pt: {
     appName: "One Word", idiomOfTheDay: 'Palavra do Dia', showMeaning: 'Ver Significado',
@@ -749,6 +766,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Continue! A pratica leva a perfeicao!',
     stagesCompleted: 'concluidas', unlockPrevious: 'Complete a etapa anterior primeiro',
     listenToWord: 'Toque para ouvir', true: 'Verdadeiro', false: 'Falso',
+    lingoIntro: 'Oi! Eu sou o Lingo, seu companheiro de idiomas! Vamos praticar "{word}" juntos!',
+    startChatting: 'Iniciar Conversa',
+    usageNotesLabel: 'Notas de Uso', funFactLabel: 'Curiosidade',
   },
   it: {
     appName: "One Word", idiomOfTheDay: 'Parola del Giorno', showMeaning: 'Mostra',
@@ -848,6 +868,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Continua cosi! La pratica rende perfetti!',
     stagesCompleted: 'completate', unlockPrevious: 'Completa prima la fase precedente',
     listenToWord: 'Tocca per ascoltare', true: 'Vero', false: 'Falso',
+    lingoIntro: 'Ciao! Sono Lingo, il tuo compagno di lingua! Pratichiamo "{word}" insieme!',
+    startChatting: 'Inizia a chattare',
+    usageNotesLabel: "Note d'uso", funFactLabel: 'Lo sapevi?',
   },
   ru: {
     appName: "One Word", idiomOfTheDay: 'Слово Дня', showMeaning: 'Показать',
@@ -947,6 +970,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: 'Продолжай! Практика ведет к совершенству!',
     stagesCompleted: 'завершено', unlockPrevious: 'Сначала заверши предыдущий этап',
     listenToWord: 'Нажми чтобы послушать', true: 'Правда', false: 'Ложь',
+    lingoIntro: 'Привет! Я Линго, твой языковой друг! Давай потренируем "{word}" вместе!',
+    startChatting: 'Начать чат',
+    usageNotesLabel: 'Заметки', funFactLabel: 'Интересный факт',
   },
   ja: {
     appName: "One Word", idiomOfTheDay: '今日の単語', showMeaning: '意味を見る',
@@ -1046,6 +1072,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: '頑張って! 練習すれば完璧になる!',
     stagesCompleted: '完了', unlockPrevious: 'まず前のステージを完了してね',
     listenToWord: 'タップして聞く', true: '正しい', false: '間違い',
+    lingoIntro: 'やあ! 僕はLingo、君の言語パートナーだよ! 一緒に「{word}」を練習しよう!',
+    startChatting: 'チャットを始める',
+    usageNotesLabel: '使い方メモ', funFactLabel: '豆知識',
   },
   ko: {
     appName: "One Word", idiomOfTheDay: '오늘의 단어', showMeaning: '뜻 보기',
@@ -1145,6 +1174,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: '계속 가세요! 연습이 완벽을 만듭니다!',
     stagesCompleted: '완료', unlockPrevious: '먼저 이전 단계를 완료하세요',
     listenToWord: '탭하여 듣기', true: '참', false: '거짓',
+    lingoIntro: '안녕! 나는 Lingo, 너의 언어 친구야! 함께 "{word}"를 연습하자!',
+    startChatting: '채팅 시작',
+    usageNotesLabel: '사용 메모', funFactLabel: '재미있는 사실',
   },
   zh: {
     appName: "One Word", idiomOfTheDay: '每日单词', showMeaning: '查看含义',
@@ -1244,6 +1276,9 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     encourageTryMore: '继续加油! 熟能生巧!',
     stagesCompleted: '已完成', unlockPrevious: '请先完成上一阶段',
     listenToWord: '点击收听', true: '对', false: '错',
+    lingoIntro: '嗨! 我是Lingo，你的语言伙伴! 让我们一起练习"{word}"吧!',
+    startChatting: '开始聊天',
+    usageNotesLabel: '使用笔记', funFactLabel: '趣味小知识',
   },
 };
 

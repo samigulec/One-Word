@@ -19,6 +19,10 @@ import * as Speech from 'expo-speech';
 import { ContentItem } from '../types';
 import { LanguageCode, getTranslation as getUITranslation } from '../utils/translations';
 import { addXP, completeDailyTask } from '../utils/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Gunluk asama ilerlemesi icin depolama anahtari (her gun sifirlanir)
+const EXPLORE_KEY = 'explore_stages_' + new Date().toISOString().split('T')[0];
 
 const { width } = Dimensions.get('window');
 
@@ -180,9 +184,25 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
   // Ceviri yardimcisi
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
 
-  // Asama durumu -- her ziyarette sifirlanir
+  // Asama durumu -- AsyncStorage ile gun ici kalici
   const [completedStages, setCompletedStages] = useState<Set<number>>(new Set());
   const [activeStage, setActiveStage] = useState<number | null>(null);
+
+  // Mount'ta kayitli asamalari yukle
+  useEffect(() => {
+    const loadCompletedStages = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(EXPLORE_KEY);
+        if (saved) {
+          const parsed: number[] = JSON.parse(saved);
+          setCompletedStages(new Set(parsed));
+        }
+      } catch (_e) {
+        // Sessizce devam et
+      }
+    };
+    loadCompletedStages();
+  }, []);
 
   // Quiz durumu
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
@@ -287,6 +307,8 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
     setCompletedStages(prev => {
       const next = new Set(prev);
       next.add(stageId);
+      // Tamamlanan asamalari AsyncStorage'a kaydet
+      AsyncStorage.setItem(EXPLORE_KEY, JSON.stringify([...next])).catch(() => {});
       return next;
     });
     setActiveStage(null);
@@ -327,6 +349,8 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
     setCompletedStages(prev => {
       const next = new Set(prev);
       next.add(3);
+      // Tamamlanan asamalari AsyncStorage'a kaydet
+      AsyncStorage.setItem(EXPLORE_KEY, JSON.stringify([...next])).catch(() => {});
       return next;
     });
     onSelectScenario(word);
@@ -434,14 +458,14 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
 
           {usageNotes ? (
             <View style={styles.culturalCard}>
-              <Text style={styles.culturalLabel}>{'\u{1F4DD}'} Notes</Text>
+              <Text style={styles.culturalLabel}>{'\u{1F4DD}'} {t('usageNotesLabel')}</Text>
               <Text style={styles.culturalText}>{usageNotes}</Text>
             </View>
           ) : null}
 
           {funFact ? (
             <View style={styles.culturalCard}>
-              <Text style={styles.culturalLabel}>{'\u{1F4A1}'} Fun Fact</Text>
+              <Text style={styles.culturalLabel}>{'\u{2728}'} {t('funFactLabel')}</Text>
               <Text style={styles.culturalText}>{funFact}</Text>
             </View>
           ) : null}
@@ -471,32 +495,49 @@ const PracticeScreen: React.FC<PracticeScreenProps> = ({
     );
   };
 
-  // Asama 3 icerigi: Lingo ile Pratik
-  const renderStage3Content = () => (
-    <View style={styles.stageContent}>
-      <View style={styles.lingoPreview}>
-        <Text style={styles.lingoEmoji}>{'\u{1F916}'}</Text>
-        <Text style={styles.lingoText}>
-          {t('chatWithLingo')}: "{word?.target_word}"
-        </Text>
-      </View>
+  // Asama 3 icerigi: Lingo ile Pratik -- cazip kart tasarimi
+  const renderStage3Content = () => {
+    // Lingo tanitim metnindeki {word} yer tutucusunu gercek kelimeyle degistir
+    const lingoIntroText = t('lingoIntro').replace('{word}', word?.target_word || '');
 
-      <TouchableOpacity
-        style={styles.lingoButton}
-        onPress={handleChatWithLingo}
-        activeOpacity={0.7}
-      >
-        <LinearGradient
-          colors={['#10B981', '#059669']}
-          style={styles.lingoButtonInner}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
+    return (
+      <View style={styles.stageContent}>
+        <View style={styles.lingoCard}>
+          {/* Lingo avatar -- gradient daire icinde robot emoji */}
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.lingoAvatar}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.lingoAvatarEmoji}>{'\u{1F916}'}</Text>
+          </LinearGradient>
+
+          {/* Konusma balonu -- Lingo'nun tanitim metni */}
+          <View style={styles.lingoBubble}>
+            <View style={styles.lingoBubbleArrow} />
+            <Text style={styles.lingoBubbleText}>{lingoIntroText}</Text>
+          </View>
+        </View>
+
+        {/* Sohbete basla butonu -- mor gradient */}
+        <TouchableOpacity
+          style={styles.lingoButton}
+          onPress={handleChatWithLingo}
+          activeOpacity={0.7}
         >
-          <Text style={styles.lingoButtonText}>{'\u{1F4AC}'} {t('chatWithLingo')}</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </View>
-  );
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.lingoButtonInner}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <Text style={styles.lingoButtonText}>{'\u{1F4AC}'} {t('startChatting')}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   // Asama 4 icerigi: Mini Quiz
   const renderStage4Content = () => {
@@ -1066,7 +1107,7 @@ const styles = StyleSheet.create({
 
   // Stage 2: Kulturel Baglam
   culturalScroll: {
-    maxHeight: 200,
+    maxHeight: 280,
     marginBottom: 12,
   },
   culturalCard: {
@@ -1084,33 +1125,74 @@ const styles = StyleSheet.create({
   culturalText: {
     fontSize: 14,
     fontWeight: '500',
-    color: 'rgba(255,255,255,0.6)',
-    lineHeight: 20,
+    color: 'rgba(255,255,255,0.8)',
+    lineHeight: 22,
   },
 
-  // Stage 3: Lingo ile Pratik
-  lingoPreview: {
+  // Stage 3: Lingo ile Pratik -- yenilenmis tasarim
+  lingoCard: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  lingoEmoji: {
-    fontSize: 42,
-    marginBottom: 10,
+  lingoAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    // Hafif golge efekti
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  lingoText: {
-    fontSize: 15,
+  lingoAvatarEmoji: {
+    fontSize: 26,
+  },
+  lingoBubble: {
+    backgroundColor: 'rgba(99,102,241,0.12)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.2)',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    width: '100%',
+    position: 'relative',
+  },
+  lingoBubbleArrow: {
+    position: 'absolute',
+    top: -6,
+    alignSelf: 'center',
+    left: '50%',
+    marginLeft: -6,
+    width: 12,
+    height: 12,
+    backgroundColor: 'rgba(99,102,241,0.12)',
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderColor: 'rgba(99,102,241,0.2)',
+    transform: [{ rotate: '45deg' }],
+  },
+  lingoBubbleText: {
+    fontSize: 14,
     fontWeight: '600',
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
+    lineHeight: 21,
   },
   lingoButton: {
     borderRadius: 16,
     overflow: 'hidden',
+    width: '100%',
   },
   lingoButtonInner: {
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
   lingoButtonText: {
     fontSize: 16,

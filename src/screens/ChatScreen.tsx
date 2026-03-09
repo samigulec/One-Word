@@ -158,8 +158,19 @@ const AnimatedMessage: React.FC<{ item: ChatMessage; index: number; isLast: bool
       ]}
     >
       {!isUser && (
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarEmoji}>{'\u{1F916}'}</Text>
+        <View style={styles.avatarWrapper}>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.avatarContainer}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.avatarEmoji}>{'\u{1F916}'}</Text>
+          </LinearGradient>
+          {/* Ilk AI mesajinda "Lingo" etiketi goster */}
+          {index === 0 && (
+            <Text style={styles.avatarLabel}>Lingo</Text>
+          )}
         </View>
       )}
       <View style={{ maxWidth: '78%' }}>
@@ -283,8 +294,15 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
 
     return (
       <View style={[styles.messageContainer, styles.aiMessageContainer]}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarEmoji}>{'\u{1F916}'}</Text>
+        <View style={styles.avatarWrapper}>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.avatarContainer}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.avatarEmoji}>{'\u{1F916}'}</Text>
+          </LinearGradient>
         </View>
         <View style={[styles.messageBubble, styles.aiBubble, styles.typingBubble]}>
           <BouncingDots />
@@ -313,7 +331,18 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
             <Text style={styles.backArrow}>{'\u2190'}</Text>
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTutorName}>{'\u{1F916}'} Lingo</Text>
+            <View style={styles.headerTutorRow}>
+              <LinearGradient
+                colors={['#6366F1', '#8B5CF6']}
+                style={styles.headerTutorAvatar}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.headerTutorAvatarEmoji}>{'\u{1F916}'}</Text>
+              </LinearGradient>
+              <Text style={styles.headerTutorName}>Lingo</Text>
+              <View style={styles.headerOnlineDot} />
+            </View>
             <View style={styles.headerWordRow}>
               <Text style={styles.headerWord}>{word.emoji || targetFlag} {word.target_word}</Text>
               <View style={[styles.headerLevelBadge, { backgroundColor: getLevelColor(word.level) }]}>
@@ -465,11 +494,33 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 12,
   },
+  headerTutorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  headerTutorAvatar: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  headerTutorAvatarEmoji: {
+    fontSize: 12,
+  },
   headerTutorName: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
     color: '#A78BFA',
-    marginBottom: 2,
+  },
+  headerOnlineDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#10B981',
+    marginLeft: 5,
   },
   headerWordRow: {
     flexDirection: 'row',
@@ -531,20 +582,27 @@ const styles = StyleSheet.create({
   aiMessageContainer: {
     justifyContent: 'flex-start',
   },
-  avatarContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: 'rgba(99,102,241,0.15)',
-    justifyContent: 'center',
+  avatarWrapper: {
     alignItems: 'center',
     marginRight: 8,
     marginTop: 2,
-    borderWidth: 1.5,
-    borderColor: 'rgba(99,102,241,0.4)',
+  },
+  avatarContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Gradient arka plan LinearGradient ile saglaniyor
   },
   avatarEmoji: {
-    fontSize: 18,
+    fontSize: 20,
+  },
+  avatarLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#A78BFA',
+    marginTop: 2,
   },
   messageBubble: {
     paddingHorizontal: 14,
