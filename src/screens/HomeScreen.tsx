@@ -32,40 +32,57 @@ import CulturalContextModal from '../components/CulturalContextModal';
 import GrammarNuggets from '../components/GrammarNuggets';
 import RealWorldExamples from '../components/RealWorldExamples';
 import { SkeletonCard } from '../components/SkeletonLoader';
-import { getCategoryIcon } from '../utils/categoryIcons';
+// @ts-ignore
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
-// Kategoriye gore emoji baloncuk gradient renkleri
-const CATEGORY_BUBBLE_COLORS: Record<string, [string, string]> = {
-  greetings: ['#FBBF24', '#F59E0B'],
-  daily_life: ['#60A5FA', '#3B82F6'],
-  home: ['#60A5FA', '#3B82F6'],
-  people: ['#F472B6', '#EC4899'],
-  food_drink: ['#FB923C', '#F97316'],
-  travel: ['#34D399', '#10B981'],
-  work_business: ['#A78BFA', '#8B5CF6'],
-  emotions: ['#FCD34D', '#FBBF24'],
-  nature: ['#4ADE80', '#22C55E'],
-  health: ['#F87171', '#EF4444'],
-  technology: ['#818CF8', '#6366F1'],
-  education: ['#67E8F9', '#22D3EE'],
-  culture: ['#E879F9', '#D946EF'],
-  sports: ['#34D399', '#10B981'],
-  music: ['#C084FC', '#A855F7'],
-  shopping: ['#FB923C', '#F97316'],
-  weather: ['#FDE68A', '#FCD34D'],
-  family: ['#F9A8D4', '#F472B6'],
-  animals: ['#86EFAC', '#4ADE80'],
-  colors: ['#C084FC', '#A855F7'],
-  numbers: ['#93C5FD', '#60A5FA'],
-  time: ['#FDA4AF', '#FB7185'],
-  body: ['#FDBA74', '#FB923C'],
-  clothing: ['#A5B4FC', '#818CF8'],
-  city: ['#67E8F9', '#22D3EE'],
+// Kategoriye gore vektor ikon + gradient renkleri
+type CategoryStyle = {
+  icon: string;
+  iconSet: 'ion' | 'mci';
+  colors: [string, string];
 };
 
-const getCategoryBubbleColors = (category?: string): [string, string] => {
-  if (!category) return ['#A78BFA', '#8B5CF6'];
-  return CATEGORY_BUBBLE_COLORS[category] || ['#A78BFA', '#8B5CF6'];
+const CATEGORY_STYLES: Record<string, CategoryStyle> = {
+  greetings:     { icon: 'hand-wave', iconSet: 'mci', colors: ['#FBBF24', '#F59E0B'] },
+  daily_life:    { icon: 'home-outline', iconSet: 'mci', colors: ['#60A5FA', '#3B82F6'] },
+  home:          { icon: 'home-outline', iconSet: 'mci', colors: ['#60A5FA', '#3B82F6'] },
+  people:        { icon: 'people-outline', iconSet: 'ion', colors: ['#F472B6', '#EC4899'] },
+  food_drink:    { icon: 'restaurant-outline', iconSet: 'ion', colors: ['#FB923C', '#F97316'] },
+  travel:        { icon: 'airplane-outline', iconSet: 'ion', colors: ['#34D399', '#10B981'] },
+  work_business: { icon: 'briefcase-outline', iconSet: 'ion', colors: ['#A78BFA', '#8B5CF6'] },
+  emotions:      { icon: 'happy-outline', iconSet: 'ion', colors: ['#FCD34D', '#FBBF24'] },
+  nature:        { icon: 'leaf-outline', iconSet: 'ion', colors: ['#4ADE80', '#22C55E'] },
+  health:        { icon: 'heart-outline', iconSet: 'ion', colors: ['#F87171', '#EF4444'] },
+  technology:    { icon: 'laptop-outline', iconSet: 'ion', colors: ['#818CF8', '#6366F1'] },
+  education:     { icon: 'school-outline', iconSet: 'ion', colors: ['#67E8F9', '#22D3EE'] },
+  culture:       { icon: 'color-palette-outline', iconSet: 'ion', colors: ['#E879F9', '#D946EF'] },
+  sports:        { icon: 'football-outline', iconSet: 'ion', colors: ['#34D399', '#10B981'] },
+  music:         { icon: 'musical-notes-outline', iconSet: 'ion', colors: ['#C084FC', '#A855F7'] },
+  shopping:      { icon: 'cart-outline', iconSet: 'ion', colors: ['#FB923C', '#F97316'] },
+  weather:       { icon: 'sunny-outline', iconSet: 'ion', colors: ['#FDE68A', '#FCD34D'] },
+  family:        { icon: 'people-circle-outline', iconSet: 'ion', colors: ['#F9A8D4', '#F472B6'] },
+  animals:       { icon: 'paw-outline', iconSet: 'ion', colors: ['#86EFAC', '#4ADE80'] },
+  colors:        { icon: 'color-palette-outline', iconSet: 'ion', colors: ['#C084FC', '#A855F7'] },
+  numbers:       { icon: 'keypad-outline', iconSet: 'ion', colors: ['#93C5FD', '#60A5FA'] },
+  time:          { icon: 'time-outline', iconSet: 'ion', colors: ['#FDA4AF', '#FB7185'] },
+  body:          { icon: 'body-outline', iconSet: 'ion', colors: ['#FDBA74', '#FB923C'] },
+  clothing:      { icon: 'shirt-outline', iconSet: 'ion', colors: ['#A5B4FC', '#818CF8'] },
+  city:          { icon: 'business-outline', iconSet: 'ion', colors: ['#67E8F9', '#22D3EE'] },
+};
+
+const DEFAULT_STYLE: CategoryStyle = { icon: 'sparkles-outline', iconSet: 'ion', colors: ['#A78BFA', '#8B5CF6'] };
+
+const getCategoryStyle = (category?: string): CategoryStyle => {
+  if (!category) return DEFAULT_STYLE;
+  return CATEGORY_STYLES[category] || DEFAULT_STYLE;
+};
+
+const CategoryIcon: React.FC<{ category?: string; size?: number }> = ({ category, size = 34 }) => {
+  const style = getCategoryStyle(category);
+  if (style.iconSet === 'mci') {
+    return <MaterialCommunityIcons name={style.icon as any} size={size} color="#FFFFFF" />;
+  }
+  return <Ionicons name={style.icon as any} size={size} color="#FFFFFF" />;
 };
 
 const { width } = Dimensions.get('window');
@@ -625,15 +642,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 colors={['rgba(124,58,237,0.14)', 'rgba(236,72,153,0.06)', 'rgba(255,255,255,0.02)']}
                 style={styles.cardInner}
               >
-                {/* Kelime emojisi -- karikatür baloncuk */}
+                {/* Kelime ikonu -- vektor ikon + gradient baloncuk */}
                 <View style={styles.emojiBubbleWrapper}>
                   <LinearGradient
-                    colors={getCategoryBubbleColors(word.category)}
+                    colors={getCategoryStyle(word.category).colors}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.emojiBubble}
                   >
-                    <Text style={styles.wordEmoji}>{word.emoji || getCategoryIcon(word.category)}</Text>
+                    <CategoryIcon category={word.category} />
                   </LinearGradient>
                 </View>
 
@@ -891,9 +908,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 8,
-  },
-  wordEmoji: {
-    fontSize: 38,
   },
   wordText: {
     fontSize: 38,
