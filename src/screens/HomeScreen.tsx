@@ -340,8 +340,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           <View style={styles.scrollContent}>
             {/* Skeleton header alani */}
             <View style={styles.header}>
-              <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-              <View style={{ width: 70, height: 36, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+              <View style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+              <View style={{ width: 50, height: 24, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.06)' }} />
             </View>
             {/* Skeleton kelime karti */}
             <SkeletonCard />
@@ -715,34 +715,22 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   headerFlag: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    padding: 4,
   },
   headerFlagText: {
-    fontSize: 26,
+    fontSize: 32,
   },
   headerStreak: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    gap: 4,
+    padding: 4,
   },
   headerStreakEmoji: {
-    fontSize: 18,
+    fontSize: 22,
   },
   headerStreakValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
     color: '#FBBF24',
   },
