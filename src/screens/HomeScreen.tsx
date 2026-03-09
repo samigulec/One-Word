@@ -340,12 +340,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           <View style={styles.scrollContent}>
             {/* Skeleton header alani */}
             <View style={styles.header}>
-              <View style={{ width: 180, height: 22, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-            </View>
-            {/* Skeleton gamification bar */}
-            <View style={[styles.gamificationBar, { opacity: 0.5 }]}>
-              <View style={{ width: 100, height: 14, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.06)' }} />
-              <View style={{ width: 50, height: 14, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+              <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+              <View style={{ width: 70, height: 36, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.06)' }} />
             </View>
             {/* Skeleton kelime karti */}
             <SkeletonCard />
@@ -417,56 +413,30 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {/* ── Kompakt Header: Greeting + Gamification Bar ── */}
+          {/* ── Minimal Header: Bayrak + Streak ── */}
           <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-            <Text style={styles.greeting} accessibilityRole="header">{getGreeting()}</Text>
-          </Animated.View>
+            <TouchableOpacity
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToProfile(); }}
+              activeOpacity={0.7}
+              style={styles.headerFlag}
+              accessibilityRole="button"
+              accessibilityLabel={`Learning ${targetLanguage}`}
+            >
+              <Text style={styles.headerFlagText}>{targetLanguageFlag}</Text>
+            </TouchableOpacity>
 
-          {/* Gamification Bar -- calmMode aktifken gizlenir */}
-          {!calmMode && (
             <TouchableOpacity
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToLeaderboard(); }}
               activeOpacity={0.7}
-              style={styles.gamificationBar}
+              style={styles.headerStreak}
               accessibilityRole="button"
-              accessibilityLabel={`Streak ${progress?.streak || 0} days, Level ${levelInfo?.level || 1}, ${totalXP} XP`}
+              accessibilityLabel={`Streak ${progress?.streak || 0} days`}
               accessibilityHint="Opens the leaderboard"
             >
-              <View style={styles.gamBarLeft}>
-                {/* Streak */}
-                <View style={styles.gamBarItem}>
-                  <Text style={styles.gamBarEmoji}>{'\u{1F525}'}</Text>
-                  <Text style={styles.gamBarValue}>{progress?.streak || 0}</Text>
-                </View>
-
-                {/* Seviye + ilerleme cubugu */}
-                <View style={styles.gamBarLevel}>
-                  <Text style={styles.gamBarLevelText}>
-                    {levelInfo?.emoji || '\u{1F331}'} {t('levelPrefix')}{levelInfo?.level || 1}
-                  </Text>
-                  <View style={styles.gamBarProgressBg}>
-                    <Animated.View
-                      style={[
-                        styles.gamBarProgressFill,
-                        {
-                          width: levelProgressWidth.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0%', '100%'],
-                          }),
-                        },
-                      ]}
-                    />
-                  </View>
-                </View>
-              </View>
-
-              {/* Toplam XP */}
-              <View style={styles.gamBarXP}>
-                <Text style={styles.gamBarXPValue}>{totalXP.toLocaleString()}</Text>
-                <Text style={styles.gamBarXPLabel}>XP</Text>
-              </View>
+              <Text style={styles.headerStreakEmoji}>{'\u{1F525}'}</Text>
+              <Text style={styles.headerStreakValue}>{progress?.streak || 0}</Text>
             </TouchableOpacity>
-          )}
+          </Animated.View>
 
           {/* Floating XP Animasyonlari -- calmMode aktifken gizlenir */}
           {!calmMode && floatingXPs.map(floatingXP => (
@@ -735,91 +705,46 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { fontSize: 16, color: 'rgba(255,255,255,0.6)', fontWeight: '600' },
 
-  // ── Kompakt Header ──
+  // ── Minimal Header: Bayrak + Streak ──
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
-  greeting: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: -0.3,
-  },
-
-  // ── Gamification Bar ──
-  gamificationBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginTop: 8,
-    marginBottom: 16,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 14,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
+  },
+  headerFlag: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  headerFlagText: {
+    fontSize: 26,
+  },
+  headerStreak: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 8,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
-    // Cam (glass) efekti -- hafif parlak kenar ve yari-seffaf arka plan
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
   },
-  gamBarLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    flex: 1,
+  headerStreakEmoji: {
+    fontSize: 18,
   },
-  gamBarItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  gamBarEmoji: { fontSize: 16 },
-  gamBarValue: {
-    fontSize: 15,
+  headerStreakValue: {
+    fontSize: 18,
     fontWeight: '800',
     color: '#FBBF24',
-  },
-  gamBarLevel: {
-    flex: 1,
-  },
-  gamBarLevelText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.7)',
-    marginBottom: 4,
-  },
-  gamBarProgressBg: {
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  gamBarProgressFill: {
-    height: '100%',
-    backgroundColor: '#8B5CF6',
-    borderRadius: 3,
-  },
-  gamBarXP: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 3,
-    marginLeft: 12,
-  },
-  gamBarXPValue: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#FBBF24',
-  },
-  gamBarXPLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: 'rgba(251,191,36,0.6)',
   },
 
   // ── Floating XP ──
