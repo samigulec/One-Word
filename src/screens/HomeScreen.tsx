@@ -709,8 +709,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 40,
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 28,
     paddingTop: 12,
     paddingBottom: 16,
   },
