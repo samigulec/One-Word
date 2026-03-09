@@ -128,7 +128,14 @@ type TranslationKey =
   | 'wordLabel' | 'dayStreakLabel' | 'badgeLabel' | 'comparedToPrevWeek' | 'dailyLearning'
   | 'topCategories' | 'knowledgeMap' | 'general' | 'totalWords' | 'completedQuizzes' | 'favoriteWords'
   // LeaderboardScreen
-  | 'leaderboard' | 'allTime' | 'thisWeek' | 'you';
+  | 'leaderboard' | 'allTime' | 'thisWeek' | 'you'
+  // ExploreScreen (Kesfet)
+  | 'explore' | 'listenRepeat' | 'listenRepeatDesc' | 'culturalContextTitle' | 'culturalContextDesc'
+  | 'practiceWithLingo' | 'practiceWithLingoDesc' | 'miniQuiz' | 'miniQuizDesc'
+  | 'stageComplete' | 'allStagesComplete' | 'iPracticed' | 'gotIt' | 'chatWithLingo'
+  | 'whatDoesMean' | 'trueOrFalse' | 'fillInBlank' | 'completeTheSentence'
+  | 'quizResult' | 'encouragePerfect' | 'encourageGood' | 'encourageOk' | 'encourageTryMore'
+  | 'stagesCompleted' | 'unlockPrevious' | 'listenToWord' | 'true' | 'false';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   en: {
@@ -224,6 +231,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     general: 'General', totalWords: 'Total Words', completedQuizzes: 'Completed Quizzes', favoriteWords: 'Favorite Words',
     // LeaderboardScreen
     leaderboard: 'Leaderboard', allTime: 'All Time', thisWeek: 'This Week', you: '(You)',
+    // ExploreScreen
+    explore: 'Explore', listenRepeat: 'Listen & Repeat', listenRepeatDesc: 'Listen to the word and practice',
+    culturalContextTitle: 'Cultural Context', culturalContextDesc: 'Learn the cultural background',
+    practiceWithLingo: 'Practice with Lingo', practiceWithLingoDesc: 'Chat about this word with Lingo',
+    miniQuiz: 'Mini Quiz', miniQuizDesc: 'Test your knowledge with 3 questions',
+    stageComplete: 'Complete!', allStagesComplete: 'All stages complete! Amazing!',
+    iPracticed: 'I practiced!', gotIt: 'Got it!', chatWithLingo: 'Chat with Lingo',
+    whatDoesMean: 'What does this mean?', trueOrFalse: 'True or False?',
+    fillInBlank: 'Fill in the blank', completeTheSentence: 'Complete the sentence',
+    quizResult: 'Quiz Result', encouragePerfect: 'Perfect! You nailed it!',
+    encourageGood: 'Great job! Almost perfect!', encourageOk: 'Good effort! Keep practicing!',
+    encourageTryMore: 'Keep going! Practice makes perfect!',
+    stagesCompleted: 'completed', unlockPrevious: 'Complete the previous stage first',
+    listenToWord: 'Tap to listen', true: 'True', false: 'False',
   },
   tr: {
     appName: "One Word", idiomOfTheDay: 'Günün Kelimesi', showMeaning: 'Anlamını Göster',
@@ -318,6 +339,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     general: 'Genel', totalWords: 'Toplam Kelime', completedQuizzes: 'Tamamlanan Quiz', favoriteWords: 'Favori Kelimeler',
     // LeaderboardScreen
     leaderboard: 'Liderlik Tablosu', allTime: 'Tum Zamanlar', thisWeek: 'Bu Hafta', you: '(Sen)',
+    // ExploreScreen
+    explore: 'Kesfet', listenRepeat: 'Dinle & Tekrarla', listenRepeatDesc: 'Kelimeyi dinle ve tekrar et',
+    culturalContextTitle: 'Kulturel Baglam', culturalContextDesc: 'Kulturel arka plani ogren',
+    practiceWithLingo: 'Lingo ile Pratik', practiceWithLingoDesc: 'Bu kelime hakkinda Lingo ile sohbet et',
+    miniQuiz: 'Mini Quiz', miniQuizDesc: '3 soruyla bilgini test et',
+    stageComplete: 'Tamamlandi!', allStagesComplete: 'Tum asamalar tamam! Harika!',
+    iPracticed: 'Pratik yaptim!', gotIt: 'Anladim!', chatWithLingo: 'Lingo ile Sohbet',
+    whatDoesMean: 'Bunun anlami ne?', trueOrFalse: 'Dogru mu Yanlis mi?',
+    fillInBlank: 'Boslugu doldur', completeTheSentence: 'Cumleyi tamamla',
+    quizResult: 'Quiz Sonucu', encouragePerfect: 'Mukemmel! Hepsini bildin!',
+    encourageGood: 'Harika! Neredeyse mukemmel!', encourageOk: 'Iyi gidiyorsun! Pratik yapmaya devam!',
+    encourageTryMore: 'Devam et! Pratik mukemmellestir!',
+    stagesCompleted: 'tamamlandi', unlockPrevious: 'Once onceki asamayi tamamla',
+    listenToWord: 'Dinlemek icin dokun', true: 'Dogru', false: 'Yanlis',
   },
   es: {
     appName: "One Word", idiomOfTheDay: 'Palabra del Día', showMeaning: 'Mostrar Significado',
@@ -403,6 +438,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: 'Aprendizaje Diario', topCategories: 'Categorias Principales', knowledgeMap: 'Mapa de Conocimiento',
     general: 'General', totalWords: 'Total Palabras', completedQuizzes: 'Quizzes Completados', favoriteWords: 'Palabras Favoritas',
     leaderboard: 'Clasificacion', allTime: 'Todo el Tiempo', thisWeek: 'Esta Semana', you: '(Tu)',
+    // ExploreScreen
+    explore: 'Explorar', listenRepeat: 'Escucha y Repite', listenRepeatDesc: 'Escucha la palabra y practica',
+    culturalContextTitle: 'Contexto Cultural', culturalContextDesc: 'Aprende el trasfondo cultural',
+    practiceWithLingo: 'Practica con Lingo', practiceWithLingoDesc: 'Chatea sobre esta palabra con Lingo',
+    miniQuiz: 'Mini Quiz', miniQuizDesc: 'Pon a prueba tu conocimiento con 3 preguntas',
+    stageComplete: 'Completado!', allStagesComplete: 'Todas las etapas completas! Increible!',
+    iPracticed: 'He practicado!', gotIt: 'Entendido!', chatWithLingo: 'Chatear con Lingo',
+    whatDoesMean: 'Que significa esto?', trueOrFalse: 'Verdadero o Falso?',
+    fillInBlank: 'Rellena el espacio', completeTheSentence: 'Completa la oracion',
+    quizResult: 'Resultado del Quiz', encouragePerfect: 'Perfecto! Lo clavaste!',
+    encourageGood: 'Genial! Casi perfecto!', encourageOk: 'Buen esfuerzo! Sigue practicando!',
+    encourageTryMore: 'Sigue asi! La practica hace al maestro!',
+    stagesCompleted: 'completadas', unlockPrevious: 'Completa la etapa anterior primero',
+    listenToWord: 'Toca para escuchar', true: 'Verdadero', false: 'Falso',
   },
   de: {
     appName: "One Word", idiomOfTheDay: 'Wort des Tages', showMeaning: 'Bedeutung zeigen',
@@ -488,6 +537,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: 'Taegliches Lernen', topCategories: 'Top Kategorien', knowledgeMap: 'Wissenskarte',
     general: 'Allgemein', totalWords: 'Gesamte Woerter', completedQuizzes: 'Abgeschlossene Quizze', favoriteWords: 'Lieblings Woerter',
     leaderboard: 'Bestenliste', allTime: 'Alle Zeiten', thisWeek: 'Diese Woche', you: '(Du)',
+    // ExploreScreen
+    explore: 'Entdecken', listenRepeat: 'Horen & Wiederholen', listenRepeatDesc: 'Hore das Wort und ube',
+    culturalContextTitle: 'Kultureller Kontext', culturalContextDesc: 'Lerne den kulturellen Hintergrund',
+    practiceWithLingo: 'Mit Lingo uben', practiceWithLingoDesc: 'Chatte uber dieses Wort mit Lingo',
+    miniQuiz: 'Mini Quiz', miniQuizDesc: 'Teste dein Wissen mit 3 Fragen',
+    stageComplete: 'Abgeschlossen!', allStagesComplete: 'Alle Stufen abgeschlossen! Fantastisch!',
+    iPracticed: 'Ich habe geubt!', gotIt: 'Verstanden!', chatWithLingo: 'Mit Lingo chatten',
+    whatDoesMean: 'Was bedeutet das?', trueOrFalse: 'Richtig oder Falsch?',
+    fillInBlank: 'Lucke fullen', completeTheSentence: 'Vervollstandige den Satz',
+    quizResult: 'Quiz-Ergebnis', encouragePerfect: 'Perfekt! Du hast es geschafft!',
+    encourageGood: 'Super! Fast perfekt!', encourageOk: 'Guter Versuch! Weiter uben!',
+    encourageTryMore: 'Weiter so! Ubung macht den Meister!',
+    stagesCompleted: 'abgeschlossen', unlockPrevious: 'Schliesse zuerst die vorherige Stufe ab',
+    listenToWord: 'Tippe zum Anhoren', true: 'Richtig', false: 'Falsch',
   },
   fr: {
     appName: "One Word", idiomOfTheDay: 'Mot du Jour', showMeaning: 'Voir le Sens',
@@ -573,6 +636,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: 'Apprentissage Quotidien', topCategories: 'Meilleures Categories', knowledgeMap: 'Carte de Connaissances',
     general: 'General', totalWords: 'Total Mots', completedQuizzes: 'Quiz Termines', favoriteWords: 'Mots Favoris',
     leaderboard: 'Classement', allTime: 'Tout Temps', thisWeek: 'Cette Semaine', you: '(Toi)',
+    // ExploreScreen
+    explore: 'Explorer', listenRepeat: 'Ecoute & Repete', listenRepeatDesc: 'Ecoute le mot et pratique',
+    culturalContextTitle: 'Contexte Culturel', culturalContextDesc: 'Decouvre le contexte culturel',
+    practiceWithLingo: 'Pratique avec Lingo', practiceWithLingoDesc: 'Discute de ce mot avec Lingo',
+    miniQuiz: 'Mini Quiz', miniQuizDesc: 'Teste tes connaissances avec 3 questions',
+    stageComplete: 'Termine!', allStagesComplete: 'Toutes les etapes terminees! Genial!',
+    iPracticed: "J'ai pratique!", gotIt: 'Compris!', chatWithLingo: 'Discuter avec Lingo',
+    whatDoesMean: 'Que signifie ceci?', trueOrFalse: 'Vrai ou Faux?',
+    fillInBlank: 'Remplis le blanc', completeTheSentence: 'Complete la phrase',
+    quizResult: 'Resultat du Quiz', encouragePerfect: 'Parfait! Tu as tout reussi!',
+    encourageGood: 'Genial! Presque parfait!', encourageOk: 'Bon effort! Continue a pratiquer!',
+    encourageTryMore: 'Continue! La pratique rend parfait!',
+    stagesCompleted: 'terminees', unlockPrevious: "Complete d'abord l'etape precedente",
+    listenToWord: 'Appuie pour ecouter', true: 'Vrai', false: 'Faux',
   },
   pt: {
     appName: "One Word", idiomOfTheDay: 'Palavra do Dia', showMeaning: 'Ver Significado',
@@ -658,6 +735,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: 'Aprendizado Diario', topCategories: 'Principais Categorias', knowledgeMap: 'Mapa de Conhecimento',
     general: 'Geral', totalWords: 'Total Palavras', completedQuizzes: 'Quizzes Completos', favoriteWords: 'Palavras Favoritas',
     leaderboard: 'Classificacao', allTime: 'Todo o Tempo', thisWeek: 'Esta Semana', you: '(Voce)',
+    // ExploreScreen
+    explore: 'Explorar', listenRepeat: 'Ouvir & Repetir', listenRepeatDesc: 'Ouca a palavra e pratique',
+    culturalContextTitle: 'Contexto Cultural', culturalContextDesc: 'Aprenda o contexto cultural',
+    practiceWithLingo: 'Praticar com Lingo', practiceWithLingoDesc: 'Converse sobre esta palavra com Lingo',
+    miniQuiz: 'Mini Quiz', miniQuizDesc: 'Teste seu conhecimento com 3 perguntas',
+    stageComplete: 'Concluido!', allStagesComplete: 'Todas as etapas concluidas! Incrivel!',
+    iPracticed: 'Eu pratiquei!', gotIt: 'Entendi!', chatWithLingo: 'Conversar com Lingo',
+    whatDoesMean: 'O que isso significa?', trueOrFalse: 'Verdadeiro ou Falso?',
+    fillInBlank: 'Preencha o espaco', completeTheSentence: 'Complete a frase',
+    quizResult: 'Resultado do Quiz', encouragePerfect: 'Perfeito! Voce arrasou!',
+    encourageGood: 'Otimo! Quase perfeito!', encourageOk: 'Bom esforco! Continue praticando!',
+    encourageTryMore: 'Continue! A pratica leva a perfeicao!',
+    stagesCompleted: 'concluidas', unlockPrevious: 'Complete a etapa anterior primeiro',
+    listenToWord: 'Toque para ouvir', true: 'Verdadeiro', false: 'Falso',
   },
   it: {
     appName: "One Word", idiomOfTheDay: 'Parola del Giorno', showMeaning: 'Mostra',
@@ -743,6 +834,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: 'Apprendimento Giornaliero', topCategories: 'Categorie Principali', knowledgeMap: 'Mappa della Conoscenza',
     general: 'Generale', totalWords: 'Parole Totali', completedQuizzes: 'Quiz Completati', favoriteWords: 'Parole Preferite',
     leaderboard: 'Classifica', allTime: 'Di Sempre', thisWeek: 'Questa Settimana', you: '(Tu)',
+    // ExploreScreen
+    explore: 'Esplora', listenRepeat: 'Ascolta & Ripeti', listenRepeatDesc: 'Ascolta la parola e pratica',
+    culturalContextTitle: 'Contesto Culturale', culturalContextDesc: 'Scopri il contesto culturale',
+    practiceWithLingo: 'Pratica con Lingo', practiceWithLingoDesc: 'Chatta su questa parola con Lingo',
+    miniQuiz: 'Mini Quiz', miniQuizDesc: 'Metti alla prova le tue conoscenze con 3 domande',
+    stageComplete: 'Completato!', allStagesComplete: 'Tutte le fasi completate! Fantastico!',
+    iPracticed: 'Ho praticato!', gotIt: 'Capito!', chatWithLingo: 'Chatta con Lingo',
+    whatDoesMean: 'Cosa significa?', trueOrFalse: 'Vero o Falso?',
+    fillInBlank: 'Riempi lo spazio', completeTheSentence: 'Completa la frase',
+    quizResult: 'Risultato Quiz', encouragePerfect: 'Perfetto! Ce l hai fatta!',
+    encourageGood: 'Ottimo! Quasi perfetto!', encourageOk: 'Buon lavoro! Continua a praticare!',
+    encourageTryMore: 'Continua cosi! La pratica rende perfetti!',
+    stagesCompleted: 'completate', unlockPrevious: 'Completa prima la fase precedente',
+    listenToWord: 'Tocca per ascoltare', true: 'Vero', false: 'Falso',
   },
   ru: {
     appName: "One Word", idiomOfTheDay: 'Слово Дня', showMeaning: 'Показать',
@@ -828,6 +933,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: 'Ежедневное обучение', topCategories: 'Лучшие категории', knowledgeMap: 'Карта знаний',
     general: 'Общее', totalWords: 'Всего слов', completedQuizzes: 'Пройденные тесты', favoriteWords: 'Любимые слова',
     leaderboard: 'Рейтинг', allTime: 'За все время', thisWeek: 'Эта неделя', you: '(Ты)',
+    // ExploreScreen
+    explore: 'Исследовать', listenRepeat: 'Слушай и Повторяй', listenRepeatDesc: 'Послушай слово и потренируйся',
+    culturalContextTitle: 'Культурный Контекст', culturalContextDesc: 'Узнай культурный контекст',
+    practiceWithLingo: 'Практика с Линго', practiceWithLingoDesc: 'Поговори об этом слове с Линго',
+    miniQuiz: 'Мини Тест', miniQuizDesc: 'Проверь свои знания с 3 вопросами',
+    stageComplete: 'Завершено!', allStagesComplete: 'Все этапы пройдены! Потрясающе!',
+    iPracticed: 'Я потренировался!', gotIt: 'Понял!', chatWithLingo: 'Чат с Линго',
+    whatDoesMean: 'Что это значит?', trueOrFalse: 'Правда или Ложь?',
+    fillInBlank: 'Заполни пропуск', completeTheSentence: 'Дополни предложение',
+    quizResult: 'Результат Теста', encouragePerfect: 'Идеально! Ты справился!',
+    encourageGood: 'Отлично! Почти идеально!', encourageOk: 'Хорошая попытка! Продолжай!',
+    encourageTryMore: 'Продолжай! Практика ведет к совершенству!',
+    stagesCompleted: 'завершено', unlockPrevious: 'Сначала заверши предыдущий этап',
+    listenToWord: 'Нажми чтобы послушать', true: 'Правда', false: 'Ложь',
   },
   ja: {
     appName: "One Word", idiomOfTheDay: '今日の単語', showMeaning: '意味を見る',
@@ -913,6 +1032,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: '日々の学習', topCategories: 'トップカテゴリ', knowledgeMap: '知識マップ',
     general: '全般', totalWords: '合計単語', completedQuizzes: '完了クイズ', favoriteWords: 'お気に入り単語',
     leaderboard: 'ランキング', allTime: '全期間', thisWeek: '今週', you: '(あなた)',
+    // ExploreScreen
+    explore: '探検', listenRepeat: '聞いて繰り返す', listenRepeatDesc: '単語を聞いて練習しよう',
+    culturalContextTitle: '文化的背景', culturalContextDesc: '文化的な背景を学ぼう',
+    practiceWithLingo: 'Lingoと練習', practiceWithLingoDesc: 'この単語についてLingoとチャットしよう',
+    miniQuiz: 'ミニクイズ', miniQuizDesc: '3つの質問で知識をテスト',
+    stageComplete: '完了!', allStagesComplete: '全ステージ完了! すごい!',
+    iPracticed: '練習した!', gotIt: '分かった!', chatWithLingo: 'Lingoとチャット',
+    whatDoesMean: 'これはどういう意味?', trueOrFalse: '正しい? 間違い?',
+    fillInBlank: '空欄を埋めて', completeTheSentence: '文を完成させて',
+    quizResult: 'クイズ結果', encouragePerfect: '完璧! やったね!',
+    encourageGood: 'すごい! ほぼ完璧!', encourageOk: 'いい調子! 練習を続けよう!',
+    encourageTryMore: '頑張って! 練習すれば完璧になる!',
+    stagesCompleted: '完了', unlockPrevious: 'まず前のステージを完了してね',
+    listenToWord: 'タップして聞く', true: '正しい', false: '間違い',
   },
   ko: {
     appName: "One Word", idiomOfTheDay: '오늘의 단어', showMeaning: '뜻 보기',
@@ -998,6 +1131,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: '일일 학습', topCategories: '상위 카테고리', knowledgeMap: '지식 맵',
     general: '전체', totalWords: '전체 단어', completedQuizzes: '완료한 퀴즈', favoriteWords: '즐겨찾기 단어',
     leaderboard: '리더보드', allTime: '전체 기간', thisWeek: '이번 주', you: '(나)',
+    // ExploreScreen
+    explore: '탐험', listenRepeat: '듣고 따라하기', listenRepeatDesc: '단어를 듣고 연습하세요',
+    culturalContextTitle: '문화적 맥락', culturalContextDesc: '문화적 배경을 배우세요',
+    practiceWithLingo: 'Lingo와 연습', practiceWithLingoDesc: '이 단어에 대해 Lingo와 대화하세요',
+    miniQuiz: '미니 퀴즈', miniQuizDesc: '3개의 질문으로 지식을 테스트하세요',
+    stageComplete: '완료!', allStagesComplete: '모든 단계 완료! 대단해요!',
+    iPracticed: '연습했어요!', gotIt: '이해했어요!', chatWithLingo: 'Lingo와 채팅',
+    whatDoesMean: '이것은 무슨 뜻인가요?', trueOrFalse: '참인가요 거짓인가요?',
+    fillInBlank: '빈칸을 채우세요', completeTheSentence: '문장을 완성하세요',
+    quizResult: '퀴즈 결과', encouragePerfect: '완벽해요! 해냈어요!',
+    encourageGood: '훌륭해요! 거의 완벽해요!', encourageOk: '좋은 노력! 계속 연습하세요!',
+    encourageTryMore: '계속 가세요! 연습이 완벽을 만듭니다!',
+    stagesCompleted: '완료', unlockPrevious: '먼저 이전 단계를 완료하세요',
+    listenToWord: '탭하여 듣기', true: '참', false: '거짓',
   },
   zh: {
     appName: "One Word", idiomOfTheDay: '每日单词', showMeaning: '查看含义',
@@ -1083,6 +1230,20 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     dailyLearning: '每日学习', topCategories: '热门类别', knowledgeMap: '知识地图',
     general: '总览', totalWords: '总单词', completedQuizzes: '完成的测验', favoriteWords: '收藏的单词',
     leaderboard: '排行榜', allTime: '全部时间', thisWeek: '本周', you: '(你)',
+    // ExploreScreen
+    explore: '探索', listenRepeat: '听并重复', listenRepeatDesc: '听单词并练习',
+    culturalContextTitle: '文化背景', culturalContextDesc: '了解文化背景',
+    practiceWithLingo: '与Lingo练习', practiceWithLingoDesc: '和Lingo聊聊这个词',
+    miniQuiz: '迷你测验', miniQuizDesc: '用3个问题测试你的知识',
+    stageComplete: '完成!', allStagesComplete: '所有阶段完成! 太棒了!',
+    iPracticed: '我练习了!', gotIt: '明白了!', chatWithLingo: '和Lingo聊天',
+    whatDoesMean: '这是什么意思?', trueOrFalse: '对还是错?',
+    fillInBlank: '填空', completeTheSentence: '完成句子',
+    quizResult: '测验结果', encouragePerfect: '完美! 你做到了!',
+    encourageGood: '太好了! 几乎完美!', encourageOk: '不错! 继续练习!',
+    encourageTryMore: '继续加油! 熟能生巧!',
+    stagesCompleted: '已完成', unlockPrevious: '请先完成上一阶段',
+    listenToWord: '点击收听', true: '对', false: '错',
   },
 };
 

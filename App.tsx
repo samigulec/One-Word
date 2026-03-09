@@ -270,6 +270,7 @@ function App() {
         <PracticeScreen
           word={selectedWord}
           nativeLanguage={nativeLanguage}
+          targetLanguage={targetLanguage}
           onSelectScenario={navigateToChat}
           onClose={navigateToHome}
         />
