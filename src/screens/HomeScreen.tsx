@@ -24,6 +24,7 @@ import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { ContentItem, UserProgress, ProficiencyLevel, LevelInfo, DailyTaskId } from '../types';
 import { getWordOfTheDay, getTranslation, getExampleTranslation, loadContentForLevel } from '../utils/contentLoader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord, getDueWordsForToday, getUserName, getDailyXPStatus, addXP, completeDailyTask, updateWeeklyChallengeGoal, claimWeeklyChallengeBonus } from '../utils/storage';
 import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../utils/translations';
 import ShareWordCard from '../components/ShareWordCard';
@@ -73,7 +74,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [word, setWord] = useState<ContentItem | null>(null);
   const [wordList, setWordList] = useState<ContentItem[]>([]);
   const [wordIndex, setWordIndex] = useState(0);
-  const [swipesLeft, setSwipesLeft] = useState(2);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [showMeaning, setShowMeaning] = useState(false);
   const [isFav, setIsFav] = useState(false);
@@ -113,56 +113,40 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   // Tinder-style swipe animasyonlari
   const swipeX = useRef(new Animated.Value(0)).current;
   const swipeY = useRef(new Animated.Value(0)).current;
-  const swipesLeftRef = useRef(2);
   const wordListRef = useRef<ContentItem[]>([]);
   const wordIndexRef = useRef(0);
+  const unlockedCountRef = useRef(1); // Kac kelime acilmis (1-3)
+  const [unlockedCount, setUnlockedCount] = useState(1);
 
   const SWIPE_THRESHOLD = 120;
+  const MAX_WORDS = 3;
 
-  // Sonraki kelimeye gec -- ref'ler uzerinden calisir, stale closure yok
-  const showNextWord = (direction: number) => {
-    if (swipesLeftRef.current <= 0) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
-      Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
-      return;
-    }
+  // Gunluk key -- acilan kelime sayisini persist etmek icin
+  const getDailySwipeKey = () => {
+    const d = new Date();
+    return `home_unlocked_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
 
-    const nextIndex = wordIndexRef.current + 1;
-    const nextWord = wordListRef.current[nextIndex];
-    if (!nextWord) {
-      Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
-      Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
-      return;
-    }
-
+  // Karta animasyonlu gecis
+  const animateToWord = (targetIndex: number, direction: number) => {
     Animated.timing(swipeX, {
       toValue: direction * (width + 100),
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      swipesLeftRef.current -= 1;
-      setSwipesLeft(swipesLeftRef.current);
-      wordIndexRef.current = nextIndex;
-      setWordIndex(nextIndex);
-      setWord(nextWord);
-      setShowMeaning(false);
-      setActiveWordTab('meaning');
-      meaningReveal.setValue(0);
-      addLearnedWord(nextWord).then(isNew => {
-        if (isNew) {
-          addXP('word_learned').then(r => {
-            if (r.leveledUp && r.newLevel) triggerLevelUpAnimation(r.newLevel);
-            if (r.gained > 0) triggerFloatingXP(r.gained);
-            loadXPStatus();
-          });
-        }
-      });
-      isFavorite(nextWord.id).then(setIsFav);
+      wordIndexRef.current = targetIndex;
+      setWordIndex(targetIndex);
+      const targetWord = wordListRef.current[targetIndex];
+      if (targetWord) {
+        setWord(targetWord);
+        setShowMeaning(false);
+        setActiveWordTab('meaning');
+        meaningReveal.setValue(0);
+        isFavorite(targetWord.id).then(setIsFav);
+      }
       swipeX.setValue(0);
       swipeY.setValue(0);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      // Giris animasyonu
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       cardScale.setValue(0.95);
       cardOpacity.setValue(0);
       Animated.parallel([
@@ -170,6 +154,53 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         Animated.timing(cardOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
       ]).start();
     });
+  };
+
+  // Swipe islemi -- yeni kelime ac veya acilmis kelimeler arasinda don
+  const handleSwipe = (direction: number) => {
+    const currentIdx = wordIndexRef.current;
+    const total = wordListRef.current.length;
+    const unlocked = unlockedCountRef.current;
+
+    if (direction > 0) {
+      // Saga cek → sonraki kelime
+      const nextIdx = (currentIdx + 1) % total;
+      if (nextIdx < unlocked) {
+        // Zaten acilmis, dongusel gecis
+        animateToWord(nextIdx, 1);
+      } else if (unlocked < MAX_WORDS) {
+        // Yeni kelime ac
+        unlockedCountRef.current = unlocked + 1;
+        setUnlockedCount(unlocked + 1);
+        AsyncStorage.setItem(getDailySwipeKey(), String(unlocked + 1));
+        const newWord = wordListRef.current[nextIdx];
+        if (newWord) {
+          addLearnedWord(newWord).then(isNew => {
+            if (isNew) {
+              addXP('word_learned').then(r => {
+                if (r.leveledUp && r.newLevel) triggerLevelUpAnimation(r.newLevel);
+                if (r.gained > 0) triggerFloatingXP(r.gained);
+                loadXPStatus();
+              });
+            }
+          });
+        }
+        animateToWord(nextIdx, 1);
+      } else {
+        // Tum kelimeler acik, dongusel
+        animateToWord(nextIdx, 1);
+      }
+    } else {
+      // Sola cek → onceki kelime
+      const prevIdx = (currentIdx - 1 + total) % total;
+      if (prevIdx < unlocked) {
+        animateToWord(prevIdx, -1);
+      } else {
+        // Henuz acilmamis, geri don
+        Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+        Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+      }
+    }
   };
 
   const panResponder = useRef(
@@ -182,7 +213,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       ),
       onPanResponderRelease: (_, gs) => {
         if (Math.abs(gs.dx) > SWIPE_THRESHOLD) {
-          showNextWord(gs.dx > 0 ? 1 : -1);
+          handleSwipe(gs.dx > 0 ? 1 : -1);
         } else {
           Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
           Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
@@ -292,8 +323,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       wordListRef.current = words;
       setWordIndex(0);
       wordIndexRef.current = 0;
-      setSwipesLeft(2);
-      swipesLeftRef.current = 2;
+
+      // Acilmis kelime sayisini geri yukle
+      const savedUnlocked = await AsyncStorage.getItem(getDailySwipeKey());
+      const restored = savedUnlocked ? Math.min(parseInt(savedUnlocked, 10), words.length) : 1;
+      unlockedCountRef.current = restored;
+      setUnlockedCount(restored);
 
       setWord(todaysWord);
       setShowMeaning(false);
@@ -490,7 +525,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     <LinearGradient colors={['#0F0A2E', '#1A1145', '#1E1650']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.mainContent}>
-          {/* ── Minimal Header: Bayrak + Streak ── */}
+          {/* ── Header: Bayrak + Day X + Streak ── */}
           <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
             <TouchableOpacity
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToProfile(); }}
@@ -501,6 +536,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             >
               <Text style={styles.headerFlagText}>{targetLanguageFlag}</Text>
             </TouchableOpacity>
+
+            <Text style={styles.headerDay}>{t('day') || 'Day'} {progress?.streak || 1}</Text>
 
             <TouchableOpacity
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToLeaderboard(); }}
@@ -634,17 +671,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             </Animated.View>
           </View>
 
-          {/* Swipe ipucu + kalan hak */}
+          {/* Dot indicator + swipe ipucu */}
           <View style={styles.swipeHint}>
-            {swipesLeft > 0 ? (
-              <Text style={styles.swipeHintText}>{'\u2190'} {'\u2192'}  +{swipesLeft}</Text>
-            ) : (
-              <View style={styles.swipeHintDots}>
-                {wordList.map((_, i) => (
-                  <View key={i} style={[styles.swipeDot, i === wordIndex && styles.swipeDotActive]} />
-                ))}
-              </View>
-            )}
+            <View style={styles.swipeHintDots}>
+              {wordList.slice(0, unlockedCount).map((_, i) => (
+                <View key={i} style={[styles.swipeDot, i === wordIndex && styles.swipeDotActive]} />
+              ))}
+              {unlockedCount < MAX_WORDS && (
+                <View style={[styles.swipeDot, styles.swipeDotLocked]} />
+              )}
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -731,6 +767,12 @@ const styles = StyleSheet.create({
   },
   headerFlagText: {
     fontSize: 32,
+  },
+  headerDay: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.5)',
+    letterSpacing: 0.5,
   },
   headerStreak: {
     flexDirection: 'row',
@@ -937,6 +979,12 @@ const styles = StyleSheet.create({
   },
   swipeDotActive: {
     backgroundColor: '#A78BFA',
+  },
+  swipeDotLocked: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    borderStyle: 'dashed',
   },
 
   // ── Gizli Paylasim Karti ──
