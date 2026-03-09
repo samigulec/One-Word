@@ -8,6 +8,7 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Badge } from '../types';
 
@@ -93,6 +94,8 @@ const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
 
   return (
     <Animated.View style={[styles.overlay, { opacity: opacityAnim }]}>
+      {/* Glassmorphism: BlurView ile buzlu cam arka plan */}
+      <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
       <TouchableOpacity style={styles.overlayTouch} activeOpacity={1} onPress={handleClose}>
         <Animated.View style={[styles.modal, { transform: [{ scale: scaleAnim }] }]}>
           {/* Parlama efekti */}
@@ -129,7 +132,7 @@ const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.75)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
@@ -140,14 +143,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
+  // Glassmorphism: yari-seffaf arka plan ve ince parlak kenar
   modal: {
-    backgroundColor: '#1A1145',
+    backgroundColor: 'rgba(15, 10, 46, 0.85)',
     borderRadius: 28,
     padding: 32,
     alignItems: 'center',
     width: width * 0.82,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.3)',
+    borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
   },
   shine: {

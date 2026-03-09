@@ -30,6 +30,7 @@ import ShareWordCard from '../components/ShareWordCard';
 import CulturalContextModal from '../components/CulturalContextModal';
 import GrammarNuggets from '../components/GrammarNuggets';
 import RealWorldExamples from '../components/RealWorldExamples';
+import { SkeletonCard } from '../components/SkeletonLoader';
 import { getCategoryIcon } from '../utils/categoryIcons';
 
 const { width } = Dimensions.get('window');
@@ -105,6 +106,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const levelProgressWidth = useRef(new Animated.Value(0)).current;
 
   const shareCardRef = useRef<View>(null);
+
+  // Buton press scale animasyonlari -- Pratik Yap ve Quiz Coz butonlari icin
+  const practiceScale = useRef(new Animated.Value(1)).current;
+  const quizScale = useRef(new Animated.Value(1)).current;
+
+  // Butona basildiginda kuculme efekti
+  const handlePressIn = (scaleAnim: Animated.Value) => {
+    Animated.timing(scaleAnim, {
+      toValue: 0.96,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Butondan el kaldirildiginda geri bounce efekti
+  const handlePressOut = (scaleAnim: Animated.Value) => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 100,
+      friction: 6,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
   const targetLanguageFlag = LANGUAGES.find(lang => lang.code === targetLanguage)?.flag || '';
@@ -308,12 +332,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   };
 
-  // Yukleniyor durumu
+  // Yukleniyor durumu -- skeleton placeholder gosterilir
   if (!word) {
     return (
       <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.container}>
-        <SafeAreaView style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>{t('loading')}</Text>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.scrollContent}>
+            {/* Skeleton header alani */}
+            <View style={styles.header}>
+              <View style={{ width: 180, height: 22, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+            </View>
+            {/* Skeleton gamification bar */}
+            <View style={[styles.gamificationBar, { opacity: 0.5 }]}>
+              <View style={{ width: 100, height: 14, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+              <View style={{ width: 50, height: 14, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.06)' }} />
+            </View>
+            {/* Skeleton kelime karti */}
+            <SkeletonCard />
+          </View>
         </SafeAreaView>
       </LinearGradient>
     );
@@ -555,50 +591,58 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* ── Aksiyon Butonlari ── */}
           <View style={styles.actionButtons}>
-            {/* Pratik Yap butonu */}
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                completeDailyTask('practice_ai');
-                onNavigateToPractice(word);
-              }}
-              activeOpacity={0.8}
-              style={styles.primaryActionBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Practice"
-              accessibilityHint="Opens AI practice session with this word"
-            >
-              <LinearGradient
-                colors={['#6366F1', '#8B5CF6']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.primaryActionBtnInner}
+            {/* Pratik Yap butonu -- press scale efekti ile */}
+            <Animated.View style={{ transform: [{ scale: practiceScale }] }}>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  completeDailyTask('practice_ai');
+                  onNavigateToPractice(word);
+                }}
+                onPressIn={() => handlePressIn(practiceScale)}
+                onPressOut={() => handlePressOut(practiceScale)}
+                activeOpacity={0.85}
+                style={styles.primaryActionBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Practice"
+                accessibilityHint="Opens AI practice session with this word"
               >
-                <Text style={styles.primaryActionBtnText}>{'\u{1F4AC}'} {t('practiceNow')}</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={['#6366F1', '#8B5CF6']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.primaryActionBtnInner}
+                >
+                  <Text style={styles.primaryActionBtnText}>{'\u{1F4AC}'} {t('practiceNow')}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
 
-            {/* Quiz Coz butonu */}
-            <TouchableOpacity
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                onNavigateToQuiz();
-              }}
-              activeOpacity={0.8}
-              style={styles.primaryActionBtn}
-              accessibilityRole="button"
-              accessibilityLabel="Start Quiz"
-              accessibilityHint="Opens a vocabulary quiz"
-            >
-              <LinearGradient
-                colors={['#F59E0B', '#EF4444']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.primaryActionBtnInner}
+            {/* Quiz Coz butonu -- press scale efekti ile */}
+            <Animated.View style={{ transform: [{ scale: quizScale }] }}>
+              <TouchableOpacity
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  onNavigateToQuiz();
+                }}
+                onPressIn={() => handlePressIn(quizScale)}
+                onPressOut={() => handlePressOut(quizScale)}
+                activeOpacity={0.85}
+                style={styles.primaryActionBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Start Quiz"
+                accessibilityHint="Opens a vocabulary quiz"
               >
-                <Text style={styles.primaryActionBtnText}>{'\u{1F9E0}'} {t('startQuiz') || 'Quiz Coz'}</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+                <LinearGradient
+                  colors={['#F59E0B', '#EF4444']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.primaryActionBtnInner}
+                >
+                  <Text style={styles.primaryActionBtnText}>{'\u{1F9E0}'} {t('startQuiz') || 'Quiz Coz'}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
 
             {/* Tekrar hatirlatma */}
             {dueCount > 0 && (
@@ -712,12 +756,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 8,
     marginBottom: 16,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.15)',
+    borderColor: 'rgba(255,255,255,0.08)',
+    // Cam (glass) efekti -- hafif parlak kenar ve yari-seffaf arka plan
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   gamBarLeft: {
     flexDirection: 'row',

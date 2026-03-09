@@ -39,6 +39,8 @@ const MultipleChoiceView: React.FC<{
   const [selected, setSelected] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const shakeAnim = useRef(new Animated.Value(0)).current;
+  // Dogru cevap icin scale bounce animasyonu
+  const correctScaleAnim = useRef(new Animated.Value(1)).current;
   // Her secenek icin giris animasyonu
   const optionAnims = useRef(
     (question.options || []).map((_, i) => new Animated.Value(0))
@@ -65,14 +67,18 @@ const MultipleChoiceView: React.FC<{
     const isCorrect = option === question.correctAnswer;
     if (isCorrect) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      // Dogru cevap icin scale bounce efekti: 1.0 -> 1.05 -> 1.0
+      Animated.sequence([
+        Animated.timing(correctScaleAnim, { toValue: 1.05, duration: 150, useNativeDriver: true }),
+        Animated.spring(correctScaleAnim, { toValue: 1, tension: 100, friction: 6, useNativeDriver: true }),
+      ]).start();
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      // Yanlis cevap icin shake efekti
+      // Yanlis cevap icin shake efekti: 0 -> -10 -> 10 -> -10 -> 0
       Animated.sequence([
+        Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 8, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -8, duration: 50, useNativeDriver: true }),
         Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
       ]).start();
     }
@@ -117,12 +123,16 @@ const MultipleChoiceView: React.FC<{
               key={i}
               style={{
                 opacity: optionAnims[i],
-                transform: [{
-                  translateY: optionAnims[i].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                }],
+                transform: [
+                  {
+                    translateY: optionAnims[i].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  },
+                  // Dogru secilen option icin scale bounce efekti
+                  { scale: (revealed && option === question.correctAnswer) ? correctScaleAnim : 1 },
+                ],
               }}
             >
               <TouchableOpacity
