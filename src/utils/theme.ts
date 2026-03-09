@@ -29,39 +29,39 @@ export const FONTS = {
 // Renk tokenlari
 export const COLORS = {
   // Arka planlar
-  bgPrimary: '#0F0A2E',
-  bgSecondary: '#1A1145',
-  bgTertiary: '#1E1650',
-  bgCard: 'rgba(255,255,255,0.06)',
-  bgCardHover: 'rgba(255,255,255,0.1)',
+  bgPrimary: '#0A0E27',
+  bgSecondary: '#141B3D',
+  bgTertiary: '#1B1040',
+  bgCard: 'rgba(139,92,246,0.08)',
+  bgCardHover: 'rgba(139,92,246,0.14)',
 
   // Metin
   textPrimary: '#FFFFFF',
-  textSecondary: 'rgba(255,255,255,0.7)',
-  textTertiary: 'rgba(255,255,255,0.45)',
+  textSecondary: 'rgba(255,255,255,0.75)',
+  textTertiary: 'rgba(167,139,250,0.6)',
   textDisabled: 'rgba(255,255,255,0.2)',
 
   // Vurgu
-  primary: '#6366F1',
-  primaryLight: '#818CF8',
-  secondary: '#8B5CF6',
-  secondaryLight: '#A78BFA',
+  primary: '#7C3AED',
+  primaryLight: '#8B5CF6',
+  secondary: '#A78BFA',
+  secondaryLight: '#C4B5FD',
 
   // Geri bildirim
-  success: '#10B981',
-  successSoft: '#66BB6A',
-  error: '#EF4444',
-  errorSoft: '#EF5350',
-  warning: '#F59E0B',
+  success: '#34D399',
+  successSoft: '#6EE7B7',
+  error: '#F87171',
+  errorSoft: '#FCA5A5',
+  warning: '#FBBF24',
 
   // Oyunlastirma
-  xp: '#FFB74D',
-  streak: '#FF6B6B',
-  level: '#A78BFA',
+  xp: '#FBBF24',
+  streak: '#F87171',
+  level: '#C4B5FD',
 
   // Kenarliklar
-  border: 'rgba(255,255,255,0.08)',
-  borderLight: 'rgba(255,255,255,0.12)',
+  border: 'rgba(139,92,246,0.12)',
+  borderLight: 'rgba(139,92,246,0.2)',
 };
 
 // Bosluk olcegi

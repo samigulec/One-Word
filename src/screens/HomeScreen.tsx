@@ -452,7 +452,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   // Yukleniyor durumu -- skeleton placeholder gosterilir
   if (!word) {
     return (
-      <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.container}>
+      <LinearGradient colors={['#0A0E27', '#141B3D', '#1B1040']} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.mainContent}>
             <View style={styles.header}>
@@ -522,7 +522,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <LinearGradient colors={['#0F0A2E', '#1A1145', '#1E1650']} style={styles.container}>
+    <LinearGradient colors={['#0A0E27', '#141B3D', '#1B1040']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.mainContent}>
           {/* ── Header: Bayrak + Day X + Streak ── */}
@@ -587,7 +587,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               ]}
             >
               <LinearGradient
-                colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)']}
+                colors={['rgba(99,102,241,0.12)', 'rgba(139,92,246,0.06)', 'rgba(255,255,255,0.03)']}
                 style={styles.cardInner}
               >
                 {/* Kelime emojisi */}
@@ -771,7 +771,7 @@ const styles = StyleSheet.create({
   headerDay: {
     fontSize: 16,
     fontWeight: '700',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#C4B5FD',
     letterSpacing: 0.5,
   },
   headerStreak: {
@@ -814,9 +814,9 @@ const styles = StyleSheet.create({
   card: {
     width: width - 32,
     borderRadius: 28,
-    shadowColor: '#6366F1',
+    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.35,
     shadowRadius: 30,
     elevation: 16,
   },
@@ -825,8 +825,8 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
     paddingHorizontal: 28,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(139,92,246,0.2)',
     minHeight: 420,
     justifyContent: 'center',
   },
@@ -841,10 +841,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 46,
     marginBottom: 6,
+    textShadowColor: 'rgba(139,92,246,0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   pronunciation: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.45)',
+    color: 'rgba(167,139,250,0.6)',
     marginBottom: 20,
     fontStyle: 'italic',
   },
@@ -858,7 +861,9 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(139,92,246,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -917,10 +922,13 @@ const styles = StyleSheet.create({
   meaningText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#6EE7B7',
+    color: '#34D399',
     textAlign: 'center',
     lineHeight: 26,
     marginBottom: 12,
+    textShadowColor: 'rgba(52,211,153,0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   separator: {
     width: '60%' as any,
@@ -978,7 +986,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
   },
   swipeDotActive: {
-    backgroundColor: '#A78BFA',
+    backgroundColor: '#C4B5FD',
+    shadowColor: '#C4B5FD',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
   },
   swipeDotLocked: {
     backgroundColor: 'rgba(255,255,255,0.08)',
@@ -997,9 +1009,9 @@ const styles = StyleSheet.create({
   // ── Alt Navigasyon Cubugu (4 tab) ──
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(15,10,46,0.95)',
+    backgroundColor: 'rgba(10,14,39,0.95)',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
+    borderTopColor: 'rgba(139,92,246,0.12)',
     paddingBottom: 20,
     paddingTop: 8,
   },
@@ -1020,7 +1032,7 @@ const styles = StyleSheet.create({
   tabLabelActive: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#A78BFA',
+    color: '#C4B5FD',
   },
 
   // ── Level Up Overlay ──
