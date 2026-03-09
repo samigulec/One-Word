@@ -169,8 +169,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const unlockedCountRef = useRef(1); // Kac kelime acilmis (1-3)
   const [unlockedCount, setUnlockedCount] = useState(1);
 
-  const SWIPE_THRESHOLD = 120;
+  const SWIPE_THRESHOLD = 100;
+  const SWIPE_UP_THRESHOLD = -80;
   const MAX_WORDS = 3;
+
+  // Super like animasyonu
+  const [showSuperLike, setShowSuperLike] = useState(false);
+  const superLikeScale = useRef(new Animated.Value(0)).current;
+  const superLikeOpacity = useRef(new Animated.Value(0)).current;
 
   // Gunluk key -- acilan kelime sayisini persist etmek icin
   const getDailySwipeKey = () => {
@@ -178,11 +184,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return `home_unlocked_${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   };
 
-  // Karta animasyonlu gecis
+  // Karta animasyonlu gecis -- bouncy spring fizigi
   const animateToWord = (targetIndex: number, direction: number) => {
     Animated.timing(swipeX, {
       toValue: direction * (width + 100),
-      duration: 300,
+      duration: 250,
       useNativeDriver: true,
     }).start(() => {
       wordIndexRef.current = targetIndex;
@@ -197,14 +203,45 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       }
       swipeX.setValue(0);
       swipeY.setValue(0);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      cardScale.setValue(0.95);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      cardScale.setValue(0.9);
       cardOpacity.setValue(0);
       Animated.parallel([
-        Animated.spring(cardScale, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
-        Animated.timing(cardOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(cardScale, { toValue: 1, tension: 70, friction: 5, useNativeDriver: true }),
+        Animated.timing(cardOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
       ]).start();
     });
+  };
+
+  // Super like tetikle -- yukari swipe ile favorilere ekle
+  const triggerSuperLike = () => {
+    if (!word) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Favori ekle
+    toggleFavorite(word.id).then(newFav => {
+      setIsFav(newFav);
+      if (newFav) {
+        addXP('favorite_added').then(r => {
+          if (r.leveledUp && r.newLevel) triggerLevelUpAnimation(r.newLevel);
+          if (r.gained > 0) triggerFloatingXP(r.gained);
+          loadXPStatus();
+        });
+      }
+    });
+    // Animasyon
+    setShowSuperLike(true);
+    superLikeScale.setValue(0);
+    superLikeOpacity.setValue(1);
+    Animated.parallel([
+      Animated.spring(superLikeScale, { toValue: 1, tension: 60, friction: 4, useNativeDriver: true }),
+      Animated.timing(superLikeOpacity, { toValue: 0, duration: 1200, delay: 600, useNativeDriver: true }),
+    ]).start(() => setShowSuperLike(false));
+    // Kart yukari uc ve geri gel
+    Animated.sequence([
+      Animated.timing(swipeY, { toValue: -150, duration: 200, useNativeDriver: true }),
+      Animated.spring(swipeY, { toValue: 0, tension: 60, friction: 5, useNativeDriver: true }),
+    ]).start();
+    Animated.spring(swipeX, { toValue: 0, tension: 60, friction: 5, useNativeDriver: true }).start();
   };
 
   // Swipe islemi -- yeni kelime ac veya acilmis kelimeler arasinda don
@@ -248,8 +285,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         animateToWord(prevIdx, -1);
       } else {
         // Henuz acilmamis, geri don
-        Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
-        Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+        Animated.spring(swipeX, { toValue: 0, tension: 70, friction: 5, useNativeDriver: true }).start();
+        Animated.spring(swipeY, { toValue: 0, tension: 70, friction: 5, useNativeDriver: true }).start();
       }
     }
   };
@@ -257,26 +294,58 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dx) > 10,
+      onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dx) > 8 || Math.abs(gs.dy) > 8,
       onPanResponderMove: Animated.event(
         [null, { dx: swipeX, dy: swipeY }],
         { useNativeDriver: false }
       ),
       onPanResponderRelease: (_, gs) => {
-        if (Math.abs(gs.dx) > SWIPE_THRESHOLD) {
+        if (gs.dy < SWIPE_UP_THRESHOLD && Math.abs(gs.dx) < 50) {
+          // Yukari swipe → Super Like (favorilere ekle)
+          triggerSuperLike();
+        } else if (Math.abs(gs.dx) > SWIPE_THRESHOLD) {
           handleSwipe(gs.dx > 0 ? 1 : -1);
         } else {
-          Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
-          Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+          Animated.spring(swipeX, { toValue: 0, tension: 70, friction: 5, useNativeDriver: true }).start();
+          Animated.spring(swipeY, { toValue: 0, tension: 70, friction: 5, useNativeDriver: true }).start();
         }
       },
     })
   ).current;
 
-  // Kart rotation -- swipe esnasinda tilt
+  // Kart rotation -- swipe esnasinda dramatik tilt (18 derece)
   const cardRotate = swipeX.interpolate({
     inputRange: [-width, 0, width],
-    outputRange: ['-12deg', '0deg', '12deg'],
+    outputRange: ['-18deg', '0deg', '18deg'],
+  });
+
+  // Stamp overlay opakliklari
+  const stampRightOpacity = swipeX.interpolate({
+    inputRange: [0, 60, 120],
+    outputRange: [0, 0.6, 1],
+    extrapolate: 'clamp',
+  });
+  const stampLeftOpacity = swipeX.interpolate({
+    inputRange: [-120, -60, 0],
+    outputRange: [1, 0.6, 0],
+    extrapolate: 'clamp',
+  });
+  const stampUpOpacity = swipeY.interpolate({
+    inputRange: [-100, -40, 0],
+    outputRange: [1, 0.5, 0],
+    extrapolate: 'clamp',
+  });
+
+  // Stack kartlari icin scale -- arkadaki kartlar buyur
+  const backCard1Scale = swipeX.interpolate({
+    inputRange: [-SWIPE_THRESHOLD, 0, SWIPE_THRESHOLD],
+    outputRange: [0.98, 0.95, 0.98],
+    extrapolate: 'clamp',
+  });
+  const backCard2Scale = swipeX.interpolate({
+    inputRange: [-SWIPE_THRESHOLD, 0, SWIPE_THRESHOLD],
+    outputRange: [0.95, 0.90, 0.95],
+    extrapolate: 'clamp',
   });
 
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
@@ -621,8 +690,27 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             </Animated.View>
           ))}
 
-          {/* ── Tinder-Style Kelime Karti ── */}
+          {/* ── Tinder-Style Kelime Karti + Stack ── */}
           <View style={styles.cardArea}>
+            {/* Stack: 3. kart (en arka) */}
+            {unlockedCount > 2 && (
+              <Animated.View style={[styles.card, styles.stackCard3, { transform: [{ scale: backCard2Scale }] }]}>
+                <LinearGradient
+                  colors={['rgba(100,100,140,0.08)', 'rgba(80,80,120,0.04)']}
+                  style={styles.cardInner}
+                />
+              </Animated.View>
+            )}
+            {/* Stack: 2. kart */}
+            {unlockedCount > 1 && (
+              <Animated.View style={[styles.card, styles.stackCard2, { transform: [{ scale: backCard1Scale }] }]}>
+                <LinearGradient
+                  colors={['rgba(120,80,200,0.08)', 'rgba(100,60,180,0.04)']}
+                  style={styles.cardInner}
+                />
+              </Animated.View>
+            )}
+            {/* On kart -- swipeable */}
             <Animated.View
               {...panResponder.panHandlers}
               style={[
@@ -631,7 +719,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                   opacity: cardOpacity,
                   transform: [
                     { translateX: swipeX },
-                    { translateY: Animated.multiply(swipeY, 0.3) },
+                    { translateY: Animated.multiply(swipeY, 0.4) },
                     { rotate: cardRotate },
                     { scale: cardScale },
                   ],
@@ -642,6 +730,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 colors={['rgba(124,58,237,0.14)', 'rgba(236,72,153,0.06)', 'rgba(255,255,255,0.02)']}
                 style={styles.cardInner}
               >
+                {/* Stamp: Saga swipe */}
+                <Animated.View style={[styles.stamp, styles.stampRight, { opacity: stampRightOpacity }]}>
+                  <Ionicons name="arrow-forward-circle" size={20} color="#34D399" />
+                  <Text style={styles.stampTextRight}>NEXT</Text>
+                </Animated.View>
+                {/* Stamp: Sola swipe */}
+                <Animated.View style={[styles.stamp, styles.stampLeft, { opacity: stampLeftOpacity }]}>
+                  <Ionicons name="arrow-back-circle" size={20} color="#F87171" />
+                  <Text style={styles.stampTextLeft}>BACK</Text>
+                </Animated.View>
+                {/* Stamp: Yukari swipe -- super like */}
+                <Animated.View style={[styles.stamp, styles.stampUp, { opacity: stampUpOpacity }]}>
+                  <Ionicons name="star" size={22} color="#FBBF24" />
+                </Animated.View>
                 {/* Kelime ikonu -- vektor ikon + gradient baloncuk */}
                 <View style={styles.emojiBubbleWrapper}>
                   <LinearGradient
@@ -731,6 +833,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               </LinearGradient>
             </Animated.View>
           </View>
+
+          {/* Super Like animasyonu */}
+          {showSuperLike && (
+            <Animated.View style={[styles.superLikeOverlay, { opacity: superLikeOpacity, transform: [{ scale: superLikeScale }] }]} pointerEvents="none">
+              <Ionicons name="star" size={64} color="#FBBF24" />
+            </Animated.View>
+          )}
 
           {/* Dot indicator + swipe ipucu */}
           <View style={styles.swipeHint}>
@@ -868,7 +977,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
 
-  // ── Tinder-Style Kelime Karti ──
+  // ── Tinder-Style Kelime Karti + Stack ──
   cardArea: {
     flex: 1,
     alignItems: 'center',
@@ -883,6 +992,69 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 32,
     elevation: 16,
+  },
+  stackCard2: {
+    position: 'absolute',
+    top: 10,
+    opacity: 0.6,
+  },
+  stackCard3: {
+    position: 'absolute',
+    top: 20,
+    opacity: 0.3,
+  },
+  // Stamp overlays
+  stamp: {
+    position: 'absolute',
+    zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 2.5,
+  },
+  stampRight: {
+    top: 20,
+    left: 16,
+    borderColor: '#34D399',
+    transform: [{ rotate: '-15deg' }],
+  },
+  stampLeft: {
+    top: 20,
+    right: 16,
+    borderColor: '#F87171',
+    transform: [{ rotate: '15deg' }],
+  },
+  stampUp: {
+    top: 20,
+    alignSelf: 'center',
+    left: '38%' as any,
+    borderColor: '#FBBF24',
+    transform: [{ rotate: '-5deg' }],
+  },
+  stampTextRight: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#34D399',
+    letterSpacing: 1,
+  },
+  stampTextLeft: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#F87171',
+    letterSpacing: 1,
+  },
+  stampTextUp: {
+    fontSize: 18,
+  },
+  // Super Like overlay
+  superLikeOverlay: {
+    position: 'absolute',
+    alignSelf: 'center',
+    top: '40%' as any,
+    zIndex: 100,
   },
   cardInner: {
     borderRadius: 28,
