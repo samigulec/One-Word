@@ -114,13 +114,23 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const swipeX = useRef(new Animated.Value(0)).current;
   const swipeY = useRef(new Animated.Value(0)).current;
   const swipesLeftRef = useRef(2);
+  const wordListRef = useRef<ContentItem[]>([]);
+  const wordIndexRef = useRef(0);
 
   const SWIPE_THRESHOLD = 120;
 
-  // Sonraki kelimeye gec
-  const showNextWord = useCallback((direction: number) => {
+  // Sonraki kelimeye gec -- ref'ler uzerinden calisir, stale closure yok
+  const showNextWord = (direction: number) => {
     if (swipesLeftRef.current <= 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+      Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
+      return;
+    }
+
+    const nextIndex = wordIndexRef.current + 1;
+    const nextWord = wordListRef.current[nextIndex];
+    if (!nextWord) {
       Animated.spring(swipeX, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
       Animated.spring(swipeY, { toValue: 0, tension: 40, friction: 5, useNativeDriver: true }).start();
       return;
@@ -133,27 +143,22 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }).start(() => {
       swipesLeftRef.current -= 1;
       setSwipesLeft(swipesLeftRef.current);
-      setWordIndex(prev => {
-        const next = prev + 1;
-        const nextWord = wordList[next];
-        if (nextWord) {
-          setWord(nextWord);
-          setShowMeaning(false);
-          setActiveWordTab('meaning');
-          meaningReveal.setValue(0);
-          addLearnedWord(nextWord).then(isNew => {
-            if (isNew) {
-              addXP('word_learned').then(r => {
-                if (r.leveledUp && r.newLevel) triggerLevelUpAnimation(r.newLevel);
-                if (r.gained > 0) triggerFloatingXP(r.gained);
-                loadXPStatus();
-              });
-            }
+      wordIndexRef.current = nextIndex;
+      setWordIndex(nextIndex);
+      setWord(nextWord);
+      setShowMeaning(false);
+      setActiveWordTab('meaning');
+      meaningReveal.setValue(0);
+      addLearnedWord(nextWord).then(isNew => {
+        if (isNew) {
+          addXP('word_learned').then(r => {
+            if (r.leveledUp && r.newLevel) triggerLevelUpAnimation(r.newLevel);
+            if (r.gained > 0) triggerFloatingXP(r.gained);
+            loadXPStatus();
           });
-          isFavorite(nextWord.id).then(setIsFav);
         }
-        return next;
       });
+      isFavorite(nextWord.id).then(setIsFav);
       swipeX.setValue(0);
       swipeY.setValue(0);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -165,7 +170,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         Animated.timing(cardOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
       ]).start();
     });
-  }, [wordList]);
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -284,7 +289,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       const bonus2 = otherWords[(dayOfYear + 13) % otherWords.length];
       const words = [todaysWord, bonus1, bonus2].filter(Boolean);
       setWordList(words);
+      wordListRef.current = words;
       setWordIndex(0);
+      wordIndexRef.current = 0;
       setSwipesLeft(2);
       swipesLeftRef.current = 2;
 
