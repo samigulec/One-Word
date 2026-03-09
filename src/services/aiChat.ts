@@ -163,28 +163,28 @@ const scenarioEmojis: Record<ScenarioKey, string> = {
  * Selamlama sablonlari - her dil icin
  */
 const greetingTemplates: Record<LanguageCode, (word: ContentItem, meaning: string, targetLang: string) => string> = {
-  en: (word, meaning, targetLang) =>
-    `Hello! I'm your ${targetLang.toUpperCase()} teacher.\n\nToday we'll learn: "${word.target_word}" ${word.emoji || ''}\n\nMeaning: ${meaning}\n\nExample: "${word.example_sentence}"\n\nTry making a sentence using this word! Or tap the buttons below to explore more.`,
-  tr: (word, meaning, targetLang) =>
-    `Merhaba! Ben senin ${targetLang.toUpperCase()} ogretmeninim.\n\nBugun "${word.target_word}" ${word.emoji || ''} kelimesini ogrenecegiz!\n\nTurkcesi: ${meaning}\n\nOrnek: "${word.example_sentence}"\n\nHaydi, bu kelimeyi kullanarak bir cumle yazmaya dene! Ya da asagidaki butonlarla kesfet.`,
-  es: (word, meaning, targetLang) =>
-    `Hola! Soy tu profesor de ${targetLang.toUpperCase()}.\n\nHoy aprenderemos: "${word.target_word}" ${word.emoji || ''}\n\nSignificado: ${meaning}\n\nEjemplo: "${word.example_sentence}"\n\nIntenta hacer una oracion usando esta palabra! O usa los botones de abajo.`,
-  de: (word, meaning, targetLang) =>
-    `Hallo! Ich bin dein ${targetLang.toUpperCase()}-Lehrer.\n\nHeute lernen wir: "${word.target_word}" ${word.emoji || ''}\n\nBedeutung: ${meaning}\n\nBeispiel: "${word.example_sentence}"\n\nVersuche einen Satz mit diesem Wort zu bilden! Oder nutze die Buttons unten.`,
-  fr: (word, meaning, targetLang) =>
-    `Bonjour! Je suis ton professeur de ${targetLang.toUpperCase()}.\n\nAujourd'hui nous apprenons: "${word.target_word}" ${word.emoji || ''}\n\nSignification: ${meaning}\n\nExemple: "${word.example_sentence}"\n\nEssaie de faire une phrase avec ce mot! Ou utilise les boutons ci-dessous.`,
-  pt: (word, meaning, targetLang) =>
-    `Ola! Sou seu professor de ${targetLang.toUpperCase()}.\n\nHoje vamos aprender: "${word.target_word}" ${word.emoji || ''}\n\nSignificado: ${meaning}\n\nExemplo: "${word.example_sentence}"\n\nTente fazer uma frase usando esta palavra! Ou use os botoes abaixo.`,
-  it: (word, meaning, targetLang) =>
-    `Ciao! Sono il tuo insegnante di ${targetLang.toUpperCase()}.\n\nOggi impariamo: "${word.target_word}" ${word.emoji || ''}\n\nSignificato: ${meaning}\n\nEsempio: "${word.example_sentence}"\n\nProva a fare una frase usando questa parola! O usa i pulsanti sotto.`,
-  ru: (word, meaning, targetLang) =>
-    `Privet! Ya tvoj uchitel' ${targetLang.toUpperCase()}.\n\nSegodnya my vyuchim: "${word.target_word}" ${word.emoji || ''}\n\nZnachenie: ${meaning}\n\nPrimer: "${word.example_sentence}"\n\nPoprobuj sostavit' predlozhenie s etim slovom! Ili ispol'zuj knopki nizhe.`,
-  ja: (word, meaning, targetLang) =>
-    `Konnichiwa! Watashi wa anata no ${targetLang.toUpperCase()} no sensei desu.\n\nKyou manabu no wa: "${word.target_word}" ${word.emoji || ''}\n\nImi: ${meaning}\n\nReibun: "${word.example_sentence}"\n\nKono kotoba wo tsukatte bun wo tsukutte mimashou! Shita no botan mo tsukae masu.`,
-  ko: (word, meaning, targetLang) =>
-    `Annyeonghaseyo! Jeoneun dangshin-ui ${targetLang.toUpperCase()} seonsaengnim imnida.\n\nOneul baeul geos: "${word.target_word}" ${word.emoji || ''}\n\nUimi: ${meaning}\n\nYemun: "${word.example_sentence}"\n\nI daneo-reul sayonghae seo munjang-eul mandeul-eo boseyo! Arae beotn-do sayonghal su isseoyo.`,
-  zh: (word, meaning, targetLang) =>
-    `Nihao! Wo shi ni de ${targetLang.toUpperCase()} laoshi.\n\nJintian women xuexi: "${word.target_word}" ${word.emoji || ''}\n\nHanyi: ${meaning}\n\nLiju: "${word.example_sentence}"\n\nShi zhe yong zhe ge ci zao ge juzi! Ye keyi yong xiamian de anniu.`,
+  en: (word, meaning, _targetLang) =>
+    `Hey there! \u{1F916} I'm Lingo, your language practice buddy!\n\nToday's word is: "${word.target_word}" ${word.emoji || ''}\nIt means: ${meaning}\n\nHere's how it's used: "${word.example_sentence}"\n\nTry using "${word.target_word}" in a sentence - I'll help you along the way!`,
+  tr: (word, meaning, _targetLang) =>
+    `Selam! \u{1F916} Ben Lingo, senin dil pratik arkadasin!\n\nBugunku kelimemiz: "${word.target_word}" ${word.emoji || ''}\nAnlami: ${meaning}\n\nOrnek kullanim: "${word.example_sentence}"\n\nHaydi, "${word.target_word}" kelimesini bir cumlede kullanmayi dene - sana yardimci olacagim!`,
+  es: (word, meaning, _targetLang) =>
+    `Hola! \u{1F916} Soy Lingo, tu companero de practica!\n\nLa palabra de hoy es: "${word.target_word}" ${word.emoji || ''}\nSignifica: ${meaning}\n\nEjemplo: "${word.example_sentence}"\n\nIntenta usar "${word.target_word}" en una oracion - te ayudare!`,
+  de: (word, meaning, _targetLang) =>
+    `Hallo! \u{1F916} Ich bin Lingo, dein Sprachpartner!\n\nDas heutige Wort ist: "${word.target_word}" ${word.emoji || ''}\nBedeutung: ${meaning}\n\nBeispiel: "${word.example_sentence}"\n\nVersuch "${word.target_word}" in einem Satz zu verwenden - ich helfe dir dabei!`,
+  fr: (word, meaning, _targetLang) =>
+    `Salut! \u{1F916} Je suis Lingo, ton partenaire de pratique!\n\nLe mot du jour: "${word.target_word}" ${word.emoji || ''}\nSignification: ${meaning}\n\nExemple: "${word.example_sentence}"\n\nEssaie d'utiliser "${word.target_word}" dans une phrase - je t'aiderai!`,
+  pt: (word, meaning, _targetLang) =>
+    `Oi! \u{1F916} Eu sou o Lingo, seu parceiro de pratica!\n\nA palavra de hoje e: "${word.target_word}" ${word.emoji || ''}\nSignificado: ${meaning}\n\nExemplo: "${word.example_sentence}"\n\nTente usar "${word.target_word}" em uma frase - eu te ajudo!`,
+  it: (word, meaning, _targetLang) =>
+    `Ciao! \u{1F916} Sono Lingo, il tuo compagno di pratica!\n\nLa parola di oggi e: "${word.target_word}" ${word.emoji || ''}\nSignificato: ${meaning}\n\nEsempio: "${word.example_sentence}"\n\nProva a usare "${word.target_word}" in una frase - ti aiutero!`,
+  ru: (word, meaning, _targetLang) =>
+    `Privet! \u{1F916} Ya Lingo, tvoj partner dlya praktiki!\n\nSlovo dnya: "${word.target_word}" ${word.emoji || ''}\nZnachenie: ${meaning}\n\nPrimer: "${word.example_sentence}"\n\nPoprobuj ispol'zovat' "${word.target_word}" v predlozhenii - ya pomogul!`,
+  ja: (word, meaning, _targetLang) =>
+    `Yaa! \u{1F916} Boku wa Lingo, kimi no renshuu paatonaa da yo!\n\nKyou no kotoba wa: "${word.target_word}" ${word.emoji || ''}\nImi: ${meaning}\n\nReibun: "${word.example_sentence}"\n\n"${word.target_word}" wo tsukatte bun wo tsukutte mite! Tetsudau yo!`,
+  ko: (word, meaning, _targetLang) =>
+    `Annyeong! \u{1F916} Na-neun Lingo, neo-ui yeonseub chingu-ya!\n\nOneul-ui daneo: "${word.target_word}" ${word.emoji || ''}\nUimi: ${meaning}\n\nYemun: "${word.example_sentence}"\n\n"${word.target_word}" reul sayonghae seo munjang-eul mandeul-eo bwa! Dowajulge!`,
+  zh: (word, meaning, _targetLang) =>
+    `Hai! \u{1F916} Wo shi Lingo, ni de lianxi huoban!\n\nJintian de danci shi: "${word.target_word}" ${word.emoji || ''}\nYisi: ${meaning}\n\nLiju: "${word.example_sentence}"\n\nShishi yong "${word.target_word}" zaoju ba - wo hui bangzhu ni de!`,
 };
 
 // ---- Senaryo bazli yanit sablonlari ----
@@ -198,7 +198,7 @@ const scenarioResponses: Record<LanguageCode, {
 }> = {
   en: {
     prompt: (word, scenario) =>
-      `Imagine you're ${scenario}. How would you use "${word.target_word}" in that situation?\n\nFor example: "${word.example_sentence}"\n\nNow it's your turn! Write a sentence using "${word.target_word}" in this context.`,
+      `Let's pretend we're ${scenario}! How would you use "${word.target_word}" in that situation?\n\nFor example: "${word.example_sentence}"\n\nYour turn - give it a shot!`,
     dialogStart: (word, scenario) =>
       `Let's practice a mini dialog! Imagine we're ${scenario}.\n\nMe: Hi! Do you know what "${word.target_word}" means?\n\nNow you respond! Try to use "${word.target_word}" in your reply.`,
     sentenceChallenge: (word) =>
@@ -214,7 +214,7 @@ const scenarioResponses: Record<LanguageCode, {
   },
   tr: {
     prompt: (word, scenario) =>
-      `${scenario} oldugumuzu hayal et. "${word.target_word}" kelimesini bu durumda nasil kullanirdin?\n\nOrnegin: "${word.example_sentence}"\n\nSimdi senin siran! Bu baglamda "${word.target_word}" kullanarak bir cumle yaz.`,
+      `${scenario} oldugumuzu hayal edelim! "${word.target_word}" kelimesini bu durumda nasil kullanirdin?\n\nOrnegin: "${word.example_sentence}"\n\nHadi, senin siran - bir dene bakalim!`,
     dialogStart: (word, scenario) =>
       `Haydi mini bir diyalog pratiği yapalim! ${scenario} oldugumuzu dusun.\n\nBen: Selam! "${word.target_word}" ne demek biliyor musun?\n\nSimdi sen cevap ver! "${word.target_word}" kelimesini cevabinda kullanmayi dene.`,
     sentenceChallenge: (word) =>
@@ -230,7 +230,7 @@ const scenarioResponses: Record<LanguageCode, {
   },
   es: {
     prompt: (word, scenario) =>
-      `Imagina que estas ${scenario}. Como usarias "${word.target_word}" en esa situacion?\n\nPor ejemplo: "${word.example_sentence}"\n\nAhora es tu turno!`,
+      `Imaginemos que estamos ${scenario}! Como usarias "${word.target_word}" en esa situacion?\n\nPor ejemplo: "${word.example_sentence}"\n\nVenga, intentalo!`,
     dialogStart: (word, scenario) =>
       `Practiquemos un mini dialogo! Imagina que estamos ${scenario}.\n\nYo: Hola! Sabes que significa "${word.target_word}"?\n\nAhora responde tu! Intenta usar "${word.target_word}" en tu respuesta.`,
     sentenceChallenge: (word) =>
@@ -245,7 +245,7 @@ const scenarioResponses: Record<LanguageCode, {
   },
   de: {
     prompt: (word, scenario) =>
-      `Stell dir vor, du bist ${scenario}. Wie wuerdest du "${word.target_word}" in dieser Situation verwenden?\n\nZum Beispiel: "${word.example_sentence}"\n\nJetzt bist du dran!`,
+      `Stell dir vor, wir sind ${scenario}! Wie wuerdest du "${word.target_word}" hier verwenden?\n\nZum Beispiel: "${word.example_sentence}"\n\nLos, probier es aus!`,
     dialogStart: (word, scenario) =>
       `Lass uns einen Mini-Dialog ueben! Stell dir vor, wir sind ${scenario}.\n\nIch: Hallo! Weisst du, was "${word.target_word}" bedeutet?\n\nJetzt antworte du!`,
     sentenceChallenge: (word) =>

@@ -159,7 +159,7 @@ const AnimatedMessage: React.FC<{ item: ChatMessage; index: number; isLast: bool
     >
       {!isUser && (
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>AI</Text>
+          <Text style={styles.avatarEmoji}>{'\u{1F916}'}</Text>
         </View>
       )}
       <View style={{ maxWidth: '78%' }}>
@@ -284,7 +284,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
     return (
       <View style={[styles.messageContainer, styles.aiMessageContainer]}>
         <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>AI</Text>
+          <Text style={styles.avatarEmoji}>{'\u{1F916}'}</Text>
         </View>
         <View style={[styles.messageBubble, styles.aiBubble, styles.typingBubble]}>
           <BouncingDots />
@@ -313,6 +313,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
             <Text style={styles.backArrow}>{'\u2190'}</Text>
           </TouchableOpacity>
           <View style={styles.headerCenter}>
+            <Text style={styles.headerTutorName}>{'\u{1F916}'} Lingo</Text>
             <View style={styles.headerWordRow}>
               <Text style={styles.headerWord}>{word.emoji || targetFlag} {word.target_word}</Text>
               <View style={[styles.headerLevelBadge, { backgroundColor: getLevelColor(word.level) }]}>
@@ -464,6 +465,12 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 12,
   },
+  headerTutorName: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#A78BFA',
+    marginBottom: 2,
+  },
   headerWordRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -525,19 +532,19 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   avatarContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: 'rgba(99,102,241,0.2)',
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: 'rgba(99,102,241,0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
     marginTop: 2,
+    borderWidth: 1.5,
+    borderColor: 'rgba(99,102,241,0.4)',
   },
-  avatarText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#A78BFA',
+  avatarEmoji: {
+    fontSize: 18,
   },
   messageBubble: {
     paddingHorizontal: 14,
