@@ -12,7 +12,7 @@ import {
   Dimensions,
   Animated,
   Alert,
-  ScrollView,
+  PanResponder,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -107,28 +107,81 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const shareCardRef = useRef<View>(null);
 
-  // Buton press scale animasyonlari -- Pratik Yap ve Quiz Coz butonlari icin
-  const practiceScale = useRef(new Animated.Value(1)).current;
-  const quizScale = useRef(new Animated.Value(1)).current;
+  // Tinder-style swipe animasyonlari
+  const swipeX = useRef(new Animated.Value(0)).current;
+  const swipeY = useRef(new Animated.Value(0)).current;
 
-  // Butona basildiginda kuculme efekti
-  const handlePressIn = (scaleAnim: Animated.Value) => {
-    Animated.timing(scaleAnim, {
-      toValue: 0.96,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
-  };
+  const SWIPE_THRESHOLD = 120;
 
-  // Butondan el kaldirildiginda geri bounce efekti
-  const handlePressOut = (scaleAnim: Animated.Value) => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      tension: 100,
-      friction: 6,
-      useNativeDriver: true,
-    }).start();
-  };
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dx) > 10,
+      onPanResponderMove: Animated.event(
+        [null, { dx: swipeX, dy: swipeY }],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx > SWIPE_THRESHOLD) {
+          // Saga cek → Kesfe
+          Animated.timing(swipeX, {
+            toValue: width + 100,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => {
+            swipeX.setValue(0);
+            swipeY.setValue(0);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            completeDailyTask('practice_ai');
+            onNavigateToPractice(word || undefined);
+          });
+        } else if (gestureState.dx < -SWIPE_THRESHOLD) {
+          // Sola cek → Quiz
+          Animated.timing(swipeX, {
+            toValue: -width - 100,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => {
+            swipeX.setValue(0);
+            swipeY.setValue(0);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            onNavigateToQuiz();
+          });
+        } else {
+          // Geri don
+          Animated.spring(swipeX, {
+            toValue: 0,
+            tension: 40,
+            friction: 5,
+            useNativeDriver: true,
+          }).start();
+          Animated.spring(swipeY, {
+            toValue: 0,
+            tension: 40,
+            friction: 5,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  // Kart rotation ve opacity -- swipe esnasinda tilt ve renk gostergeleri
+  const cardRotate = swipeX.interpolate({
+    inputRange: [-width, 0, width],
+    outputRange: ['-12deg', '0deg', '12deg'],
+  });
+  const swipeRightOpacity = swipeX.interpolate({
+    inputRange: [0, 80],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+  const swipeLeftOpacity = swipeX.interpolate({
+    inputRange: [-80, 0],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
 
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
   const targetLanguageFlag = LANGUAGES.find(lang => lang.code === targetLanguage)?.flag || '';
@@ -337,14 +390,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     return (
       <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
-          <View style={styles.scrollContent}>
-            {/* Skeleton header alani */}
+          <View style={styles.mainContent}>
             <View style={styles.header}>
               <View style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.06)' }} />
               <View style={{ width: 50, height: 24, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.06)' }} />
             </View>
-            {/* Skeleton kelime karti */}
-            <SkeletonCard />
+            <View style={styles.cardArea}>
+              <SkeletonCard />
+            </View>
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -407,12 +460,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   return (
     <LinearGradient colors={['#0F0A2E', '#1A1145', '#1E1650']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
+        <View style={styles.mainContent}>
           {/* ── Minimal Header: Bayrak + Streak ── */}
           <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
             <TouchableOpacity
@@ -455,13 +503,35 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             </Animated.View>
           ))}
 
-          {/* ── Kelime Karti (Sadelestirmis) ── */}
+          {/* ── Tinder-Style Kelime Karti ── */}
           <View style={styles.cardArea}>
-            <Animated.View style={[styles.card, { opacity: cardOpacity, transform: [{ scale: cardScale }] }]}>
+            <Animated.View
+              {...panResponder.panHandlers}
+              style={[
+                styles.card,
+                {
+                  opacity: cardOpacity,
+                  transform: [
+                    { translateX: swipeX },
+                    { translateY: Animated.multiply(swipeY, 0.3) },
+                    { rotate: cardRotate },
+                    { scale: cardScale },
+                  ],
+                },
+              ]}
+            >
               <LinearGradient
-                colors={['rgba(255,255,255,0.08)', 'rgba(255,255,255,0.02)']}
+                colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.03)']}
                 style={styles.cardInner}
               >
+                {/* Swipe gostergeleri */}
+                <Animated.View style={[styles.swipeLabel, styles.swipeLabelRight, { opacity: swipeRightOpacity }]}>
+                  <Text style={styles.swipeLabelTextRight}>{t('practiceNow')}</Text>
+                </Animated.View>
+                <Animated.View style={[styles.swipeLabel, styles.swipeLabelLeft, { opacity: swipeLeftOpacity }]}>
+                  <Text style={styles.swipeLabelTextLeft}>{t('startQuiz') || 'Quiz'}</Text>
+                </Animated.View>
+
                 {/* Kelime emojisi */}
                 <Text style={styles.wordEmoji}>{word.emoji || getCategoryIcon(word.category)}</Text>
 
@@ -475,32 +545,28 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
                 {/* Aksiyon butonlari */}
                 <View style={styles.actionRow}>
-                  <TouchableOpacity onPress={handleSpeak} style={styles.actionBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Listen to pronunciation" accessibilityHint="Plays the word audio">
+                  <TouchableOpacity onPress={handleSpeak} style={styles.actionBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Listen to pronunciation">
                     <Text style={styles.actionBtnIcon}>{'\u{1F50A}'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleToggleFavorite} style={styles.actionBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={isFav ? "Remove from favorites" : "Add to favorites"} accessibilityHint="Toggles favorite status" accessibilityState={{ selected: isFav }}>
+                  <TouchableOpacity onPress={handleToggleFavorite} style={styles.actionBtn} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel={isFav ? "Remove from favorites" : "Add to favorites"}>
                     <Text style={styles.actionBtnIcon}>{isFav ? '\u2764\uFE0F' : '\u{1F90D}'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleShare} style={styles.actionBtn} activeOpacity={0.7} disabled={isSharing} accessibilityRole="button" accessibilityLabel="Share this word" accessibilityHint="Opens the share dialog" accessibilityState={{ disabled: isSharing }}>
+                  <TouchableOpacity onPress={handleShare} style={styles.actionBtn} activeOpacity={0.7} disabled={isSharing} accessibilityRole="button" accessibilityLabel="Share this word">
                     <Text style={styles.actionBtnIcon}>{isSharing ? '\u23F3' : '\u{1F4E4}'}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setShowCulturalContext(true);
-                    }}
+                    onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowCulturalContext(true); }}
                     style={styles.actionBtn}
                     activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityLabel="Cultural context"
-                    accessibilityHint="Shows cultural background information"
                   >
                     <Text style={styles.actionBtnIcon}>{'\u{1F4A1}'}</Text>
                   </TouchableOpacity>
                 </View>
 
                 {/* Anlamini Gor butonu */}
-                <TouchableOpacity onPress={handleMeaningPress} activeOpacity={0.7} style={styles.meaningToggleBtn} accessibilityRole="button" accessibilityLabel={showMeaning ? "Hide meaning" : "Show meaning"} accessibilityHint={showMeaning ? "Hides the word meaning and examples" : "Reveals the word meaning and examples"} accessibilityState={{ expanded: showMeaning }}>
+                <TouchableOpacity onPress={handleMeaningPress} activeOpacity={0.7} style={styles.meaningToggleBtn}>
                   <LinearGradient
                     colors={showMeaning ? ['rgba(110,231,183,0.15)', 'rgba(52,211,153,0.1)'] : ['rgba(167,139,250,0.15)', 'rgba(99,102,241,0.1)']}
                     style={styles.meaningToggleBtnInner}
@@ -511,17 +577,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                   </LinearGradient>
                 </TouchableOpacity>
 
-                {/* Anlam acildiginda: Tab'lar ile icerik goster */}
+                {/* Anlam acildiginda */}
                 {showMeaning && (
                   <View style={styles.wordCardTabs}>
-                    {/* Tab seciciler */}
                     <View style={styles.wordCardTabBar}>
                       <TouchableOpacity
                         style={[styles.wordCardTabItem, activeWordTab === 'meaning' && styles.wordCardTabItemActive]}
                         onPress={() => setActiveWordTab('meaning')}
-                        accessibilityRole="tab"
-                        accessibilityLabel="Meaning"
-                        accessibilityState={{ selected: activeWordTab === 'meaning' }}
                       >
                         <Text style={[styles.wordCardTabText, activeWordTab === 'meaning' && styles.wordCardTabTextActive]}>
                           {t('tabMeaning')}
@@ -530,9 +592,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                       <TouchableOpacity
                         style={[styles.wordCardTabItem, activeWordTab === 'example' && styles.wordCardTabItemActive]}
                         onPress={() => setActiveWordTab('example')}
-                        accessibilityRole="tab"
-                        accessibilityLabel="Examples"
-                        accessibilityState={{ selected: activeWordTab === 'example' }}
                       >
                         <Text style={[styles.wordCardTabText, activeWordTab === 'example' && styles.wordCardTabTextActive]}>
                           {t('tabExample')}
@@ -541,17 +600,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                       <TouchableOpacity
                         style={[styles.wordCardTabItem, activeWordTab === 'grammar' && styles.wordCardTabItemActive]}
                         onPress={() => setActiveWordTab('grammar')}
-                        accessibilityRole="tab"
-                        accessibilityLabel="Grammar"
-                        accessibilityState={{ selected: activeWordTab === 'grammar' }}
                       >
                         <Text style={[styles.wordCardTabText, activeWordTab === 'grammar' && styles.wordCardTabTextActive]}>
                           {t('tabGrammar')}
                         </Text>
                       </TouchableOpacity>
                     </View>
-
-                    {/* Tab icerigi */}
                     {renderWordTabContent()}
                   </View>
                 )}
@@ -559,81 +613,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             </Animated.View>
           </View>
 
-          {/* ── Aksiyon Butonlari ── */}
-          <View style={styles.actionButtons}>
-            {/* Pratik Yap butonu -- press scale efekti ile */}
-            <Animated.View style={{ transform: [{ scale: practiceScale }] }}>
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  completeDailyTask('practice_ai');
-                  onNavigateToPractice(word);
-                }}
-                onPressIn={() => handlePressIn(practiceScale)}
-                onPressOut={() => handlePressOut(practiceScale)}
-                activeOpacity={0.85}
-                style={styles.primaryActionBtn}
-                accessibilityRole="button"
-                accessibilityLabel="Practice"
-                accessibilityHint="Opens AI practice session with this word"
-              >
-                <LinearGradient
-                  colors={['#6366F1', '#8B5CF6']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.primaryActionBtnInner}
-                >
-                  <Text style={styles.primaryActionBtnText}>{'\u{1F4AC}'} {t('practiceNow')}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Quiz Coz butonu -- press scale efekti ile */}
-            <Animated.View style={{ transform: [{ scale: quizScale }] }}>
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  onNavigateToQuiz();
-                }}
-                onPressIn={() => handlePressIn(quizScale)}
-                onPressOut={() => handlePressOut(quizScale)}
-                activeOpacity={0.85}
-                style={styles.primaryActionBtn}
-                accessibilityRole="button"
-                accessibilityLabel="Start Quiz"
-                accessibilityHint="Opens a vocabulary quiz"
-              >
-                <LinearGradient
-                  colors={['#F59E0B', '#EF4444']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.primaryActionBtnInner}
-                >
-                  <Text style={styles.primaryActionBtnText}>{'\u{1F9E0}'} {t('startQuiz') || 'Quiz Coz'}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-
-            {/* Tekrar hatirlatma */}
-            {dueCount > 0 && (
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  onNavigateToReview();
-                }}
-                style={styles.reviewBtn}
-                activeOpacity={0.8}
-                accessibilityRole="button"
-                accessibilityLabel={`${dueCount} words to review`}
-                accessibilityHint="Opens the review session"
-              >
-                <Text style={styles.reviewBtnText}>
-                  {'\u{1F504}'} {dueCount} {t('wordsToReview')} {'\u203A'}
-                </Text>
-              </TouchableOpacity>
-            )}
+          {/* Swipe ipucu */}
+          <View style={styles.swipeHint}>
+            <Text style={styles.swipeHintText}>{'\u2190'} Quiz  |  {t('practiceNow')} {'\u2192'}</Text>
           </View>
-        </ScrollView>
+        </View>
       </SafeAreaView>
 
       {/* Gizli paylasim karti (ekran disi) */}
@@ -700,8 +684,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1 },
-  scrollView: { flex: 1 },
-  scrollContent: { paddingBottom: 8 },
+  mainContent: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { fontSize: 16, color: 'rgba(255,255,255,0.6)', fontWeight: '600' },
 
@@ -750,28 +733,58 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
 
-  // ── Kelime Karti ──
+  // ── Tinder-Style Kelime Karti ──
   cardArea: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 16,
-    marginBottom: 24,
   },
   card: {
     width: width - 32,
     borderRadius: 28,
     shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 30,
+    elevation: 16,
   },
   cardInner: {
     borderRadius: 28,
-    paddingVertical: 36,
+    paddingVertical: 40,
     paddingHorizontal: 28,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.12)',
+    minHeight: 420,
+    justifyContent: 'center',
+  },
+  swipeLabel: {
+    position: 'absolute',
+    top: 24,
+    zIndex: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 2,
+  },
+  swipeLabelRight: {
+    left: 20,
+    borderColor: '#6EE7B7',
+  },
+  swipeLabelLeft: {
+    right: 20,
+    borderColor: '#F87171',
+  },
+  swipeLabelTextRight: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#6EE7B7',
+  },
+  swipeLabelTextLeft: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#F87171',
   },
   wordEmoji: {
     fontSize: 40,
@@ -898,39 +911,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // ── Aksiyon Butonlari ──
-  actionButtons: {
-    paddingHorizontal: 20,
-    gap: 10,
+  // ── Swipe Ipucu ──
+  swipeHint: {
+    alignItems: 'center',
     paddingBottom: 8,
+    paddingTop: 4,
   },
-  primaryActionBtn: {
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  primaryActionBtnInner: {
-    paddingVertical: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  primaryActionBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  reviewBtn: {
-    backgroundColor: 'rgba(245,158,11,0.12)',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(245,158,11,0.2)',
-  },
-  reviewBtnText: {
-    fontSize: 14,
+  swipeHintText: {
+    fontSize: 13,
     fontWeight: '600',
-    color: '#FBBF24',
+    color: 'rgba(255,255,255,0.25)',
+    letterSpacing: 0.5,
   },
 
   // ── Gizli Paylasim Karti ──
