@@ -692,23 +692,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
           {/* ── Tinder-Style Kelime Karti + Stack ── */}
           <View style={styles.cardArea}>
-            {/* Stack: 3. kart (en arka) */}
+            {/* Stack: arka kart izleri -- sadece ince kenar cizgileri */}
             {unlockedCount > 2 && (
-              <Animated.View style={[styles.card, styles.stackCard3, { transform: [{ scale: backCard2Scale }] }]}>
-                <LinearGradient
-                  colors={['rgba(100,100,140,0.08)', 'rgba(80,80,120,0.04)']}
-                  style={styles.cardInner}
-                />
-              </Animated.View>
+              <Animated.View style={[styles.stackLine, styles.stackLine3, { transform: [{ scale: backCard2Scale }] }]} />
             )}
-            {/* Stack: 2. kart */}
             {unlockedCount > 1 && (
-              <Animated.View style={[styles.card, styles.stackCard2, { transform: [{ scale: backCard1Scale }] }]}>
-                <LinearGradient
-                  colors={['rgba(120,80,200,0.08)', 'rgba(100,60,180,0.04)']}
-                  style={styles.cardInner}
-                />
-              </Animated.View>
+              <Animated.View style={[styles.stackLine, styles.stackLine2, { transform: [{ scale: backCard1Scale }] }]} />
             )}
             {/* On kart -- swipeable */}
             <Animated.View
@@ -993,15 +982,21 @@ const styles = StyleSheet.create({
     shadowRadius: 32,
     elevation: 16,
   },
-  stackCard2: {
+  stackLine: {
     position: 'absolute',
-    top: 10,
-    opacity: 0.6,
+    width: width - 52,
+    height: '100%',
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.12)',
   },
-  stackCard3: {
-    position: 'absolute',
-    top: 20,
-    opacity: 0.3,
+  stackLine2: {
+    top: 8,
+    opacity: 0.5,
+  },
+  stackLine3: {
+    top: 16,
+    opacity: 0.25,
   },
   // Stamp overlays
   stamp: {
