@@ -763,19 +763,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* Alt Navigasyon Cubugu -- 4 tab: Home | Quests | History | Profile */}
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tab} onPress={() => {}} accessibilityRole="tab" accessibilityLabel="Home" accessibilityState={{ selected: true }}>
-          <Text style={styles.tabIcon}>{'\u{1F3E0}'}</Text>
+          <Ionicons name="home" size={22} color="#C4B5FD" />
           <Text style={styles.tabLabelActive}>{t('tabHome')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToQuests(); }} accessibilityRole="tab" accessibilityLabel="Quests" accessibilityState={{ selected: false }} accessibilityHint="Opens quests and daily tasks">
-          <Text style={styles.tabIcon}>{'\u{1F3AF}'}</Text>
+          <Ionicons name="trophy-outline" size={22} color="rgba(255,255,255,0.4)" />
           <Text style={styles.tabLabel}>{t('tabQuests')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }} accessibilityRole="tab" accessibilityLabel="History" accessibilityState={{ selected: false }} accessibilityHint="Opens word history">
-          <Text style={styles.tabIcon}>{'\u{1F4DA}'}</Text>
+          <Ionicons name="time-outline" size={22} color="rgba(255,255,255,0.4)" />
           <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToProfile(); }} accessibilityRole="tab" accessibilityLabel="Profile" accessibilityState={{ selected: false }} accessibilityHint="Opens profile and settings">
-          <Text style={styles.tabIcon}>{'\u{1F464}'}</Text>
+          <Ionicons name="person-outline" size={22} color="rgba(255,255,255,0.4)" />
           <Text style={styles.tabLabel}>{t('tabProfile')}</Text>
         </TouchableOpacity>
       </View>
@@ -1095,19 +1095,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
   },
-  tabIcon: {
-    fontSize: 22,
-    marginBottom: 4,
-  },
   tabLabel: {
     fontSize: 10,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.4)',
+    marginTop: 4,
   },
   tabLabelActive: {
     fontSize: 10,
     fontWeight: '700',
     color: '#C4B5FD',
+    marginTop: 4,
   },
 
   // ── Level Up Overlay ──
