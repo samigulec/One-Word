@@ -452,7 +452,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   // Yukleniyor durumu -- skeleton placeholder gosterilir
   if (!word) {
     return (
-      <LinearGradient colors={['#0A0E27', '#141B3D', '#1B1040']} style={styles.container}>
+      <LinearGradient colors={['#0D0D1A', '#1A1333', '#120E2E']} style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.mainContent}>
             <View style={styles.header}>
@@ -522,10 +522,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   };
 
   return (
-    <LinearGradient colors={['#0A0E27', '#141B3D', '#1B1040']} style={styles.container}>
+    <LinearGradient colors={['#0D0D1A', '#1A1333', '#120E2E']} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.mainContent}>
-          {/* ── Header: Bayrak + Day X + Streak ── */}
+          {/* ── Header: Bayrak + Streak ── */}
           <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
             <TouchableOpacity
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToProfile(); }}
@@ -536,8 +536,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
             >
               <Text style={styles.headerFlagText}>{targetLanguageFlag}</Text>
             </TouchableOpacity>
-
-            <Text style={styles.headerDay}>{t('day') || 'Day'} {progress?.streak || 1}</Text>
 
             <TouchableOpacity
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToLeaderboard(); }}
@@ -551,6 +549,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               <Text style={styles.headerStreakValue}>{progress?.streak || 0}</Text>
             </TouchableOpacity>
           </Animated.View>
+
+          {/* Day X -- kartın üstünde belirgin */}
+          <Text style={styles.headerDay}>{t('day') || 'Day'} {progress?.streak || 1}</Text>
 
           {/* Floating XP Animasyonlari -- calmMode aktifken gizlenir */}
           {!calmMode && floatingXPs.map(floatingXP => (
@@ -587,7 +588,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               ]}
             >
               <LinearGradient
-                colors={['rgba(99,102,241,0.12)', 'rgba(139,92,246,0.06)', 'rgba(255,255,255,0.03)']}
+                colors={['rgba(124,58,237,0.14)', 'rgba(236,72,153,0.06)', 'rgba(255,255,255,0.02)']}
                 style={styles.cardInner}
               >
                 {/* Kelime emojisi */}
@@ -769,10 +770,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   headerDay: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: '#C4B5FD',
-    letterSpacing: 0.5,
+    letterSpacing: 1.5,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
   headerStreak: {
     flexDirection: 'row',
@@ -785,7 +789,7 @@ const styles = StyleSheet.create({
   headerStreakValue: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#FBBF24',
+    color: '#FCD34D',
   },
 
   // ── Floating XP ──
@@ -814,10 +818,10 @@ const styles = StyleSheet.create({
   card: {
     width: width - 32,
     borderRadius: 28,
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 30,
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.4,
+    shadowRadius: 32,
     elevation: 16,
   },
   cardInner: {
@@ -826,7 +830,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: 'rgba(139,92,246,0.2)',
+    borderColor: 'rgba(196,181,253,0.18)',
     minHeight: 420,
     justifyContent: 'center',
   },
