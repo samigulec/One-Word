@@ -16,11 +16,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-// @ts-ignore
 import * as Speech from 'expo-speech';
-// @ts-ignore
 import { captureRef } from 'react-native-view-shot';
-// @ts-ignore
 import * as Sharing from 'expo-sharing';
 import { ContentItem, UserProgress, ProficiencyLevel, LevelInfo, DailyTaskId } from '../types';
 import { getWordOfTheDay, getTranslation, getExampleTranslation, loadContentForLevel } from '../utils/contentLoader';
@@ -32,7 +29,6 @@ import CulturalContextModal from '../components/CulturalContextModal';
 import GrammarNuggets from '../components/GrammarNuggets';
 import RealWorldExamples from '../components/RealWorldExamples';
 import { SkeletonCard } from '../components/SkeletonLoader';
-// @ts-ignore
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Kategoriye gore vektor ikon + gradient renkleri
@@ -96,6 +92,8 @@ type HomeScreenProps = {
   onNavigateToQuiz: () => void;
   onNavigateToPractice: (word?: ContentItem) => void;
   onNavigateToLeaderboard: () => void;
+  /** [GUESS_GAME] Gunun Tahmini oyununu ac */
+  onNavigateToGuessGame?: () => void;
   nativeLanguage: LanguageCode;
   targetLanguage: LanguageCode;
   proficiencyLevel: ProficiencyLevel;
@@ -118,6 +116,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigateToHistory, onNavigateToProfile,
   onNavigateToReview, onNavigateToQuiz,
   onNavigateToPractice, onNavigateToLeaderboard,
+  onNavigateToGuessGame,
   nativeLanguage, targetLanguage, proficiencyLevel,
   calmMode,
 }) => {
@@ -145,6 +144,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Kulturel baglam modal state
   const [showCulturalContext, setShowCulturalContext] = useState(false);
+
+  // Tutorial overlay state -- ilk kullanim kilavuzu
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const tutorialFade = useRef(new Animated.Value(0)).current;
 
   // Floating XP animasyonlari
   const [floatingXPs, setFloatingXPs] = useState<FloatingXP[]>([]);
@@ -200,6 +204,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         setActiveWordTab('meaning');
         meaningReveal.setValue(0);
         isFavorite(targetWord.id).then(setIsFav);
+        // Yeni kelimeye gecildiginde otomatik olarak seslendir
+        speakWord(targetWord.target_word);
       }
       swipeX.setValue(0);
       swipeY.setValue(0);
@@ -369,7 +375,39 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     startAnimations();
     getUserName().then(name => setUserName(name));
     loadXPStatus();
+    // Ilk kullanim tutorial kontrolu -- AsyncStorage'dan okunur
+    checkTutorialStatus();
   }, [targetLanguage, proficiencyLevel]);
+
+  // Tutorial durumunu kontrol et -- daha once gosterilmisse tekrar gosterme
+  const checkTutorialStatus = async () => {
+    try {
+      const seen = await AsyncStorage.getItem('home_tutorial_seen');
+      if (!seen) {
+        // Icerik yuklenmesini bekle, sonra tutoriali goster
+        setTimeout(() => {
+          setShowTutorial(true);
+          setTutorialStep(0);
+          Animated.timing(tutorialFade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+        }, 1200);
+      }
+    } catch {
+      // Hata durumunda tutorial gosterilmez
+    }
+  };
+
+  // Tutorial adimini ilerlet veya kapat
+  const handleTutorialNext = () => {
+    if (tutorialStep < 2) {
+      setTutorialStep(prev => prev + 1);
+    } else {
+      // Son adim -- tutoriali kapat ve AsyncStorage'a kaydet
+      Animated.timing(tutorialFade, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+        setShowTutorial(false);
+        AsyncStorage.setItem('home_tutorial_seen', 'true');
+      });
+    }
+  };
 
   // Giris animasyonlari
   const startAnimations = () => {
@@ -455,6 +493,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       setWord(todaysWord);
       setShowMeaning(false);
       setActiveWordTab('meaning');
+      // Gunun kelimesi yuklendiginde otomatik seslendir
+      speakWord(todaysWord.target_word);
       const idHash = parseInt(todaysWord.id.replace(/\D/g, '')) || 1;
       const updatedProgress = await updateDailyStreak(idHash);
       setProgress(updatedProgress);
@@ -493,19 +533,26 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   };
 
-  // Kelimeyi seslendir
-  const handleSpeak = () => {
-    if (!word) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const speechLang: Record<string, string> = {
-      en: 'en-US', es: 'es-ES', de: 'de-DE', fr: 'fr-FR',
-      pt: 'pt-BR', it: 'it-IT', ru: 'ru-RU', ja: 'ja-JP',
-      ko: 'ko-KR', zh: 'zh-CN', tr: 'tr-TR',
-    };
-    Speech.speak(word.target_word, {
+  // Dil kodundan konusma diline esleme -- tum speech fonksiyonlarinda kullanilir
+  const speechLang: Record<string, string> = {
+    en: 'en-US', es: 'es-ES', de: 'de-DE', fr: 'fr-FR',
+    pt: 'pt-BR', it: 'it-IT', ru: 'ru-RU', ja: 'ja-JP',
+    ko: 'ko-KR', zh: 'zh-CN', tr: 'tr-TR',
+  };
+
+  // Verilen kelimeyi otomatik seslendir -- yeni kelime geldiginde veya butonla tetiklenir
+  const speakWord = (targetWord: string) => {
+    Speech.speak(targetWord, {
       language: speechLang[targetLanguage] || 'en-US',
       rate: 0.8,
     });
+  };
+
+  // Kelimeyi seslendir (kullanici butona bastiginda)
+  const handleSpeak = () => {
+    if (!word) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    speakWord(word.target_word);
   };
 
   // Favori toggler
@@ -844,6 +891,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               )}
             </View>
           </View>
+
+          {/* [GUESS_GAME] Gunun Tahmini kucuk butonu -- footer tab bar'a tasindi, artik burada gosterilmiyor */}
+          {/* Geri donulebilirlik icin kod korunuyor:
+          {onNavigateToGuessGame && (
+            <TouchableOpacity
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onNavigateToGuessGame();
+              }}
+              style={styles.guessGameMiniBtn}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={t('guessPlayButton' as any)}
+            >
+              <Text style={styles.guessGameMiniBtnIcon}>{'\u{1F3AF}'}</Text>
+              <Text style={styles.guessGameMiniBtnText}>{t('guessPlayButton' as any)}</Text>
+            </TouchableOpacity>
+          )}
+          */}
         </View>
       </SafeAreaView>
 
@@ -861,7 +927,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
       )}
 
-      {/* Alt Navigasyon Cubugu -- 4 tab: Home | Quests | History | Profile */}
+      {/* Alt Navigasyon Cubugu -- 5 tab: Home | Quests | Tahmin | History | Profile */}
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tab} onPress={() => {}} accessibilityRole="tab" accessibilityLabel="Home" accessibilityState={{ selected: true }}>
           <Ionicons name="home" size={22} color="#C4B5FD" />
@@ -871,6 +937,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           <Ionicons name="trophy-outline" size={22} color="rgba(255,255,255,0.4)" />
           <Text style={styles.tabLabel}>{t('tabQuests')}</Text>
         </TouchableOpacity>
+        {/* [GUESS_GAME] Gunun Tahmini tab'i -- footer'a tasinmis versiyon */}
+        {onNavigateToGuessGame && (
+          <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); onNavigateToGuessGame(); }} accessibilityRole="tab" accessibilityLabel="Guess" accessibilityState={{ selected: false }} accessibilityHint="Opens daily guess game">
+            <MaterialCommunityIcons name="bullseye-arrow" size={22} color="rgba(255,255,255,0.4)" />
+            <Text style={styles.tabLabel}>{t('guessTabLabel' as any)}</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.tab} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onNavigateToHistory(); }} accessibilityRole="tab" accessibilityLabel="History" accessibilityState={{ selected: false }} accessibilityHint="Opens word history">
           <Ionicons name="time-outline" size={22} color="rgba(255,255,255,0.4)" />
           <Text style={styles.tabLabel}>{t('tabHistory')}</Text>
@@ -902,6 +975,79 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
               <Text style={styles.levelUpName}>{levelInfo.title}</Text>
             </LinearGradient>
           </Animated.View>
+        </Animated.View>
+      )}
+
+      {/* Ilk Kullanim Tutorial Overlay -- 3 adimli kilavuz */}
+      {showTutorial && (
+        <Animated.View style={[styles.tutorialOverlay, { opacity: tutorialFade }]}>
+          <View style={styles.tutorialContent}>
+            {/* Adim gostergesi */}
+            <View style={styles.tutorialStepIndicator}>
+              {[0, 1, 2].map(i => (
+                <View
+                  key={i}
+                  style={[
+                    styles.tutorialStepDot,
+                    i === tutorialStep && styles.tutorialStepDotActive,
+                    i < tutorialStep && styles.tutorialStepDotDone,
+                  ]}
+                />
+              ))}
+            </View>
+
+            {/* Adim 1: Saga/sola kaydirma */}
+            {tutorialStep === 0 && (
+              <View style={styles.tutorialStepContent}>
+                <View style={styles.tutorialIconRow}>
+                  <Ionicons name="arrow-back" size={28} color="#F87171" />
+                  <View style={styles.tutorialCardIcon}>
+                    <Ionicons name="card-outline" size={36} color="#C4B5FD" />
+                  </View>
+                  <Ionicons name="arrow-forward" size={28} color="#34D399" />
+                </View>
+                <Text style={styles.tutorialTitle}>Karti saga veya sola kaydir</Text>
+                <Text style={styles.tutorialDesc}>Yeni kelime kesfet veya onceki kelimelere geri don</Text>
+              </View>
+            )}
+
+            {/* Adim 2: Yukari kaydirma */}
+            {tutorialStep === 1 && (
+              <View style={styles.tutorialStepContent}>
+                <View style={styles.tutorialIconRow}>
+                  <Ionicons name="arrow-up" size={36} color="#FBBF24" />
+                </View>
+                <Text style={styles.tutorialTitle}>Yukari kaydir</Text>
+                <Text style={styles.tutorialDesc}>Kelimeyi favorilerine ekle</Text>
+              </View>
+            )}
+
+            {/* Adim 3: Dokunma */}
+            {tutorialStep === 2 && (
+              <View style={styles.tutorialStepContent}>
+                <View style={styles.tutorialIconRow}>
+                  <Ionicons name="hand-left-outline" size={36} color="#A78BFA" />
+                </View>
+                <Text style={styles.tutorialTitle}>Anlamini gormek icin dokun</Text>
+                <Text style={styles.tutorialDesc}>"Anlamini Gor" butonuna bas ve kelimenin anlamini, ornegini kesfet</Text>
+              </View>
+            )}
+
+            {/* Sonraki / Basla butonu */}
+            <TouchableOpacity onPress={handleTutorialNext} style={styles.tutorialButton} activeOpacity={0.8}>
+              <LinearGradient
+                colors={['#8B5CF6', '#6366F1']}
+                style={styles.tutorialButtonInner}
+              >
+                <Text style={styles.tutorialButtonText}>
+                  {tutorialStep < 2 ? 'Sonraki' : 'Basla!'}
+                </Text>
+                {tutorialStep < 2 && (
+                  <Ionicons name="arrow-forward" size={18} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </Animated.View>
       )}
     </LinearGradient>
@@ -1255,6 +1401,27 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
 
+  // [GUESS_GAME] Gunun Tahmini mini butonu
+  guessGameMiniBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(99,102,241,0.12)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.2)',
+    gap: 6,
+  },
+  guessGameMiniBtnIcon: { fontSize: 16 },
+  guessGameMiniBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#A78BFA',
+  },
+
   // ── Gizli Paylasim Karti ──
   shareCardHidden: {
     position: 'absolute',
@@ -1262,7 +1429,7 @@ const styles = StyleSheet.create({
     left: -9999,
   },
 
-  // ── Alt Navigasyon Cubugu (4 tab) ──
+  // ── Alt Navigasyon Cubugu (5 tab: Home | Quests | Tahmin | History | Profile) ──
   tabBar: {
     flexDirection: 'row',
     backgroundColor: 'rgba(10,14,39,0.95)',
@@ -1312,6 +1479,108 @@ const styles = StyleSheet.create({
   levelUpTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginBottom: 4 },
   levelUpLevel: { fontSize: 36, fontWeight: '900', color: '#FBBF24', marginBottom: 4 },
   levelUpName: { fontSize: 16, fontWeight: '700', color: 'rgba(255,255,255,0.8)' },
+
+  // ── Tutorial Overlay Stilleri ──
+  tutorialOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  tutorialContent: {
+    width: width - 64,
+    backgroundColor: 'rgba(26,17,69,0.95)',
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.3)',
+    shadowColor: '#8B5CF6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    elevation: 20,
+  },
+  tutorialStepIndicator: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 24,
+  },
+  tutorialStepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  tutorialStepDotActive: {
+    backgroundColor: '#C4B5FD',
+    width: 24,
+    shadowColor: '#C4B5FD',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
+  },
+  tutorialStepDotDone: {
+    backgroundColor: '#34D399',
+  },
+  tutorialStepContent: {
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  tutorialIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 20,
+  },
+  tutorialCardIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: 'rgba(139,92,246,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(139,92,246,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tutorialTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  tutorialDesc: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.6)',
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: 8,
+  },
+  tutorialButton: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  tutorialButtonInner: {
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  tutorialButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
 });
 
 export default HomeScreen;

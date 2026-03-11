@@ -16,9 +16,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-// @ts-ignore
 import { captureRef } from 'react-native-view-shot';
-// @ts-ignore
 import * as Sharing from 'expo-sharing';
 import { Badge, EarnedBadge, BadgeCategory, DailyTasksData, DailyTaskId, WeeklyChallengeData, UserProgress, LevelInfo } from '../types';
 import { ALL_BADGES, getBadgesByCategory } from '../utils/badges';
@@ -28,6 +26,8 @@ import { LanguageCode, getTranslation as getUITranslation } from '../utils/trans
 import { ShareTemplate } from '../types';
 import { createStreakTemplate, createWordsTemplate } from '../utils/shareTemplates';
 import ShareAchievementCard from '../components/ShareAchievementCard';
+// [GUESS_GAME] Gunun Tahmini oyunu icin eklendi
+import { getGuessGameState, GuessGameState } from '../utils/guessGameStorage';
 
 const { width } = Dimensions.get('window');
 
@@ -64,12 +64,15 @@ type QuestsScreenProps = {
   nativeLanguage: LanguageCode;
   onClose: () => void;
   onNavigateToWeeklySummary?: () => void;
+  /** [GUESS_GAME] Gunun Tahmini oyununu ac */
+  onOpenGuessGame?: () => void;
 };
 
 const QuestsScreen: React.FC<QuestsScreenProps> = ({
   nativeLanguage,
   onClose,
   onNavigateToWeeklySummary,
+  onOpenGuessGame,
 }) => {
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
 
@@ -87,6 +90,9 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
   // Journey state'leri
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
+
+  // [GUESS_GAME] Gunun Tahmini durumu
+  const [guessGameState, setGuessGameState] = useState<GuessGameState | null>(null);
 
   // Paylasim state'leri
   const [isSharing, setIsSharing] = useState(false);
@@ -114,17 +120,19 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
   // Tum verileri yukle
   const loadAllData = async () => {
-    const [tasks, challenge, badges, progress] = await Promise.all([
+    const [tasks, challenge, badges, progress, guessState] = await Promise.all([
       getDailyTasks(),
       getWeeklyChallenge(),
       getEarnedBadges(),
       getUserProgress(),
+      getGuessGameState(), // [GUESS_GAME]
     ]);
 
     setDailyTasks(tasks);
     setWeeklyChallenge(challenge);
     setEarnedBadges(badges);
     setUserProgress(progress);
+    setGuessGameState(guessState); // [GUESS_GAME]
 
     // Tamamlanmis gorevlerin checkmark animasyonlarini baslat
     tasks.tasks.forEach(task => {
@@ -294,6 +302,57 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
           )}
         </>
       )}
+
+      {/* [GUESS_GAME] Gunun Tahmini -- footer tab bar'a tasindi, burada sadece sonuc gosteriliyor */}
+      {guessGameState?.completed ? (
+        <View style={styles.guessGameButton}>
+          <LinearGradient
+            colors={['rgba(52,211,153,0.12)', 'rgba(16,185,129,0.08)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.guessGameButtonInner}
+          >
+            <Text style={styles.guessGameEmoji}>{'\u{2705}'}</Text>
+            <View style={styles.guessGameTextContainer}>
+              <Text style={[styles.guessGameTitle, styles.guessGameTitleCompleted]}>
+                {t('guessPlayButton' as any)}
+              </Text>
+              <Text style={styles.guessGameSubtitle}>
+                {`${t('guessAlreadyPlayed' as any)}${guessGameState.won ? ` (+${guessGameState.xpEarned} XP)` : ''}`}
+              </Text>
+            </View>
+          </LinearGradient>
+        </View>
+      ) : onOpenGuessGame ? (
+        <TouchableOpacity
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            onOpenGuessGame();
+          }}
+          activeOpacity={0.8}
+          style={styles.guessGameButton}
+          accessibilityRole="button"
+          accessibilityLabel={t('guessPlayButton' as any)}
+        >
+          <LinearGradient
+            colors={['rgba(99,102,241,0.15)', 'rgba(139,92,246,0.1)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.guessGameButtonInner}
+          >
+            <Text style={styles.guessGameEmoji}>{'\u{1F3AF}'}</Text>
+            <View style={styles.guessGameTextContainer}>
+              <Text style={styles.guessGameTitle}>
+                {t('guessPlayButton' as any)}
+              </Text>
+              <Text style={styles.guessGameSubtitle}>
+                {t('guessGameSubtitle' as any)}
+              </Text>
+            </View>
+            <Text style={styles.guessGameArrow}>{'\u203A'}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 
@@ -924,6 +983,28 @@ const styles = StyleSheet.create({
   weeklySummaryTitle: { fontSize: 15, fontWeight: '700', color: '#34D399' },
   weeklySummarySubtitle: { fontSize: 12, color: 'rgba(52,211,153,0.6)', marginTop: 2 },
   weeklySummaryArrow: { fontSize: 24, fontWeight: '700', color: 'rgba(52,211,153,0.6)' },
+
+  // [GUESS_GAME] Gunun Tahmini butonu stilleri
+  guessGameButton: {
+    marginTop: 8,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  guessGameButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.2)',
+  },
+  guessGameEmoji: { fontSize: 22, marginRight: 12 },
+  guessGameTextContainer: { flex: 1 },
+  guessGameTitle: { fontSize: 15, fontWeight: '700', color: '#A78BFA' },
+  guessGameTitleCompleted: { color: '#34D399' },
+  guessGameSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
+  guessGameArrow: { fontSize: 24, fontWeight: '700', color: 'rgba(167,139,250,0.4)' },
 
   // Rozetler
   badgeProgressBar: {

@@ -53,7 +53,7 @@ type TranslationKey =
   // Chat
   | 'practiceTime' | 'typing' | 'writeYourSentence'
   | 'quickReplyExample' | 'quickReplyMeaning' | 'quickReplyPronunciation'
-  | 'languageSelectTitle' | 'continue' | 'aiGreeting' | 'errorMessage'
+  | 'languageSelectTitle' | 'continue' | 'aiGreeting' | 'errorMessage' | 'offlineChatMessage'
   // Tabs
   | 'tabHome' | 'tabHistory' | 'tabJourney' | 'tabSettings'
   // Onboarding
@@ -137,7 +137,15 @@ type TranslationKey =
   | 'quizResult' | 'encouragePerfect' | 'encourageGood' | 'encourageOk' | 'encourageTryMore'
   | 'stagesCompleted' | 'unlockPrevious' | 'listenToWord' | 'true' | 'false'
   | 'lingoIntro' | 'startChatting'
-  | 'usageNotesLabel' | 'funFactLabel';
+  | 'usageNotesLabel' | 'funFactLabel'
+  // DailyGuessGame (Gunun Tahmini)
+  | 'guessGameTitle' | 'guessGameSubtitle' | 'guessStart'
+  | 'guessHint1Label' | 'guessHint2Label' | 'guessHint3Label'
+  | 'guessLetterCount' | 'guessStartsWith'
+  | 'guessPlaceholder' | 'guessSubmit' | 'guessWrong'
+  | 'guessResultGenius' | 'guessResultGreat' | 'guessResultNice' | 'guessResultMissed'
+  | 'guessShare' | 'guessHintProgress' | 'guessPlayButton' | 'guessAlreadyPlayed'
+  | 'guessTabLabel';
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   en: {
@@ -151,6 +159,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: 'How to pronounce?',
     languageSelectTitle: 'Which language do you speak?', continue: 'Continue',
     aiGreeting: "Hello!", errorMessage: 'An error occurred. Please try again.',
+    offlineChatMessage: 'No internet connection. Try Quiz or Review offline!',
     tabHome: 'Home', tabHistory: 'History', tabJourney: 'Journey', tabSettings: 'Settings',
     welcome: 'Welcome!', greatChoice: 'Great choice!', almostDone: 'Almost done!',
     whatLanguage: 'What language do you speak?', whatLearn: 'What do you want to learn?',
@@ -250,6 +259,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: "Hey! I'm Lingo, your language buddy! Let's practice \"{word}\" together!",
     startChatting: 'Start Chatting',
     usageNotesLabel: 'Usage Notes', funFactLabel: 'Fun Fact',
+    // DailyGuessGame
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: 'Guess',
   },
   tr: {
     appName: "One Word", idiomOfTheDay: 'Günün Kelimesi', showMeaning: 'Anlamını Göster',
@@ -262,6 +281,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: 'Nasıl okunur?',
     languageSelectTitle: 'Hangi dili konuşuyorsun?', continue: 'Devam Et',
     aiGreeting: "Merhaba!", errorMessage: 'Hata oluştu. Tekrar dene.',
+    offlineChatMessage: 'İnternet bağlantısı gerekli. Quiz veya Review\'ı offline dene!',
     tabHome: 'Ana Sayfa', tabHistory: 'Geçmiş', tabJourney: 'Yolculuk', tabSettings: 'Ayarlar',
     welcome: 'Hoş geldin!', greatChoice: 'Harika seçim!', almostDone: 'Neredeyse bitti!',
     whatLanguage: 'Hangi dili konuşuyorsun?', whatLearn: 'Ne öğrenmek istiyorsun?',
@@ -361,6 +381,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'Merhaba! Ben Lingo, dil arkadaşın! Hadi birlikte "{word}" kelimesini pratik yapalim!',
     startChatting: 'Sohbete Basla',
     usageNotesLabel: 'Kullanim Notlari', funFactLabel: 'Ilginc Bilgi',
+    // DailyGuessGame
+    guessGameTitle: 'Gunun Tahmini', guessGameSubtitle: '3 ipucu ile gunun kelimesini tahmin et!',
+    guessStart: 'Baslayalim!', guessHint1Label: 'Kategori', guessHint2Label: 'Harf Sayisi',
+    guessHint3Label: 'Ilk Harf', guessLetterCount: 'harfli', guessStartsWith: 'ile basliyor',
+    guessPlaceholder: 'Tahminini yaz...', guessSubmit: 'Tahmin Et',
+    guessWrong: 'Olmadi! Sonraki ipucunu dene.', guessResultGenius: 'Dahice!',
+    guessResultGreat: 'Harika!', guessResultNice: 'Guzel!',
+    guessResultMissed: 'Bir dahaki sefere!', guessShare: 'Sonucu Paylas',
+    guessHintProgress: 'Ipucu', guessPlayButton: 'Gunun Tahmini', guessAlreadyPlayed: 'Bugun oynanildi',
+    guessTabLabel: 'Tahmin',
   },
   es: {
     appName: "One Word", idiomOfTheDay: 'Palabra del Día', showMeaning: 'Mostrar Significado',
@@ -373,6 +403,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: '¿Cómo se pronuncia?',
     languageSelectTitle: '¿Qué idioma hablas?', continue: 'Continuar',
     aiGreeting: "¡Hola!", errorMessage: '¡Error! Inténtalo de nuevo',
+    offlineChatMessage: 'Sin conexion. Prueba Quiz o Review sin internet!',
     tabHome: 'Inicio', tabHistory: 'Historial', tabJourney: 'Viaje', tabSettings: 'Ajustes',
     welcome: '¡Bienvenido!', greatChoice: '¡Gran elección!', almostDone: '¡Casi listo!',
     whatLanguage: '¿Qué idioma hablas?', whatLearn: '¿Qué quieres aprender?',
@@ -463,6 +494,16 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'Hola! Soy Lingo, tu companero de idiomas! Practiquemos "{word}" juntos!',
     startChatting: 'Iniciar Chat',
     usageNotesLabel: 'Notas de Uso', funFactLabel: 'Dato Curioso',
+    // DailyGuessGame (fallback EN)
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: 'Adivina',
   },
   de: {
     appName: "One Word", idiomOfTheDay: 'Wort des Tages', showMeaning: 'Bedeutung zeigen',
@@ -475,6 +516,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: 'Aussprache?',
     languageSelectTitle: 'Welche Sprache?', continue: 'Weiter',
     aiGreeting: "Hallo!", errorMessage: 'Fehler! Versuche es nochmal',
+    offlineChatMessage: 'Keine Internetverbindung. Probiere Quiz oder Review offline!',
     tabHome: 'Start', tabHistory: 'Verlauf', tabJourney: 'Reise', tabSettings: 'Einstellungen',
     welcome: 'Willkommen!', greatChoice: 'Tolle Wahl!', almostDone: 'Fast fertig!',
     whatLanguage: 'Welche Sprache sprichst du?', whatLearn: 'Was möchtest du lernen?',
@@ -565,6 +607,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'Hey! Ich bin Lingo, dein Sprachfreund! Lass uns "{word}" zusammen uben!',
     startChatting: 'Chat starten',
     usageNotesLabel: 'Verwendungshinweise', funFactLabel: 'Wusstest du?',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: 'Raten',
   },
   fr: {
     appName: "One Word", idiomOfTheDay: 'Mot du Jour', showMeaning: 'Voir le Sens',
@@ -577,6 +628,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: 'Prononciation?',
     languageSelectTitle: 'Quelle langue?', continue: 'Continuer',
     aiGreeting: "Bonjour!", errorMessage: 'Erreur! Réessaie',
+    offlineChatMessage: 'Pas de connexion. Essaie Quiz ou Review hors ligne!',
     tabHome: 'Accueil', tabHistory: 'Historique', tabJourney: 'Parcours', tabSettings: 'Réglages',
     welcome: 'Bienvenue!', greatChoice: 'Super choix!', almostDone: 'Presque fini!',
     whatLanguage: 'Quelle langue parles-tu?', whatLearn: 'Que veux-tu apprendre?',
@@ -667,6 +719,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'Salut! Je suis Lingo, ton compagnon de langue! Pratiquons "{word}" ensemble!',
     startChatting: 'Commencer a discuter',
     usageNotesLabel: "Notes d'utilisation", funFactLabel: 'Le saviez-vous?',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: 'Deviner',
   },
   pt: {
     appName: "One Word", idiomOfTheDay: 'Palavra do Dia', showMeaning: 'Ver Significado',
@@ -679,6 +740,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: 'Pronúncia?',
     languageSelectTitle: 'Qual idioma?', continue: 'Continuar',
     aiGreeting: "Olá!", errorMessage: 'Erro! Tente novamente',
+    offlineChatMessage: 'Sem conexao. Tente Quiz ou Review offline!',
     tabHome: 'Início', tabHistory: 'Histórico', tabJourney: 'Jornada', tabSettings: 'Config',
     welcome: 'Bem-vindo!', greatChoice: 'Ótima escolha!', almostDone: 'Quase lá!',
     whatLanguage: 'Que idioma você fala?', whatLearn: 'O que quer aprender?',
@@ -769,6 +831,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'Oi! Eu sou o Lingo, seu companheiro de idiomas! Vamos praticar "{word}" juntos!',
     startChatting: 'Iniciar Conversa',
     usageNotesLabel: 'Notas de Uso', funFactLabel: 'Curiosidade',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: 'Adivinhar',
   },
   it: {
     appName: "One Word", idiomOfTheDay: 'Parola del Giorno', showMeaning: 'Mostra',
@@ -781,6 +852,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: 'Pronuncia?',
     languageSelectTitle: 'Che lingua parli?', continue: 'Continua',
     aiGreeting: "Ciao!", errorMessage: 'Errore! Riprova',
+    offlineChatMessage: 'Nessuna connessione. Prova Quiz o Review offline!',
     tabHome: 'Home', tabHistory: 'Cronologia', tabJourney: 'Viaggio', tabSettings: 'Impostazioni',
     welcome: 'Benvenuto!', greatChoice: 'Ottima scelta!', almostDone: 'Quasi fatto!',
     whatLanguage: 'Che lingua parli?', whatLearn: 'Cosa vuoi imparare?',
@@ -871,6 +943,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'Ciao! Sono Lingo, il tuo compagno di lingua! Pratichiamo "{word}" insieme!',
     startChatting: 'Inizia a chattare',
     usageNotesLabel: "Note d'uso", funFactLabel: 'Lo sapevi?',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: 'Indovina',
   },
   ru: {
     appName: "One Word", idiomOfTheDay: 'Слово Дня', showMeaning: 'Показать',
@@ -883,6 +964,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: 'Произношение?',
     languageSelectTitle: 'Какой язык?', continue: 'Далее',
     aiGreeting: "Привет!", errorMessage: 'Ошибка! Попробуй снова',
+    offlineChatMessage: 'Нет подключения. Попробуй Quiz или Review офлайн!',
     tabHome: 'Главная', tabHistory: 'История', tabJourney: 'Путь', tabSettings: 'Настройки',
     welcome: 'Добро пожаловать!', greatChoice: 'Отличный выбор!', almostDone: 'Почти готово!',
     whatLanguage: 'На каком языке говоришь?', whatLearn: 'Что хочешь выучить?',
@@ -973,6 +1055,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'Привет! Я Линго, твой языковой друг! Давай потренируем "{word}" вместе!',
     startChatting: 'Начать чат',
     usageNotesLabel: 'Заметки', funFactLabel: 'Интересный факт',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: 'Угадай',
   },
   ja: {
     appName: "One Word", idiomOfTheDay: '今日の単語', showMeaning: '意味を見る',
@@ -985,6 +1076,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: '発音？',
     languageSelectTitle: '何語？', continue: '次へ',
     aiGreeting: "こんにちは！", errorMessage: 'エラー！もう一度',
+    offlineChatMessage: 'インターネット接続なし。QuizかReviewをオフラインで試して！',
     tabHome: 'ホーム', tabHistory: '履歴', tabJourney: '旅', tabSettings: '設定',
     welcome: 'ようこそ！', greatChoice: 'いい選択！', almostDone: 'あと少し！',
     whatLanguage: '何語を話しますか？', whatLearn: '何を学びたい？',
@@ -1075,6 +1167,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: 'やあ! 僕はLingo、君の言語パートナーだよ! 一緒に「{word}」を練習しよう!',
     startChatting: 'チャットを始める',
     usageNotesLabel: '使い方メモ', funFactLabel: '豆知識',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: '推測',
   },
   ko: {
     appName: "One Word", idiomOfTheDay: '오늘의 단어', showMeaning: '뜻 보기',
@@ -1087,6 +1188,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: '발음?',
     languageSelectTitle: '어떤 언어?', continue: '다음',
     aiGreeting: "안녕하세요!", errorMessage: '오류! 다시 시도',
+    offlineChatMessage: '인터넷 연결 없음. Quiz나 Review를 오프라인으로 시도하세요!',
     tabHome: '홈', tabHistory: '기록', tabJourney: '여정', tabSettings: '설정',
     welcome: '환영합니다!', greatChoice: '좋은 선택!', almostDone: '거의 다 됐어요!',
     whatLanguage: '어떤 언어를 사용하나요?', whatLearn: '무엇을 배우고 싶나요?',
@@ -1177,6 +1279,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: '안녕! 나는 Lingo, 너의 언어 친구야! 함께 "{word}"를 연습하자!',
     startChatting: '채팅 시작',
     usageNotesLabel: '사용 메모', funFactLabel: '재미있는 사실',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: '추측',
   },
   zh: {
     appName: "One Word", idiomOfTheDay: '每日单词', showMeaning: '查看含义',
@@ -1189,6 +1300,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     quickReplyPronunciation: '怎么读？',
     languageSelectTitle: '你说什么语言？', continue: '下一步',
     aiGreeting: "你好！", errorMessage: '出错了！再试一次',
+    offlineChatMessage: '没有网络连接。试试离线Quiz或Review！',
     tabHome: '首页', tabHistory: '历史', tabJourney: '旅程', tabSettings: '设置',
     welcome: '欢迎！', greatChoice: '好选择！', almostDone: '快好了！',
     whatLanguage: '你说什么语言？', whatLearn: '你想学什么？',
@@ -1279,6 +1391,15 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     lingoIntro: '嗨! 我是Lingo，你的语言伙伴! 让我们一起练习"{word}"吧!',
     startChatting: '开始聊天',
     usageNotesLabel: '使用笔记', funFactLabel: '趣味小知识',
+    guessGameTitle: "Daily Guess", guessGameSubtitle: "Guess today's word with 3 hints!",
+    guessStart: "Let's Go!", guessHint1Label: 'Category', guessHint2Label: 'Letter Count',
+    guessHint3Label: 'First Letter', guessLetterCount: 'letters', guessStartsWith: "starts with",
+    guessPlaceholder: 'Type your guess...', guessSubmit: 'Guess',
+    guessWrong: 'Not quite! Try the next hint.', guessResultGenius: 'Genius!',
+    guessResultGreat: 'Amazing!', guessResultNice: 'Nice!',
+    guessResultMissed: 'Better luck next time!', guessShare: 'Share Result',
+    guessHintProgress: 'Hint', guessPlayButton: 'Daily Guess', guessAlreadyPlayed: 'Played today',
+    guessTabLabel: '猜测',
   },
 };
 

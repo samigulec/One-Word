@@ -124,17 +124,29 @@ export const scheduleDailyWordReminder = async (
   });
 };
 
-// Streak hatirlatmasini zamanla
+// Streak hatirlatmasini zamanla -- cesitli mesajlarla
 export const scheduleStreakReminder = async (
   hour: number,
   minute: number
 ): Promise<void> => {
   await cancelNotificationsByChannel(CHANNEL_IDS.STREAK);
 
+  // Streak hatirlatma mesajlari (rastgele secilir)
+  const messages = [
+    { title: "Streak'ini kaybetme!", body: 'Bugunku kelimeni henuz gormedin. Serini korumak icin simdi bak!' },
+    { title: 'Serisini koru!', body: 'Bugun henuz kelimeni gormedin. Bir dakikan var mi?' },
+    { title: 'Geri don!', body: 'Serisini bozmamak icin bugun de bir kelime ogren.' },
+    { title: 'Kaciyor!', body: 'Gunluk kelimeni almadan gunu kapatma!' },
+    { title: 'Hatirlatma!', body: 'Streak serisini devam ettirmek senin elinde. Simdi bak!' },
+    { title: 'Son sans!', body: 'Bugun bitmeden kelimeni ogren, serisini koru!' },
+  ];
+
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Serisini kaybetme!',
-      body: 'Bugunku kelimeni henuz gormedin. Serini korumak icin simdi bak!',
+      title: msg.title,
+      body: msg.body,
       data: { channelId: CHANNEL_IDS.STREAK, type: 'streak' },
       sound: 'default',
     },
@@ -146,17 +158,29 @@ export const scheduleStreakReminder = async (
   });
 };
 
-// Quiz hatirlatmasini zamanla
+// Quiz / review hatirlatmasini zamanla -- cesitli mesajlarla
 export const scheduleQuizReminder = async (
   hour: number,
   minute: number
 ): Promise<void> => {
   await cancelNotificationsByChannel(CHANNEL_IDS.QUIZ);
 
+  // Review / quiz hatirlatma mesajlari (rastgele secilir)
+  const messages = [
+    { title: 'Quiz zamani!', body: 'Ogrendiklerini test et! Kisa bir quiz seni bekliyor.' },
+    { title: 'Tekrar vakti!', body: 'Kelimelerini pekistirmek icin kisa bir tekrar yap.' },
+    { title: 'Hafizani tazele!', body: 'Bugunku tekrarini yapmak icin harika bir zaman.' },
+    { title: 'Kendini test et!', body: 'Bir quiz ile ne kadar ogrendigini gor.' },
+    { title: 'Pratik zamani!', body: 'Birka dakika ayirip kelimelerini gozden gecir.' },
+    { title: 'Bilgini olc!', body: 'Kisa bir quiz seni bekliyor. Hazir misin?' },
+  ];
+
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Quiz zamani!',
-      body: 'Ogrendiklerini test et! Kisa bir quiz seni bekliyor.',
+      title: msg.title,
+      body: msg.body,
       data: { channelId: CHANNEL_IDS.QUIZ, type: 'quiz' },
       sound: 'default',
     },

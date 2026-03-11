@@ -37,6 +37,7 @@ import {
   scheduleAllNotifications,
   DEFAULT_NOTIFICATION_SETTINGS,
 } from '../utils/notifications';
+import StreakHeatmap from '../components/StreakHeatmap';
 
 // Profil tab secenekleri
 type ProfileTab = 'stats' | 'settings';
@@ -242,6 +243,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
           <Text style={styles.statLabel}>{t('weeks')}</Text>
         </View>
       </View>
+
+      {/* Streak Heatmap -- son 12 haftalik aktivite takvimi */}
+      <StreakHeatmap learnedWords={userProgress?.learnedWords || []} />
 
       {/* Dil ayarlari */}
       <Text style={styles.sectionTitle}>{t('yourSettings')}</Text>

@@ -170,6 +170,8 @@ const AnimatedWordCard: React.FC<{
         <TouchableOpacity
           onPress={handleFavPress}
           style={[styles.favButton, item.isFavorite && styles.favButtonActive]}
+          accessibilityRole="button"
+          accessibilityLabel={item.isFavorite ? `Remove ${item.word.target_word} from favorites` : `Add ${item.word.target_word} to favorites`}
         >
           <Text style={[styles.favIcon, item.isFavorite && styles.favIconActive]}>
             {item.isFavorite ? '\u2665' : '\u2661'}
@@ -310,7 +312,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Go back">
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('wordHistory')}</Text>
@@ -324,6 +326,9 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
           <TouchableOpacity
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFilter('all'); }}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('all')} (${words.length})`}
+            accessibilityState={{ selected: filter === 'all' }}
           >
             <LinearGradient
               colors={filter === 'all' ? ['#6366F1', '#8B5CF6'] : ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.03)']}
@@ -337,6 +342,9 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
           <TouchableOpacity
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setFilter('favorites'); }}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('favorites')} (${words.filter(w => w.isFavorite).length})`}
+            accessibilityState={{ selected: filter === 'favorites' }}
           >
             <LinearGradient
               colors={filter === 'favorites' ? ['#EF4444', '#F87171'] : ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.03)']}
@@ -356,6 +364,9 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ nativeLanguage, onClose }
               key={mode}
               onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setGroupMode(mode); }}
               style={[styles.groupChip, groupMode === mode && styles.groupChipActive]}
+              accessibilityRole="button"
+              accessibilityLabel={`Group by ${label}`}
+              accessibilityState={{ selected: groupMode === mode }}
             >
               <Text style={[styles.groupChipText, groupMode === mode && styles.groupChipTextActive]}>
                 {label}

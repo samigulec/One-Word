@@ -265,13 +265,20 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
       const aiResponse = await getAIResponse(messageText, word, updatedMessages, nativeLanguage, targetLanguage, wordTranslation, intensity, scenario);
       setMessages(prev => [...prev, aiResponse]);
     } catch (error) {
-      const errorMessage: ChatMessage = {
+      // Internet baglantisi hatasi kontrolu -- kullanici dostu mesaj goster
+      const isNetworkError =
+        error instanceof TypeError && error.message === 'Network request failed';
+
+      const offlineMessage = t('offlineChatMessage');
+      const genericMessage = t('errorMessage');
+
+      const errorMsg: ChatMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant',
-        content: t('errorMessage'),
+        content: isNetworkError ? offlineMessage : genericMessage,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
       setTimeout(() => {
@@ -327,6 +334,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               onNavigateBack();
             }}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
             <Text style={styles.backArrow}>{'\u2190'}</Text>
           </TouchableOpacity>
@@ -392,6 +401,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
                   disabled={isLoading}
                   activeOpacity={0.7}
                   style={styles.quickReplyChip}
+                  accessibilityRole="button"
+                  accessibilityLabel={option.text}
                 >
                   <Text style={styles.quickReplyEmoji}>{option.emoji}</Text>
                   <Text style={styles.quickReplyText}>{option.text}</Text>
@@ -424,6 +435,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ word, onNavigateBack, nativeLan
                   onPress={() => handleSend()}
                   disabled={!inputText.trim() || isLoading}
                   activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="Send message"
                 >
                   <LinearGradient
                     colors={inputText.trim() && !isLoading

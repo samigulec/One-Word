@@ -1,9 +1,9 @@
 // App.tsx -- v2.0.0 Ana navigasyon (UX yeniden tasarimi)
 // Yeni tab yapisi: Home | Quests | History | Profile
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { LogBox, ActivityIndicator, StyleSheet } from 'react-native';
+import { LogBox, ActivityIndicator, StyleSheet, Animated, View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Sentry from '@sentry/react-native';
 
@@ -28,10 +28,12 @@ import QuizScreen from './src/screens/QuizScreen';
 import WeeklySummaryScreen from './src/screens/WeeklySummaryScreen';
 import LeaderboardScreen from './src/screens/LeaderboardScreen';
 import BadgeUnlockedModal from './src/components/BadgeUnlockedModal';
+// [GUESS_GAME] Gunun Tahmini mini oyunu
+import DailyGuessGame from './src/components/DailyGuessGame';
 
 // Tipler ve utility'ler
 import { ContentItem, ProficiencyLevel, UserProgress, Badge } from './src/types';
-import { LanguageCode } from './src/utils/translations';
+import { LanguageCode, getTranslation as getUITranslation } from './src/utils/translations';
 import {
   getLanguagePreferences,
   saveLanguagePreferences,
@@ -43,9 +45,83 @@ import {
   getCalmMode,
 } from './src/utils/storage';
 import { requestNotificationPermission, scheduleAllNotifications } from './src/utils/notifications';
+// [GUESS_GAME] Gunun kelimesini almak icin
+import { getWordOfTheDay } from './src/utils/contentLoader';
 import { checkStreakBadges, checkWordBadges, checkSpecialBadges, createEarnedBadge } from './src/utils/badges';
 
 LogBox.ignoreLogs(['Non-serializable values']);
+
+// Splash Screen -- fade-in animasyonlu giris ekrani
+const SplashScreen: React.FC = () => {
+  // Fade-in animasyon degerleri
+  const fadeTitle = useRef(new Animated.Value(0)).current;
+  const fadeSlogan = useRef(new Animated.Value(0)).current;
+  const fadeSpinner = useRef(new Animated.Value(0)).current;
+  const scaleTitle = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    // Sirali fade-in: baslik → slogan → spinner
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fadeTitle, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.spring(scaleTitle, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
+      ]),
+      Animated.timing(fadeSlogan, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.timing(fadeSpinner, { toValue: 1, duration: 400, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  return (
+    <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={splashStyles.container}>
+      <StatusBar style="light" />
+      <View style={splashStyles.content}>
+        <Animated.Text
+          style={[
+            splashStyles.title,
+            { opacity: fadeTitle, transform: [{ scale: scaleTitle }] },
+          ]}
+        >
+          One Word
+        </Animated.Text>
+        <Animated.Text style={[splashStyles.slogan, { opacity: fadeSlogan }]}>
+          {getUITranslation('slogan', 'en')}
+        </Animated.Text>
+        <Animated.View style={{ opacity: fadeSpinner, marginTop: 32 }}>
+          <ActivityIndicator size="large" color="#8B5CF6" />
+        </Animated.View>
+      </View>
+    </LinearGradient>
+  );
+};
+
+const splashStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 2,
+    textShadowColor: 'rgba(139,92,246,0.6)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 16,
+    marginBottom: 12,
+  },
+  slogan: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'rgba(196,181,253,0.7)',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+    paddingHorizontal: 40,
+  },
+});
 
 // Tum ekran tipleri -- v2.0.0 guncellendi
 type Screen =
@@ -60,7 +136,8 @@ type Screen =
   | 'Review'
   | 'Quiz'
   | 'WeeklySummary'
-  | 'Leaderboard';
+  | 'Leaderboard'
+  | 'GuessGame'; // [GUESS_GAME]
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('Loading');
@@ -207,6 +284,11 @@ function App() {
     setCurrentScreen('Leaderboard');
   };
 
+  // [GUESS_GAME] Gunun Tahmini ekranina git
+  const navigateToGuessGame = () => {
+    setCurrentScreen('GuessGame');
+  };
+
   const handleReset = () => {
     setUserProgress(null);
     setSelectedWord(null);
@@ -216,14 +298,9 @@ function App() {
     setCurrentScreen('Onboarding');
   };
 
-  // Loading screen
+  // Splash Screen -- fade-in animasyonu ile One Word markasi
   if (currentScreen === 'Loading') {
-    return (
-      <LinearGradient colors={['#0F0A2E', '#1A1145', '#251B5E']} style={styles.loadingContainer}>
-        <StatusBar style="light" />
-        <ActivityIndicator size="large" color="#8B5CF6" />
-      </LinearGradient>
-    );
+    return <SplashScreen />;
   }
 
   return (
@@ -242,6 +319,7 @@ function App() {
           onNavigateToQuiz={navigateToQuiz}
           onNavigateToPractice={(w?: ContentItem) => navigateToPractice(w)}
           onNavigateToLeaderboard={navigateToLeaderboard}
+          onNavigateToGuessGame={navigateToGuessGame}
           nativeLanguage={nativeLanguage}
           targetLanguage={targetLanguage}
           proficiencyLevel={proficiencyLevel}
@@ -253,6 +331,7 @@ function App() {
           nativeLanguage={nativeLanguage}
           onClose={navigateToHome}
           onNavigateToWeeklySummary={navigateToWeeklySummary}
+          onOpenGuessGame={navigateToGuessGame}
         />
       )}
       {currentScreen === 'Profile' && (
@@ -301,6 +380,14 @@ function App() {
       {currentScreen === 'Leaderboard' && (
         <LeaderboardScreen onClose={navigateToHome} nativeLanguage={nativeLanguage} />
       )}
+      {/* [GUESS_GAME] Gunun Tahmini ekrani */}
+      {currentScreen === 'GuessGame' && (
+        <DailyGuessGame
+          word={getWordOfTheDay(targetLanguage, proficiencyLevel)}
+          nativeLanguage={nativeLanguage}
+          onClose={navigateToHome}
+        />
+      )}
       {currentScreen === 'Chat' && selectedWord && (
         <ChatScreen
           word={selectedWord}
@@ -324,13 +411,7 @@ function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+const styles = StyleSheet.create({});
 
 // Sentry ile App bileseni sarmalanarak export ediliyor
 export default Sentry.wrap(App);

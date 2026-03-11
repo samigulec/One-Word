@@ -162,7 +162,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose, nativeLa
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityRole="button" accessibilityLabel="Go back">
             <Text style={styles.closeIcon}>{'\u2190'}</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('leaderboard')}</Text>
@@ -176,6 +176,9 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose, nativeLa
           <TouchableOpacity
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setTab('allTime'); }}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={t('allTime')}
+            accessibilityState={{ selected: tab === 'allTime' }}
           >
             <LinearGradient
               colors={tab === 'allTime' ? ['#6366F1', '#8B5CF6'] : ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.03)']}
@@ -189,6 +192,9 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onClose, nativeLa
           <TouchableOpacity
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setTab('weekly'); }}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={t('thisWeek')}
+            accessibilityState={{ selected: tab === 'weekly' }}
           >
             <LinearGradient
               colors={tab === 'weekly' ? ['#F59E0B', '#EF4444'] : ['rgba(255,255,255,0.06)', 'rgba(255,255,255,0.03)']}
