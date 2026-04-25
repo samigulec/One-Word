@@ -25,8 +25,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord, getDueWordsForToday, getUserName, getDailyXPStatus, addXP, completeDailyTask, updateWeeklyChallengeGoal, claimWeeklyChallengeBonus } from '../utils/storage';
 import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../utils/translations';
 import ShareWordCard from '../components/ShareWordCard';
-import GrammarNuggets from '../components/GrammarNuggets';
-import RealWorldExamples from '../components/RealWorldExamples';
 import { SkeletonCard } from '../components/SkeletonLoader';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -108,7 +106,6 @@ interface FloatingXP {
 }
 
 // Kelime karti icindeki tab secenekleri
-type WordCardTab = 'meaning' | 'example' | 'grammar';
 
 const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigateToChat, onNavigateToQuests,
@@ -139,7 +136,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const [levelProgress, setLevelProgress] = useState<number>(0);
 
   // Kelime karti tab state
-  const [activeWordTab, setActiveWordTab] = useState<WordCardTab>('meaning');
 
   // Tutorial overlay state -- ilk kullanim kilavuzu
   const [showTutorial, setShowTutorial] = useState(false);
@@ -197,7 +193,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       if (targetWord) {
         setWord(targetWord);
         setShowMeaning(false);
-        setActiveWordTab('meaning');
         meaningReveal.setValue(0);
         isFavorite(targetWord.id).then(setIsFav);
         // Yeni kelimeye gecildiginde otomatik olarak seslendir
@@ -488,7 +483,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
       setWord(todaysWord);
       setShowMeaning(false);
-      setActiveWordTab('meaning');
       // Gunun kelimesi yuklendiginde otomatik seslendir
       speakWord(todaysWord.target_word);
       const idHash = parseInt(todaysWord.id.replace(/\D/g, '')) || 1;
@@ -637,53 +631,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
   const localizedExample = getExampleTranslation(word, nativeLanguage);
 
   // Kelime karti tab icerik renderla
-  const renderWordTabContent = () => {
-    switch (activeWordTab) {
-      case 'meaning':
-        return (
-          <Animated.View style={[styles.tabContentArea, {
-            opacity: meaningReveal,
-            transform: [{
-              translateY: meaningReveal.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }),
-            }],
-          }]}>
-            <Text style={styles.meaningText}>{localizedMeaning}</Text>
-            <View style={styles.separator} />
-            <View style={styles.exampleArea}>
-              <Text style={styles.exampleText}>{targetLanguageFlag} "{word.example_sentence}"</Text>
-              {localizedExample && (
-                <Text style={styles.exampleTrans}>{nativeLanguageFlag} {localizedExample}</Text>
-              )}
-            </View>
-          </Animated.View>
-        );
-      case 'example':
-        return (
-          <Animated.View style={[styles.tabContentArea, { opacity: meaningReveal }]}>
-            {word.realWorldExamples && word.realWorldExamples.length > 0 ? (
-              <RealWorldExamples word={word} />
-            ) : (
-              <View style={styles.emptyTabContent}>
-                <Text style={styles.emptyTabEmoji}>{'\u{1F4D6}'}</Text>
-                <Text style={styles.emptyTabText}>{t('noExamplesYet')}</Text>
-              </View>
-            )}
-          </Animated.View>
-        );
-      case 'grammar':
-        return (
-          <Animated.View style={[styles.tabContentArea, { opacity: meaningReveal }]}>
-            {(word.grammarNote || (word.sentencePatterns && word.sentencePatterns.length > 0)) ? (
-              <GrammarNuggets word={word} />
-            ) : (
-              <View style={styles.emptyTabContent}>
-                <Text style={styles.emptyTabEmoji}>{'\u{1F4DD}'}</Text>
-                <Text style={styles.emptyTabText}>{t('noGrammarYet')}</Text>
-              </View>
-            )}
-          </Animated.View>
-        );
-    }
+  const renderMeaningContent = () => {
+    return (
+      <Animated.View style={[styles.tabContentArea, {
+        opacity: meaningReveal,
+        transform: [{
+          translateY: meaningReveal.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }),
+        }],
+      }]}>
+        <Text style={styles.meaningText}>{localizedMeaning}</Text>
+        <View style={styles.separator} />
+        <View style={styles.exampleArea}>
+          <Text style={styles.exampleText}>{targetLanguageFlag} "{word.example_sentence}"</Text>
+          {localizedExample && (
+            <Text style={styles.exampleTrans}>{nativeLanguageFlag} {localizedExample}</Text>
+          )}
+        </View>
+      </Animated.View>
+    );
   };
 
   return (
@@ -826,33 +791,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                 {/* Anlam acildiginda */}
                 {showMeaning && (
                   <View style={styles.wordCardTabs}>
-                    <View style={styles.wordCardTabBar}>
-                      <TouchableOpacity
-                        style={[styles.wordCardTabItem, activeWordTab === 'meaning' && styles.wordCardTabItemActive]}
-                        onPress={() => setActiveWordTab('meaning')}
-                      >
-                        <Text style={[styles.wordCardTabText, activeWordTab === 'meaning' && styles.wordCardTabTextActive]}>
-                          {t('tabMeaning')}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.wordCardTabItem, activeWordTab === 'example' && styles.wordCardTabItemActive]}
-                        onPress={() => setActiveWordTab('example')}
-                      >
-                        <Text style={[styles.wordCardTabText, activeWordTab === 'example' && styles.wordCardTabTextActive]}>
-                          {t('tabExample')}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.wordCardTabItem, activeWordTab === 'grammar' && styles.wordCardTabItemActive]}
-                        onPress={() => setActiveWordTab('grammar')}
-                      >
-                        <Text style={[styles.wordCardTabText, activeWordTab === 'grammar' && styles.wordCardTabTextActive]}>
-                          {t('tabGrammar')}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                    {renderWordTabContent()}
+                    {renderMeaningContent()}
                   </View>
                 )}
               </LinearGradient>
@@ -1273,31 +1212,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 16,
   },
-  wordCardTabBar: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 10,
-    padding: 3,
-    marginBottom: 12,
-  },
-  wordCardTabItem: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  wordCardTabItemActive: {
-    backgroundColor: 'rgba(99,102,241,0.2)',
-  },
-  wordCardTabText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.4)',
-  },
-  wordCardTabTextActive: {
-    color: '#A78BFA',
-    fontWeight: '700',
-  },
   tabContentArea: {
     width: '100%',
   },
@@ -1333,16 +1247,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255,255,255,0.4)',
     lineHeight: 20,
-  },
-  emptyTabContent: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  emptyTabEmoji: { fontSize: 28, marginBottom: 8, opacity: 0.5 },
-  emptyTabText: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.35)',
-    textAlign: 'center',
   },
 
   // ── Swipe Ipucu ──

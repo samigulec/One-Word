@@ -18,10 +18,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
-import { Badge, EarnedBadge, BadgeCategory, DailyTasksData, DailyTaskId, WeeklyChallengeData, UserProgress, LevelInfo } from '../types';
+import { Badge, EarnedBadge, BadgeCategory, DailyTasksData, DailyTaskId, UserProgress, LevelInfo } from '../types';
 import { ALL_BADGES, getBadgesByCategory } from '../utils/badges';
-import { getEarnedBadges, getDailyTasks, completeDailyTask, claimDailyTasksBonus, getWeeklyChallenge, updateWeeklyChallengeGoal, claimWeeklyChallengeBonus, getUserProgress, getDailyXPStatus, addXP } from '../utils/storage';
-import { getWeeklyChallengeProgress } from '../utils/weeklyChallenge';
+import { getEarnedBadges, getDailyTasks, completeDailyTask, claimDailyTasksBonus, getUserProgress, getDailyXPStatus, addXP } from '../utils/storage';
 import { LanguageCode, getTranslation as getUITranslation } from '../utils/translations';
 import { ShareTemplate } from '../types';
 import { createStreakTemplate, createWordsTemplate } from '../utils/shareTemplates';
@@ -32,10 +31,9 @@ import { getGuessGameState, GuessGameState } from '../utils/guessGameStorage';
 const { width } = Dimensions.get('window');
 
 // Gunluk gorev ikon ve label eslestirmesi
-const TASK_CONFIG: Record<DailyTaskId, { icon: string; labelKey: 'taskLearnWord' | 'taskDiscoverMeaning' | 'taskPracticeAI' }> = {
+const TASK_CONFIG: Record<DailyTaskId, { icon: string; labelKey: 'taskLearnWord' | 'taskDiscoverMeaning' }> = {
   learn_word: { icon: '\u{1F4D6}', labelKey: 'taskLearnWord' },
   discover_meaning: { icon: '\u{1F50D}', labelKey: 'taskDiscoverMeaning' },
-  practice_ai: { icon: '\u{1F4AC}', labelKey: 'taskPracticeAI' },
 };
 
 // Rozet kategori bilgileri
@@ -50,28 +48,18 @@ const CATEGORY_KEYS: Record<BadgeCategory, { titleKey: 'categoryStreak' | 'categ
 
 const CATEGORIES: BadgeCategory[] = ['streak', 'words', 'quiz', 'level', 'special'];
 
-// Hedef ikon eslestirmesi (haftalik zorluk)
-const GOAL_ICONS: Record<string, string> = {
-  learn_words: '\u{1F4D6}',
-  complete_quizzes: '\u{1F9E0}',
-  ai_practice: '\u{1F4AC}',
-};
-
 // Tab secenekleri
-type QuestTab = 'daily' | 'weekly' | 'badges' | 'journey';
+type QuestTab = 'daily' | 'badges' | 'journey';
 
 type QuestsScreenProps = {
   nativeLanguage: LanguageCode;
   onClose: () => void;
-  onNavigateToWeeklySummary?: () => void;
-  /** [GUESS_GAME] Gunun Tahmini oyununu ac */
   onOpenGuessGame?: () => void;
 };
 
 const QuestsScreen: React.FC<QuestsScreenProps> = ({
   nativeLanguage,
   onClose,
-  onNavigateToWeeklySummary,
   onOpenGuessGame,
 }) => {
   const t = (key: Parameters<typeof getUITranslation>[0]) => getUITranslation(key, nativeLanguage);
@@ -81,9 +69,6 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
   // Gunluk gorev state'leri
   const [dailyTasks, setDailyTasks] = useState<DailyTasksData | null>(null);
-
-  // Haftalik zorluk state
-  const [weeklyChallenge, setWeeklyChallenge] = useState<WeeklyChallengeData | null>(null);
 
   // Rozet state'leri
   const [earnedBadges, setEarnedBadges] = useState<EarnedBadge[]>([]);
@@ -107,7 +92,6 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
   const taskCheckScales = useRef<Record<string, Animated.Value>>({
     learn_word: new Animated.Value(0),
     discover_meaning: new Animated.Value(0),
-    practice_ai: new Animated.Value(0),
   }).current;
 
   useEffect(() => {
@@ -120,16 +104,14 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
 
   // Tum verileri yukle
   const loadAllData = async () => {
-    const [tasks, challenge, badges, progress, guessState] = await Promise.all([
+    const [tasks, badges, progress, guessState] = await Promise.all([
       getDailyTasks(),
-      getWeeklyChallenge(),
       getEarnedBadges(),
       getUserProgress(),
-      getGuessGameState(), // [GUESS_GAME]
+      getGuessGameState(),
     ]);
 
     setDailyTasks(tasks);
-    setWeeklyChallenge(challenge);
     setEarnedBadges(badges);
     setUserProgress(progress);
     setGuessGameState(guessState); // [GUESS_GAME]
@@ -229,7 +211,6 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
     <View style={styles.tabSelector}>
       {([
         { id: 'daily' as QuestTab, label: t('questsDaily'), icon: '\u{2705}' },
-        { id: 'weekly' as QuestTab, label: t('questsWeekly'), icon: '\u{1F3AF}' },
         { id: 'badges' as QuestTab, label: t('questsBadges'), icon: '\u{1F3C6}' },
         { id: 'journey' as QuestTab, label: t('questsJourney'), icon: '\u{1F680}' },
       ]).map((tab) => (
@@ -355,105 +336,6 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
       ) : null}
     </View>
   );
-
-  // Haftalik zorluk tab icerigi
-  const renderWeeklyTab = () => {
-    if (!weeklyChallenge) return null;
-    const progress = getWeeklyChallengeProgress(weeklyChallenge);
-    const allComplete = weeklyChallenge.goals.every(g => g.completed);
-
-    return (
-      <View style={styles.tabContent}>
-        {/* Zorluk baslik */}
-        <View style={styles.challengeHeader}>
-          <Text style={styles.challengeEmoji}>{weeklyChallenge.categoryEmoji}</Text>
-          <View style={styles.challengeInfo}>
-            <Text style={styles.challengeTitle} accessibilityRole="header">{weeklyChallenge.themeTitle}</Text>
-            <Text style={styles.challengeSubtitle}>{t('weeklyChallenge')}</Text>
-          </View>
-          <View style={styles.challengeProgressBadge}>
-            <Text style={[styles.challengeProgressText, allComplete && styles.challengeProgressComplete]}>
-              {progress}%
-            </Text>
-          </View>
-        </View>
-
-        {/* Ilerleme cubugu */}
-        <View style={styles.challengeProgressBar}>
-          <View style={[
-            styles.challengeProgressFill,
-            { width: `${progress}%` as any },
-            allComplete && styles.challengeProgressFillComplete,
-          ]} />
-        </View>
-
-        {/* Hedefler listesi */}
-        {weeklyChallenge.goals.map((goal) => {
-          const icon = GOAL_ICONS[goal.id] || '\u{2B50}';
-          return (
-            <View key={goal.id} style={[styles.goalRow, goal.completed && styles.goalRowCompleted]}>
-              <View style={styles.goalLeft}>
-                <View style={[styles.goalIconContainer, goal.completed && styles.goalIconCompleted]}>
-                  {goal.completed ? (
-                    <Text style={styles.goalCheck}>{'\u2713'}</Text>
-                  ) : (
-                    <Text style={styles.goalIcon}>{icon}</Text>
-                  )}
-                </View>
-                <Text style={[styles.goalText, goal.completed && styles.goalTextCompleted]}>
-                  {goal.description}
-                </Text>
-              </View>
-              <Text style={[styles.goalProgress, goal.completed && styles.goalProgressCompleted]}>
-                {goal.current}/{goal.target}
-              </Text>
-            </View>
-          );
-        })}
-
-        {/* Tamamlandi bilgisi */}
-        {allComplete && (
-          <LinearGradient
-            colors={['rgba(251,191,36,0.1)', 'rgba(251,191,36,0.05)']}
-            style={styles.challengeCompleteBanner}
-          >
-            <Text style={styles.challengeCompleteText}>
-              {'\u{1F389}'} Challenge Complete! +{weeklyChallenge.bonusXPClaimed ? '0' : '100'} XP
-            </Text>
-          </LinearGradient>
-        )}
-
-        {/* Haftalik Ozet butonu */}
-        {onNavigateToWeeklySummary && (
-          <TouchableOpacity
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              onNavigateToWeeklySummary();
-            }}
-            activeOpacity={0.8}
-            style={styles.weeklySummaryButton}
-            accessibilityRole="button"
-            accessibilityLabel="Weekly Summary"
-            accessibilityHint="Shows your weekly progress statistics"
-          >
-            <LinearGradient
-              colors={['rgba(52,211,153,0.15)', 'rgba(16,185,129,0.1)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.weeklySummaryInner}
-            >
-              <Text style={styles.weeklySummaryEmoji}>{'\u{1F4CA}'}</Text>
-              <View style={styles.weeklySummaryTextContainer}>
-                <Text style={styles.weeklySummaryTitle}>{t('weeklySummary')}</Text>
-                <Text style={styles.weeklySummarySubtitle}>{t('progressStats')}</Text>
-              </View>
-              <Text style={styles.weeklySummaryArrow}>{'\u203A'}</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  };
 
   // Rozetler tab icerigi
   const renderBadgesTab = () => (
@@ -668,7 +550,6 @@ const QuestsScreen: React.FC<QuestsScreenProps> = ({
         <Animated.View style={{ flex: 1, opacity: opacityAnim, transform: [{ translateY: slideAnim }] }}>
           <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
             {activeTab === 'daily' && renderDailyTab()}
-            {activeTab === 'weekly' && renderWeeklyTab()}
             {activeTab === 'badges' && renderBadgesTab()}
             {activeTab === 'journey' && renderJourneyTab()}
           </ScrollView>
@@ -846,143 +727,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FBBF24',
   },
-
-  // Haftalik zorluk
-  challengeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 14,
-  },
-  challengeEmoji: { fontSize: 36 },
-  challengeInfo: { flex: 1 },
-  challengeTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  challengeSubtitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.4)',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  challengeProgressBadge: {
-    backgroundColor: 'rgba(99,102,241,0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  challengeProgressText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#A78BFA',
-  },
-  challengeProgressComplete: {
-    color: '#34D399',
-  },
-  challengeProgressBar: {
-    height: 8,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  challengeProgressFill: {
-    height: '100%',
-    backgroundColor: '#8B5CF6',
-    borderRadius: 4,
-  },
-  challengeProgressFillComplete: {
-    backgroundColor: '#34D399',
-  },
-  goalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
-    marginBottom: 8,
-  },
-  goalRowCompleted: {
-    backgroundColor: 'rgba(52,211,153,0.05)',
-    borderColor: 'rgba(52,211,153,0.1)',
-  },
-  goalLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  goalIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  goalIconCompleted: {
-    backgroundColor: 'rgba(52,211,153,0.2)',
-  },
-  goalIcon: { fontSize: 16 },
-  goalCheck: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#34D399',
-  },
-  goalText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.6)',
-    flex: 1,
-  },
-  goalTextCompleted: {
-    color: 'rgba(255,255,255,0.35)',
-    textDecorationLine: 'line-through',
-  },
-  goalProgress: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#A78BFA',
-  },
-  goalProgressCompleted: {
-    color: '#34D399',
-  },
-  challengeCompleteBanner: {
-    borderRadius: 10,
-    padding: 12,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  challengeCompleteText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FBBF24',
-  },
-  weeklySummaryButton: {
-    marginTop: 16,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  weeklySummaryInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(52,211,153,0.3)',
-  },
-  weeklySummaryEmoji: { fontSize: 22, marginRight: 12 },
-  weeklySummaryTextContainer: { flex: 1 },
-  weeklySummaryTitle: { fontSize: 15, fontWeight: '700', color: '#34D399' },
-  weeklySummarySubtitle: { fontSize: 12, color: 'rgba(52,211,153,0.6)', marginTop: 2 },
-  weeklySummaryArrow: { fontSize: 24, fontWeight: '700', color: 'rgba(52,211,153,0.6)' },
 
   // [GUESS_GAME] Gunun Tahmini butonu stilleri
   guessGameButton: {

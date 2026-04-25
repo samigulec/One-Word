@@ -140,7 +140,7 @@ export interface LeaderboardData {
 }
 
 // Gunluk gorev sistemi
-export type DailyTaskId = 'learn_word' | 'discover_meaning' | 'practice_ai';
+export type DailyTaskId = 'learn_word' | 'discover_meaning';
 
 export interface DailyTask {
   id: DailyTaskId;
