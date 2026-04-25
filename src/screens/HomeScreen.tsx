@@ -25,7 +25,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updateDailyStreak, toggleFavorite, isFavorite, addLearnedWord, getDueWordsForToday, getUserName, getDailyXPStatus, addXP, completeDailyTask, updateWeeklyChallengeGoal, claimWeeklyChallengeBonus } from '../utils/storage';
 import { getTranslation as getUITranslation, LanguageCode, LANGUAGES } from '../utils/translations';
 import ShareWordCard from '../components/ShareWordCard';
-import CulturalContextModal from '../components/CulturalContextModal';
 import GrammarNuggets from '../components/GrammarNuggets';
 import RealWorldExamples from '../components/RealWorldExamples';
 import { SkeletonCard } from '../components/SkeletonLoader';
@@ -141,9 +140,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
   // Kelime karti tab state
   const [activeWordTab, setActiveWordTab] = useState<WordCardTab>('meaning');
-
-  // Kulturel baglam modal state
-  const [showCulturalContext, setShowCulturalContext] = useState(false);
 
   // Tutorial overlay state -- ilk kullanim kilavuzu
   const [showTutorial, setShowTutorial] = useState(false);
@@ -813,15 +809,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
                   <TouchableOpacity onPress={handleShare} style={styles.actionBtn} activeOpacity={0.7} disabled={isSharing} accessibilityRole="button" accessibilityLabel="Share this word">
                     <Text style={styles.actionBtnIcon}>{isSharing ? '\u23F3' : '\u{1F4E4}'}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowCulturalContext(true); }}
-                    style={styles.actionBtn}
-                    activeOpacity={0.7}
-                    accessibilityRole="button"
-                    accessibilityLabel="Cultural context"
-                  >
-                    <Text style={styles.actionBtnIcon}>{'\u{1F4A1}'}</Text>
-                  </TouchableOpacity>
                 </View>
 
                 {/* Anlamini Gor butonu */}
@@ -953,13 +940,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
           <Text style={styles.tabLabel}>{t('tabProfile')}</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Kulturel Baglam Modali */}
-      <CulturalContextModal
-        visible={showCulturalContext}
-        word={word}
-        onClose={() => setShowCulturalContext(false)}
-      />
 
       {/* Level Up Overlay -- calmMode aktifken gizlenir */}
       {!calmMode && showLevelUp && levelInfo && (
