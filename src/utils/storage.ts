@@ -512,7 +512,6 @@ export const getDailyXPStatus = async (): Promise<{
 const createDefaultDailyTasks = (): DailyTask[] => [
   { id: 'learn_word', completed: false, xp: 10 },
   { id: 'discover_meaning', completed: false, xp: 5 },
-  { id: 'practice_ai', completed: false, xp: 15 },
 ];
 
 // Gunluk gorev verisini getir (yeni gun ise sifirla)

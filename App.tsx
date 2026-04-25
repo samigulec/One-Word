@@ -330,7 +330,6 @@ function App() {
         <QuestsScreen
           nativeLanguage={nativeLanguage}
           onClose={navigateToHome}
-          onNavigateToWeeklySummary={navigateToWeeklySummary}
           onOpenGuessGame={navigateToGuessGame}
         />
       )}
