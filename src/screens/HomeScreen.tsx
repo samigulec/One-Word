@@ -193,7 +193,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
       if (targetWord) {
         setWord(targetWord);
         setShowMeaning(false);
-        setActiveWordTab('meaning');
         meaningReveal.setValue(0);
         isFavorite(targetWord.id).then(setIsFav);
         // Yeni kelimeye gecildiginde otomatik olarak seslendir
@@ -484,7 +483,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
 
       setWord(todaysWord);
       setShowMeaning(false);
-      setActiveWordTab('meaning');
       // Gunun kelimesi yuklendiginde otomatik seslendir
       speakWord(todaysWord.target_word);
       const idHash = parseInt(todaysWord.id.replace(/\D/g, '')) || 1;
