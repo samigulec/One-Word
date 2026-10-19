@@ -120,8 +120,8 @@ docs/                    README images
 You need Node.js 18 or newer.
 
 ```bash
-git clone https://github.com/samigulec/one-word.git
-cd one-word
+git clone https://github.com/samigulec/One-Word.git
+cd One-Word
 npm install
 npx expo start
 ```
