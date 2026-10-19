@@ -1,226 +1,154 @@
-# 🌍 One Word
+<p align="center">
+  <img src="docs/banner.png" alt="One Word — one word a day, one step every day" width="100%">
+</p>
 
-<div align="center">
+<p align="center">
+  <b>A mobile app that teaches you one new word every day.</b><br>
+  Small daily habit, streaks and quests to keep you going, spaced repetition so the words stick.
+</p>
 
-![One Word Logo](https://img.shields.io/badge/One%20Word-Learn%20Daily-667eea?style=for-the-badge&logo=duolingo&logoColor=white)
+<p align="center">
+  <img alt="React Native 0.81" src="https://img.shields.io/badge/React%20Native-0.81-1B1040?logo=react&logoColor=61DAFB">
+  <img alt="Expo SDK 54" src="https://img.shields.io/badge/Expo-SDK%2054-1B1040?logo=expo&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.9-1B1040?logo=typescript&logoColor=white">
+  <img alt="11 languages" src="https://img.shields.io/badge/languages-11-8B5CF6">
+  <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4CAF7A">
+</p>
 
-**Learn a new word every day. Build your vocabulary, one word at a time.**
-
-[![React Native](https://img.shields.io/badge/React%20Native-0.76-61DAFB?style=flat-square&logo=react)](https://reactnative.dev/)
-[![Expo](https://img.shields.io/badge/Expo-54-000020?style=flat-square&logo=expo)](https://expo.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-
-[Features](#-features) • [Screenshots](#-screenshots) • [Installation](#-installation) • [Tech Stack](#-tech-stack) • [Contributing](#-contributing)
-
-</div>
-
----
-
-## ✨ Features
-
-### 🎯 Daily Word Learning
-- **One word per day** - Focus on quality over quantity
-- **Level-based content** - Beginner, Intermediate, and Advanced words
-- **Multi-language support** - Learn Spanish, English, and more!
-
-### 🌐 Truly Global
-- **11 UI languages** - English, Turkish, Spanish, German, French, Portuguese, Italian, Russian, Japanese, Korean, Chinese
-- **Learn any language** - Choose your native language and target language
-- **Localized translations** - Meanings shown in your native language
-
-### 🗺️ Learning Journey
-- **Visual roadmap** - Track your daily progress
-- **Streak system** - Build consistency with day streaks
-- **Milestones** - Celebrate achievements at 7, 14, 30, 60, and 100 days
-
-### 💬 AI Practice Mode
-- **Chat with AI tutor** - Practice using the word in context
-- **Gentle corrections** - Learn from mistakes without frustration
-- **Quick replies** - Get examples, meanings, and pronunciation help
-
-### 🎨 Beautiful UX
-- **Modern gradient design** - Eye-catching purple/blue theme
-- **Smooth animations** - Delightful micro-interactions
-- **Kawaii aesthetic** - Friendly and approachable design
+<p align="center">
+  <a href="#-what-it-does">Features</a> ·
+  <a href="#-screens">Screens</a> ·
+  <a href="#-under-the-hood">Under the hood</a> ·
+  <a href="#-run-it-locally">Run locally</a> ·
+  <a href="#-nederlands">Nederlands</a>
+</p>
 
 ---
 
-## 📱 Screenshots
+## ✨ What it does
 
-<div align="center">
+Learning a language often fails on consistency, not difficulty. One Word keeps the daily step tiny, one word with its
+pronunciation and an example sentence, and wraps it in game mechanics that make you come back tomorrow.
 
-| Onboarding | Home Screen | Journey Map |
-|:---:|:---:|:---:|
-| 👋 Welcome flow | 📚 Daily word card | 🗺️ Progress tracking |
-| Select native language | See word + meaning | Visual day-by-day path |
-| Choose target language | Practice with AI | Streak & milestones |
-| Pick your level | Tap to reveal meaning | Motivational messages |
+<table>
+<tr>
+<td width="50%" valign="top">
 
-</div>
+### 📚 Learn
+- One word a day on a card: pronunciation, meaning and an example sentence
+- Hear the word spoken (text-to-speech)
+- Three levels (beginner, intermediate, advanced) and topic categories
+- 365 words for each of the 11 target languages
+
+</td>
+<td width="50%" valign="top">
+
+### 🔁 Remember
+- **Spaced repetition** based on the SM-2 algorithm: words come back right before you would forget them
+- Review sessions and quizzes on the words you learned
+- Word history with favourites and filters by day, week or category
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+### 🎯 Stay motivated
+- Day streaks with an activity heatmap
+- Daily quests with XP and levels
+- 28 badges for streaks, words and quests
+- **Daily Guess**: guess today's word from three hints
+- Weekly challenge and weekly summary
+
+</td>
+<td valign="top">
+
+### 💬 Practice and share
+- Conversation practice in everyday scenarios (café, travel, work…) with quick replies and gentle corrections
+- Share a word or an achievement as an image card
+- Daily reminder notifications
+- Interface in 11 languages
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🚀 Installation
+## 📸 Screens
 
-### Prerequisites
+<p align="center">
+  <img src="docs/screenshots/learn.png" alt="Onboarding, daily word card, daily quests and Daily Guess" width="100%"><br>
+  <sub><b>Learn</b>: onboarding, today's word with meaning and example, daily quests, Daily Guess</sub>
+</p>
 
-- Node.js 18+ 
-- npm or yarn
-- Expo Go app on your phone
+<p align="center">
+  <img src="docs/screenshots/progress.png" alt="Profile, learning path, badges and word history" width="100%"><br>
+  <sub><b>Progress</b>: profile with XP and activity heatmap, learning path, badges, word history</sub>
+</p>
 
-### Quick Start
+---
+
+## 🛠 Under the hood
+
+| | |
+|---|---|
+| **App** | React Native 0.81 with Expo SDK 54, TypeScript |
+| **Storage** | AsyncStorage: progress, streaks, favourites and repetition data stay on the device, no account needed |
+| **Content** | One JSON file per language in `src/data/content/`, 365 words each with level, category, pronunciation and example |
+| **Spaced repetition** | `src/utils/srs.ts`, an SM-2 implementation that schedules each word's next review |
+| **Practice chat** | `src/services/aiChat.ts`: scenario-based replies picked by the word's category, in the learner's language |
+| **Native features** | `expo-speech` (pronunciation), `expo-notifications` (reminders), `expo-haptics`, `react-native-view-shot` (share cards) |
+
+### Project layout
+
+```
+App.tsx                  Entry point and navigation between screens
+src/
+├── screens/             Home, Onboarding, Quests, Review, Quiz, Practice, History, Profile, …
+├── components/          Daily Guess game, badge modal, streak heatmap, share cards, …
+├── data/content/        Words per language (en, es, de, fr, it, pt, ru, ja, ko, zh, tr)
+├── services/aiChat.ts   Practice conversation logic
+└── utils/               Spaced repetition, XP and levels, badges, quests, translations, storage
+docs/                    README images
+```
+
+---
+
+## 🚀 Run it locally
+
+You need Node.js 18 or newer.
 
 ```bash
-# Clone the repository
-git clone https://github.com/samigulec/Bi-kelime.git
-
-# Navigate to project
-cd Bi-kelime/DailyIdiomApp
-
-# Install dependencies
+git clone https://github.com/samigulec/one-word.git
+cd one-word
 npm install
-
-# Start the development server
 npx expo start
 ```
 
-### Running on Device
-
-1. Install **Expo Go** from App Store / Play Store
-2. Scan the QR code from terminal
-3. App will load on your device!
+Scan the QR code with **Expo Go** on your phone, or press `w` to open the web version in your browser.
 
 ---
 
-## 🛠️ Tech Stack
+## 🤖 How it was built
 
-| Technology | Purpose |
-|------------|---------|
-| **React Native** | Cross-platform mobile framework |
-| **Expo** | Development platform & tooling |
-| **TypeScript** | Type-safe JavaScript |
-| **AsyncStorage** | Local data persistence |
-| **Expo Linear Gradient** | Beautiful gradient backgrounds |
-| **Expo Haptics** | Tactile feedback |
-| **React Native Animated** | Smooth UI animations |
+Designed and built by **Sami Güleç** together with [Claude](https://claude.ai) as an AI pair programmer:
+I decide what the app needs and test every change, Claude helps write and refine the code.
 
 ---
 
-## 📁 Project Structure
+## 🇳🇱 Nederlands
 
-```
-DailyIdiomApp/
-├── App.tsx                 # Main app entry & navigation
-├── src/
-│   ├── screens/
-│   │   ├── OnboardingScreen.tsx   # 3-step welcome flow
-│   │   ├── HomeScreen.tsx         # Daily word display
-│   │   ├── ChatScreen.tsx         # AI practice chat
-│   │   └── JourneyScreen.tsx      # Progress roadmap
-│   ├── data/
-│   │   └── content/
-│   │       ├── en_content.json    # English words (A1-C2)
-│   │       └── es_content.json    # Spanish words (A1-C2)
-│   ├── utils/
-│   │   ├── translations.ts        # UI translations (11 languages)
-│   │   ├── contentLoader.ts       # Level-based content loading
-│   │   └── storage.ts             # AsyncStorage helpers
-│   ├── services/
-│   │   └── aiChat.ts              # AI tutor responses
-│   └── types/
-│       └── index.ts               # TypeScript definitions
-└── assets/                        # App icons & images
-```
+**One Word** is een mobiele app waarmee je elke dag één nieuw woord leert.
 
----
+- Elke dag één woord met uitspraak, betekenis en voorbeeldzin, in 11 talen
+- Herhaling volgens het SM-2-algoritme, zodat woorden blijven hangen
+- Streaks, dagelijkse opdrachten, XP, 28 badges en een dagelijks raadspel
+- Oefengesprekken in alledaagse situaties
+- Gebouwd met React Native, Expo en TypeScript; alle gegevens blijven op het toestel
 
-## 🎮 How It Works
-
-### 1️⃣ Onboarding (First Launch)
-```
-Step 1: "I speak..." → Select your native language
-Step 2: "I want to learn..." → Choose target language  
-Step 3: "My level is..." → Pick Beginner/Intermediate/Advanced
-```
-
-### 2️⃣ Daily Learning
-- Open the app each day
-- See your word of the day
-- Tap "Show Meaning" to reveal translation
-- Practice with AI to reinforce learning
-
-### 3️⃣ Track Progress
-- Tap the streak counter to see your journey
-- Complete daily lessons to unlock new days
-- Earn milestone badges as you progress
-
----
-
-## 🌍 Supported Languages
-
-### As Native Language (UI)
-🇺🇸 English • 🇹🇷 Türkçe • 🇪🇸 Español • 🇩🇪 Deutsch • 🇫🇷 Français • 🇧🇷 Português • 🇮🇹 Italiano • 🇷🇺 Русский • 🇯🇵 日本語 • 🇰🇷 한국어 • 🇨🇳 中文
-
-### As Target Language (Learning)
-🇺🇸 English • 🇪🇸 Spanish *(more coming soon!)*
-
----
-
-## 📊 Content Levels
-
-| Level | Badge | Description | Example Words |
-|-------|-------|-------------|---------------|
-| 🌱 Beginner | A1 | Basic vocabulary | Hello, Thank you, Friend |
-| 📚 Intermediate | B1 | Everyday topics | However, Develop, Despite |
-| 🚀 Advanced | C1 | Complex expressions | Nevertheless, Elucidate |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Add more words** - Expand the content files
-2. **Add languages** - Create new `xx_content.json` files
-3. **Improve translations** - Enhance UI translations
-4. **Fix bugs** - Report or fix issues
-5. **Suggest features** - Open a feature request
-
-```bash
-# Fork the repo
-# Create your feature branch
-git checkout -b feature/AmazingFeature
-
-# Commit your changes
-git commit -m 'Add some AmazingFeature'
-
-# Push to the branch
-git push origin feature/AmazingFeature
-
-# Open a Pull Request
-```
-
----
+Gemaakt door Sami Güleç, AI-first ontwikkeld samen met Claude.
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- Inspired by language learning apps like Duolingo
-- Built with ❤️ using React Native & Expo
-- Icons and emojis from native system fonts
-
----
-
-<div align="center">
-
-**Made with 💜 for language learners worldwide**
-
-[⬆ Back to top](#-one-word)
-
-</div>
+MIT, see [LICENSE](LICENSE).
